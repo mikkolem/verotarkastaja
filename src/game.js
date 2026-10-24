@@ -7,8 +7,8 @@ export const INVENTORY = {
 };
 
 export const EVIDENCE = {
-  kiuas: 'Kesämökin kiuas kirjattu edustuskuluksi (400 €, juhannusaatto)',
-  cayman_invoice: 'Myyntilasku 10 000 € Caymansaarille – puuttuu virallisesta kirjanpidosta',
+  kiuas: 'Kesämökin kiuas (400 €) kirjattu edustuskuluksi – yksityinen kulu, verotuksessa peiteltyä osinkoa',
+  cayman_invoice: 'Myyntilasku 10 000 € Kalevin Cayman-yhtiölle – tuloa ei ole kirjattu kirjanpitoon',
   second_ledger: 'Salainen B-kirjanpito: todellinen liikevaihto 1,48 milj. € (virallinen 0,61 milj. €)',
   cayman_transfer: 'Kalenterimerkintä: 870 000 € siirto Caymansaarille ”golfmatkana”',
 };

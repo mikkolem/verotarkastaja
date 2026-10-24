@@ -418,17 +418,17 @@ inventoryHud(game, { onHelp: () => { interaction.close(); showIntro(); } });
 // etene NUDGE_DELAY sekuntiin, muistutetaan napista – vihjettä ei anneta ilmaiseksi.
 const NUDGE_DELAY = 90;
 const HINTS = [
-  [() => !game.has('key'), 'Lue työpöydän muistilaput. Mitä tässä huoneessa on kirjattu taiteeksi?'],
+  [() => !game.has('key'), 'Tietokoneen kannessa on muistilappu. Mitä tässä huoneessa on kirjattu taiteeksi?'],
   [() => !game.is('drawer_a_open'), 'Messinkiavain sopii johonkin työpöydän laatikkoon.'],
-  [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit. Onko jokin niistä päivätty oudosti – vaikka juhannukseksi?'],
-  [() => !game.is('drawer_b_open'), 'Laske kuitit yhteen ja vertaa pääkirjan edustuskuluihin. Erotus on ”se mikä puuttuu”.'],
+  [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit. Mikä niistä ei ole yrityksen kulu – vaikka juhannuksena ostettu?'],
+  [() => !game.is('drawer_b_open'), 'Laatikon A lappu: koodi on vuosi, josta Kalevi on ylpein. Katso sohvan yläpuolelle.'],
   [() => !game.has('invoice_bottom'), 'Laatikon B lappu muistuttaa silppurista. Löytyisikö sieltä laskun loppuosa?'],
-  [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku. Kuuluuko Caymansaarille myyty lasku virallisiin kirjoihin?'],
-  [() => !game.is('safe_open'), 'Kassakaapin koodi on maksettava ALV: 25,5 % laskun verottomasta hinnasta miinus ostojen ALV (Kirjanpito 2025 -mappi).'],
+  [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku ja merkitse se. Löytyykö tämä tulo virallisesta kirjanpidosta?'],
+  [() => !game.is('safe_open'), 'Kassakaapin koodi on hääpäivä. Kuuntele puhelinvastaajan viestit.'],
   [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapista löytynyt musta kirja.'],
-  [() => !game.is('laptop_open'), 'Tietokoneen salasanavihje on ”tasoitukseni”. Kuuntele puhelinvastaajan viestit.'],
+  [() => !game.is('laptop_open'), 'Tietokoneen salasanavihje on ”tasoitukseni”. Golfkaveri mainitsee sen puhelinvastaajassa.'],
   [() => !game.hasEvidence('cayman_transfer'), 'Katso Kalevin kalenteria tietokoneelta. Mitä perjantaina tapahtuu?'],
-  [() => true, 'Kaikki todisteet on löydetty. Kokoa ne tarkastusraporttiin (oikea yläkulma) ennen kuin Kalevi palaa.'],
+  [() => true, 'Kaikki todisteet on löydetty. Lähetä tarkastusraportti (oikea yläkulma) ennen kuin Kalevi palaa.'],
 ];
 const nextHint = () => HINTS.find(([when]) => when())[1];
 const hints = {

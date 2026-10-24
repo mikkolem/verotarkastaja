@@ -205,53 +205,17 @@ function spineTexture(text, bg) {
   });
 }
 
-// --- pääkirjan ote laatikossa A (pulma 2: edustuskulut 1 247 €) --------------------
-const LEDGER = [
-  ['1100', 'Koneet ja kalusto', '340,00', 'nitoja'],
-  ['1120', 'Kalusteet', '8 900,00', 'neuvottelutila'],
-  ['1150', 'Taideteokset', '12 000,00', 'viherkasvi'],
-  ['6800', 'Edustuskulut', '1 247,00', 'kuitit liitteenä'],
-  ['6900', 'Valaistusinvestoinnit', '1 200,00', 'pöytälamppu'],
-];
-
-function ledgerTexture() {
-  return canvasTexture(600, 840, (g, w, h) => {
-    paperBackground(g, w, h, '#f1ede2');
-    g.fillStyle = '#1a1a1a';
-    g.textAlign = 'left';
-    g.font = `bold 26px ${MONO}`;
-    g.fillText('KIVI & KUMPPANIT OY', 40, 70);
-    g.font = `20px ${MONO}`;
-    g.fillText('Pääkirjan ote 1.1.–30.6.2025', 40, 105);
-    g.fillRect(40, 125, w - 80, 2);
-    g.font = `bold 17px ${MONO}`;
-    g.fillText('TILI', 40, 165);
-    g.fillText('NIMI', 110, 165);
-    g.textAlign = 'right';
-    g.fillText('EUROA', w - 40, 165);
-    LEDGER.forEach(([acc, name, sum, note], i) => {
-      const y = 215 + i * 78;
-      g.textAlign = 'left';
-      g.font = `18px ${MONO}`;
-      g.fillText(acc, 40, y);
-      g.fillText(name, 110, y);
-      g.textAlign = 'right';
-      g.font = `bold 20px ${MONO}`;
-      g.fillText(sum, w - 40, y);
-      g.textAlign = 'left';
-      g.font = `italic 15px ${SERIF}`;
-      g.fillStyle = '#555';
-      g.fillText(`(${note})`, 110, y + 24);
-      g.fillStyle = '#1a1a1a';
-    });
-    g.fillRect(40, 640, w - 80, 1);
-    g.font = `28px ${HAND}`;
-    g.fillStyle = '#1f3a8a';
-    g.fillText('Täsmätty – P.', 40, 720);
+// --- laatikon B paperit (johtavat pulmaan 3) -----------------------------------------
+// Pirjon lappu laatikossa A: vihje laatikon B koodiin (diplomin vuosi 1998)
+function pirjoNoteTexture() {
+  return canvasTexture(420, 420, (g, w, h) => {
+    paperBackground(g, w, h, '#fbf8ee');
+    g.fillStyle = '#5a2a6a';
+    g.font = `27px ${HAND}`;
+    ['Kalevi,', 'laatikon B koodi on', 'se vuosi, josta olet', 'niin ylpeä.', 'Unohdat sen aina.', '        – P.'].forEach((l, i) => g.fillText(l, 26, 60 + i * 56));
   });
 }
 
-// --- laatikon B paperit (johtavat pulmaan 3) -----------------------------------------
 function invoiceHalfTexture() {
   return canvasTexture(840, 600, (g, w, h) => {
     // revitty alareuna: piirretään paperi sahalaitaisena monikulmiona
@@ -295,13 +259,11 @@ function safeNoteTexture() {
     }
     g.fillStyle = '#1f3a8a';
     g.font = `30px ${HAND}`;
-    ['Kassakaapin koodi =', 'tämän kuun', 'MAKSETTAVA ALV', '', 'Silppuri –', 'älä unohda!!!'].forEach((l, i) => g.fillText(l, 28, 62 + i * 42));
+    ['Silppuri –', 'älä unohda!!!', '', 'Kassakaappi:', 'HÄÄPÄIVÄ', '(älä kirjoita ylös)'].forEach((l, i) => g.fillText(l, 28, 62 + i * 42));
   });
 }
 
-// --- pulma 3: laskun alaosa silppurista, koottu lasku ja ALV-laskelma -------------
-// Laskelma: myynnin ALV 10 000 € × 25,5 % = 2 550 €, ostojen ALV 1 290 €,
-// maksettava 1 260 € = kassakaapin koodi.
+// --- pulma 3: laskun alaosa silppurista, koottu lasku ja virallinen tuloslaskelma ---
 function invoiceBottomCanvas() {
   const c = document.createElement('canvas');
   c.width = 840;
@@ -322,25 +284,24 @@ function invoiceBottomCanvas() {
   g.font = `18px ${MONO}`;
   g.fillText('kesäkuu 2025 (sopimus KK/CI-04)', 50, 105);
   g.fillRect(50, 130, c.width - 100, 1);
-  g.font = `bold 20px ${MONO}`;
-  g.fillText('Veroton hinta', 50, 175);
-  g.textAlign = 'right';
-  g.fillText('10 000,00 €', c.width - 50, 175);
+  // EU:n ulkopuolelle myyty palvelu: ei Suomen arvonlisäveroa (oikein laskutettu),
+  // mutta tuloa ei ole kirjattu yhtiön kirjanpitoon.
+  const rows = [['Veroton hinta', '10 000,00 €'], ['ALV 0 % (myynti EU:n ulkop.)', '0,00 €'], ['YHTEENSÄ', '10 000,00 €']];
+  rows.forEach(([label, value], i) => {
+    const y = 175 + i * 40;
+    g.font = i === 2 ? `bold 22px ${MONO}` : `20px ${MONO}`;
+    g.textAlign = 'left';
+    g.fillText(label, 50, y);
+    g.textAlign = 'right';
+    g.fillText(value, c.width - 50, y);
+  });
   g.textAlign = 'left';
-  g.font = `20px ${MONO}`;
-  g.fillText('ALV 25,5 %', 50, 215);
-  // ALV:n ja loppusumman kohdalle on kaatunut kahvia
-  g.fillStyle = 'rgba(110, 70, 30, 0.55)';
-  g.beginPath();
-  g.ellipse(c.width - 170, 235, 150, 55, 0.1, 0, Math.PI * 2);
-  g.fill();
-  g.fillStyle = '#1a1a1a';
   g.font = `16px ${MONO}`;
   g.fillText('Maksuehto: heti netto', 50, 330);
   g.fillText('Tilille: Cayman National Bank, George Town', 50, 360);
   g.font = `italic 15px ${SERIF}`;
   g.fillStyle = '#555';
-  g.fillText('Ei kirjata Suomeen. – K.K.', 50, 420);
+  g.fillText('Ei kirjanpitoon. – K.K.', 50, 420);
   return c;
 }
 
@@ -364,7 +325,8 @@ function assembledInvoiceCanvas(top, bottom) {
   return c;
 }
 
-function vatSheetCanvas() {
+// Virallinen tuloslaskelma (Kirjanpito 2025 -mappi): vertailukohta B-kirjanpidolle
+function officialPnlCanvas() {
   const c = document.createElement('canvas');
   c.width = 600;
   c.height = 840;
@@ -372,24 +334,30 @@ function vatSheetCanvas() {
   paperBackground(g, c.width, c.height, '#f1ede2');
   g.fillStyle = '#1a1a1a';
   g.font = `bold 26px ${MONO}`;
-  g.fillText('KIRJANPITO 2025', 40, 70);
+  g.fillText('KIVI & KUMPPANIT OY', 40, 70);
   g.font = `20px ${MONO}`;
-  g.fillText('ALV-laskelma, kesäkuu', 40, 105);
+  g.fillText('Tuloslaskelma 1.1.–30.6.2025', 40, 105);
   g.fillRect(40, 125, c.width - 80, 2);
-  const rows = [['Myynnin ALV (25,5 %)', ''], ['Ostojen ALV', '1 290,00'], ['Maksettava ALV', '']];
+  const rows = [
+    ['Liikevaihto', '610 000'],
+    ['Materiaalit ja palvelut', '−320 000'],
+    ['Henkilöstökulut', '−210 000'],
+    ['Liiketoiminnan muut kulut', '−62 000'],
+    ['LIIKEVOITTO', '18 000'],
+  ];
   rows.forEach(([label, value], i) => {
-    const y = 200 + i * 80;
-    g.font = `20px ${MONO}`;
+    const y = 190 + i * 64;
+    if (i === 4) g.fillRect(40, y - 40, c.width - 80, 1);
+    g.font = i === 4 ? `bold 21px ${MONO}` : `20px ${MONO}`;
     g.textAlign = 'left';
     g.fillText(label, 40, y);
     g.textAlign = 'right';
-    g.font = `bold 22px ${MONO}`;
-    g.fillText(value || '________', c.width - 40, y);
+    g.fillText(value, c.width - 40, y);
   });
   g.textAlign = 'left';
   g.fillStyle = '#1f3a8a';
   g.font = `28px ${HAND}`;
-  ['Kalevi!', 'Myynnin ALV:sta puuttuu', 'kesäkuun lasku nro 117.', 'Missä se on?? – Pirjo'].forEach((l, i) => g.fillText(l, 40, 520 + i * 44));
+  ['Kalevi! Liikevaihto ei', 'täsmää pankkitiliin.', 'Missä on kesäkuun', 'lasku nro 117?? – Pirjo'].forEach((l, i) => g.fillText(l, 40, 560 + i * 44));
   return c;
 }
 
@@ -517,14 +485,14 @@ export function addPaperItems(scene) {
     m.position.set([-0.12, -0.04, 0.04, 0.12][i], 0.002 + i * 0.0006, [0.01, -0.01, 0.015, -0.005][i]);
     receipts.add(m);
   });
-  const ledger = sheet('ledger', ledgerTexture(), 0.15, 0.21, { back: 0xece8dc });
-  ledger.rotation.set(-Math.PI / 2, 0, 0.04);
-  ledger.position.set(0.01, 0.001, -0.1);
-  receipts.add(ledger);
-  receipts.position.set(-0.045, DRAWER_BOTTOM, -0.3);
+  receipts.position.set(-0.045, DRAWER_BOTTOM, -0.33);
   // attach säilyttää maailmasijainnin (pakattu malli ei ole origossa)
   drawerA.updateMatrixWorld(true);
   drawerA.attach(receipts);
+  const notePirjo = sheet('note_pirjo', pirjoNoteTexture(), 0.09, 0.09, { back: 0xf4f2ea });
+  notePirjo.rotation.set(-Math.PI / 2, 0, -0.15);
+  notePirjo.position.set(-0.13, DRAWER_BOTTOM + 0.004, -0.235);
+  drawerA.attach(notePirjo);
 
   // Laatikko B: puolikas lasku Caymansaarille ja lappu kassakaapin koodista
   const drawerB = scene.getObjectByName('drawer_b');
@@ -541,15 +509,12 @@ export function addPaperItems(scene) {
   drawerB.updateMatrixWorld(true);
   drawerB.attach(papersB);
 
-  // muistilaput: pöydän reunalla ja lampun juurella
-  const note1 = sheet('note_silppu', noteTexture('Muista\nsilputa!!!'), 0.076, 0.076, { back: 0xf2dc5e });
-  note1.rotation.set(-Math.PI / 2, 0, 0.12);
-  note1.position.set(0.02, DESK + 0.0008, -0.3);
-  scene.add(note1);
-  const note2 = sheet('note_avain', noteTexture('Varavain\nsiellä missä\ntaide kasvaa'), 0.076, 0.076, { back: 0xf2dc5e });
-  note2.rotation.set(-Math.PI / 2, 0, -0.2);
-  note2.position.set(0.48, DESK + 0.0008, -0.95);
-  scene.add(note2);
+  // Varavainlappu teipattuna tietokoneen kanteen pelaajan puolelle, jotta se
+  // huomataan heti ensimmäisestä kuvakulmasta.
+  const noteKey = sheet('note_avain', noteTexture('Varavain\nsiellä missä\ntaide kasvaa'), 0.1, 0.1, { back: 0xf2dc5e });
+  noteKey.rotation.set(-0.12, 0, 0.06);
+  noteKey.position.set(0.95, 0.97, -0.584);
+  scene.add(noteKey);
 
   // ALV-juliste oven oikealla puolella
   const poster = sheet('poster', posterTexture(), 0.42, 0.594, { back: 0xf0ece0 });
@@ -587,13 +552,12 @@ export function addPaperItems(scene) {
 export function pagesFor(key) {
   if (key === 'receipts') {
     return [
-      { canvas: PAGES.get('ledger'), label: 'Pääkirjan ote' },
       ...RECEIPTS.map((r, i) => ({
         canvas: PAGES.get(`receipt_${i + 1}`),
         label: r.shop,
         markable: true,
         evidence: r.evidence,
-        wrongText: 'Tämä näyttää tavalliselta edustuskululta.',
+        wrongText: 'Tämä on tavallinen edustuskulu: liikeasiakkaiden kestitsemistä.',
       })),
     ];
   }
@@ -610,7 +574,7 @@ export function pagesFor(key) {
     ];
   }
   if (key === 'invoice_assembled') return [assembled()];
-  if (key === 'binder_1') return [{ canvas: once('vat', vatSheetCanvas), label: 'ALV-laskelma' }];
+  if (key === 'binder_1') return [{ canvas: once('pnl', officialPnlCanvas), label: 'Tuloslaskelma' }];
   if (key === 'ledger_book') {
     return [{ canvas: once('secret', secretLedgerCanvas), label: 'B-kirjanpito', markable: true, evidence: 'second_ledger' }];
   }

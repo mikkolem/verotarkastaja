@@ -310,7 +310,7 @@ DRAWER_BACK = -0.6               # laatikon takaseinä (suljettuna)
 def build_drawer(name, px0, px1, z1):
     """Avattava pöytälaatikko omana objektinaan (three.js liu'uttaa sitä +z-suuntaan).
 
-    drawer_a: avaimella aukeava (avaimenreikä), drawer_b: kolminumeroinen numerolukko.
+    drawer_a: avaimella aukeava (avaimenreikä), drawer_b: nelinumeroinen numerolukko.
     """
     p = Part(name)
     y0 = DRAWER_Y0
@@ -327,9 +327,10 @@ def build_drawer(name, px0, px1, z1):
         p.box("brass", hx - 0.012, hx + 0.012, y0 + 0.135, y0 + 0.165, fz1, fz1 + 0.003)
         p.box("plastic_black", hx - 0.003, hx + 0.003, y0 + 0.14, y0 + 0.158, fz1 + 0.003, fz1 + 0.004)
     else:
-        p.box("brass", hx - 0.04, hx + 0.04, y0 + 0.13, y0 + 0.17, fz1, fz1 + 0.012)
-        for i in range(3):
-            wx = hx - 0.03 + i * 0.022
+        # nelinumeroinen numerolukko
+        p.box("brass", hx - 0.05, hx + 0.05, y0 + 0.13, y0 + 0.17, fz1, fz1 + 0.012)
+        for i in range(4):
+            wx = hx - 0.042 + i * 0.022
             p.box("plastic_black", wx, wx + 0.016, y0 + 0.136, y0 + 0.164, fz1 + 0.012, fz1 + 0.016)
     p.build(bevel=0.003)
 

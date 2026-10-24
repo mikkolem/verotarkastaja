@@ -41,44 +41,27 @@ Pelaaja liikkuu neljän kiinteän kuvakulman välillä:
 
 Esineitä voi klikata, nostaa lähemmäs ja pyöritellä. Läheltä katsottaessa realistiset yksityiskohdat pääsevät oikeuksiinsa.
 
-## 4. Pulmaketju
+## 4. Pulmaketju (toteutettu)
 
-### Pulma 1: Avain (tutoriaali, helppo)
-- Näytön reunassa on muistilappu: *"Varavain siellä, missä taide kasvaa."*
-- Pöydällä on kirjanpidon ote, jossa viherkasvi on kirjattu "taideteokseksi, 12 000 €".
-- Kukkaruukun alta löytyy avain **pöytälaatikkoon A**.
+Ei laskutehtäviä: koodit löytyvät huoneesta tutkimalla, ja kirjanpidon osaaminen auttaa
+tunnistamaan todisteita. Jokainen vaihe vie eri kuvakulmaan.
 
-### Pulma 2: Kuittipino (helppo–keskitaso)
-- Laatikossa A on edustuskulujen kuitit ja kirjanpidon ote: *edustuskulut yhteensä 1 247 €*.
-- Kuitit: ravintola 214 €, golfklubi 158 €, kukkakauppa 90 € ja kiuas 400 €. Yhteensä **862 €**.
-- **Erotus 385 €** on kirjattu ilman kuittia, ja se on **laatikon B numerolukon koodi** (385).
-- Lisälöytö: kiuaskuitti on päivätty juhannusaatolle, ja se on kirjattu "neuvotteluhuoneen kalustukseksi". Kyseessä on kesämökin kiuas. **Todiste 1.**
-- *Kirjanpitäjä huomaa heti, että summat eivät täsmää. Muut saavat vihjeen Pirjon viestistä.*
+| # | Missä | Mitä tapahtuu | Tulos |
+|---|---|---|---|
+| 1 | Työpöytä → Ikkuna | Tietokoneen kannen lappu: ”Varavain siellä missä taide kasvaa.” Viherkasvi on kirjattu taideteokseksi → **Nosta ruukkua** | Messinkiavain |
+| 2 | Työpöytä | Laatikko A avautuu avaimella: kuitit ja Pirjon lappu | – |
+| 2a | Lukunäkymä | Yksi edustuskuluksi kirjatuista kuiteista on kesämökin kiuas (juhannusaatto) | **Todiste 1**: yksityiskulu, peiteltyä osinkoa |
+| 2b | Sohva | Pirjon lappu: koodi on vuosi, josta Kalevi on ylpein → diplomi ”Vuoden veronmaksaja 1998” | Laatikko B: **1998** |
+| 3 | Työpöytä → Ikkuna | Laatikossa B puolikas lasku ja lappu ”Silppuri – älä unohda / Kassakaappi: HÄÄPÄIVÄ”. Silppurista löytyy laskun alaosa | **Todiste 2**: 10 000 € lasku Cayman-yhtiölle (ALV 0 %, myynti EU:n ulkopuolelle), tuloa ei kirjanpidossa |
+| 3b | Ovi | Puhelinvastaaja: vaimo muistuttaa hääpäivästä 12.6., joka on myös kassakaapin koodi | Kassakaappi: **1206** |
+| 4 | Kirjahylly | Kassakaapissa musta ”Kirjanpito B”: todellinen liikevaihto 1,48 milj. € vs. virallinen 0,61 milj. € (vertailu: Kirjanpito 2025 -mapin tuloslaskelma) | **Todiste 3** |
+| 4b | Työpöytä | Tietokoneen salasana = golftasoitus **36** (golfkaveri Raimon viesti). Kalenterissa pe 27.6. klo 14 ”siirto Caymanille 870 000 € – golfmatka” | **Todiste 4** |
 
-### Pulma 3: Silputtu lasku (keskitaso)
-- Laatikossa B on puolikas myyntilasku ja Kalevin käsin kirjoittama lappu: *"Kassakaapin koodi = tämän kuun maksettava ALV. Silppuri, älä unohda!!!"*
-- Silppurin roskakorista löytyy laskun toinen puolisko. Palaset kootaan.
-- Koottu lasku: myynti **10 000 € (veroton)**, ostaja *"Kivi Consulting Ltd, Cayman Islands"*. **Todiste 2.**
-- Pöydällä on ostojen ALV-muistio: **1 290 €**.
-- Laskelma: 10 000 € × 25,5 % = 2 550 €, josta vähennetään 1 290 €. Maksettavaa jää **1 260 €**, joten **kassakaapin koodi on 1260**.
-- *Kirjanpitäjä tietää ALV-kannan. Muut löytävät sen oven vieressä olevasta julisteesta: "ALV 25,5 % – muista!"*
+**Loppu:** tarkastusraportti on tarkistuslista neljästä todisteesta. Sen voi lähettää milloin
+tahansa. 15 minuutin aikarajan lopussa ovi aukeaa ja Kalevi palaa. Arvosana määräytyy
+löydettyjen todisteiden ja käytettyjen vihjeiden mukaan. Vihje maksaa minuutin aikaa.
 
-### Pulma 4: Kassakaappi ja tietokone (keskitaso–vaikea)
-- Kassakaapista löytyy **"se toinen mappi"**, eli B-kirjanpito. Sen liikevaihto on selvästi suurempi kuin virallisessa mapissa.
-- Kaapissa on myös lappu: *"Salasana = tasoitukseni"*. Golfkaveri mainitsee puhelinvastaajassa Kalevin tasoituksen (esim. "Kalevi, tasoitus 36 ei ole tasoitus vaan toive").
-- Tietokoneen kalenterissa on merkintä: *"Pe klo 14 – siirto Caymanille ('golfmatka')"*. **Todiste 3.**
-
-### Loppu: Tarkastusraportti
-- Pelaaja valitsee löydöksistään ne, jotka menevät raporttiin. Mukana on myös harhautuksia, kuten "kahvikuppi edustuskuluna".
-- Arvosana määräytyy oikeiden löydösten ja jäljellä olevan ajan mukaan. Esimerkkejä:
-  - *"Pirjon mielestä olisit hyvä kirjanpitäjä."*
-  - *"Verovirasto harkitsee ylennystäsi."*
-  - *"Kalevi ehti takaisin. Hän tarjoaa sinulle viskiä. Kieltäydyt."*
-- Lopuksi ovi aukeaa ja Kalevi astuu sisään. Hauska lopetusrepliikki.
-
-### Vihjejärjestelmä
-- Pirjon puhelinvastaajaviestit ilmestyvät tietyin väliajoin ja auttavat jumiin jäänyttä.
-- Lisäksi voi olla "kysy toimistolta" -nappi, joka antaa suoran vinkin, mutta vähentää arvosanaa.
+**Prologi:** nimetön vihjekirje (Pirjolta) ja henkilöesittelyt (Kalevi, Pirjo, Sinä).
 
 ## 5. Huumori ja yksityiskohdat
 

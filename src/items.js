@@ -4,12 +4,12 @@
 // tarkastelunäkymän napit; api tarjoaa pelin toiminnot (ks. main.js: puzzleApi).
 import { game } from './game.js';
 
-// Puhelinvastaajan viestit (pulmat 3 ja 4: ALV-vihje ja golftasoitus)
+// Puhelinvastaajan viestit (pulmat 3 ja 4: kassakaapin koodi ja golftasoitus)
 const MESSAGES = [
   { from: 'Pirjo, kirjanpito', time: 'tänään 9.12',
-    text: 'Kalevi, Pirjo täällä. Kesäkuun ALV-laskelma on vielä kesken – myynnin vero puuttuu, koska en löydä sitä laskua numero 117. Laitoitko sen taas silppuriin? Soita!' },
+    text: 'Kalevi, Pirjo täällä. Kesäkuun myyntilasku numero 117 puuttuu kirjanpidosta, eikä liikevaihto täsmää pankkitiliin. Laitoitko sen taas silppuriin? Soita!' },
   { from: 'Marjatta', time: 'tänään 10.40',
-    text: 'Kalle, kulta. Muista, että juhannuksena saunotaan sillä uudella kiukaalla! Ja kerro sille kirjanpitäjälle, ettei se ollut mikään ”edustuskulu”.' },
+    text: 'Kalle, kulta. Muistathan, että ensi viikolla on meidän hääpäivä, kahdestoista kesäkuuta – ja että se on myös sen sinun kassakaappisi koodi. Ja juhannuksena saunotaan uudella kiukaalla!' },
   { from: 'Raimo, golfklubi', time: 'tänään 11.05',
     text: 'Kalevi, Raimo tässä! Lauantaina klo 9 ykkösteellä. Ja muistutan: tasoitus 36 ei ole tasoitus vaan toive, hahhah! Perjantain ”golfmatka” meni kai läpi?' },
 ];
@@ -69,14 +69,13 @@ export const ITEMS = {
     }],
   },
   photo: { title: 'Mökkikuva', text: 'Kalevi laiturilla. Taustalla uusi sauna, jota ei löydy yhdenkään yhtiön taseesta.' },
-  notepads: { title: 'Muistilehtiöt', text: 'Ylimpään lehtiöön on painunut edellisen sivun teksti: ”Cayman – pe klo 14”.', rotation: FLAT },
   stapler: { title: 'Nitoja', text: 'Kirjattu käyttöomaisuudeksi. Poistoajaksi on merkitty 25 vuotta.' },
   glasses: { title: 'Lukulasit', text: 'Pientä präntättyä tekstiä varten. Näyttävät käyttämättömiltä.' },
   // Pulma 1 -> 2: laatikko A aukeaa avaimella
   drawer_a: {
     title: 'Pöytälaatikko A',
     text: () => {
-      if (game.is('drawer_a_open')) return 'Laatikko on auki. Sisällä on kuittinippu ja kirjanpidon ote.';
+      if (game.is('drawer_a_open')) return 'Laatikko on auki. Sisällä on kuittinippu ja käsin kirjoitettu lappu.';
       if (game.has('key')) return 'Etulevyssä on pieni messinkikyltti: ”A”. Lukko näyttää sopivan löytämällesi avaimelle.';
       return 'Etulevyssä on pieni messinkikyltti: ”A”. Lukossa. Avain on varmasti jossain lähellä – Kalevi ei vaikuta ihmiseltä, joka kantaa avaimia mukanaan.';
     },
@@ -86,29 +85,35 @@ export const ITEMS = {
         api.close();
         api.openDrawer('drawer_a');
         game.set('drawer_a_open');
-        api.toast('Laatikko A aukesi. Sisällä on papereita.', 'success');
+        api.toast('Laatikko A aukesi. Sisällä on kuitteja ja lappu.', 'success');
       },
     }] : []),
   },
-  // Pulma 2: kuittien summa (862 €) vs. kirjanpito (1 247 €) -> erotus 385 avaa laatikon B
+  // Pulma 2: yksi edustuskuluksi kirjatuista kuiteista on yksityinen (kesämökin kiuas)
   receipts: {
-    title: 'Kuittinippu ja kirjanpidon ote',
-    text: 'Edustuskulujen kuitit ja pääkirjan ote. Kannattaisi verrata lukuja keskenään.',
+    title: 'Edustuskulujen kuitit',
+    text: 'Neljä kuittia, jotka Kalevi on kirjannut yrityksen edustuskuluiksi. Onko jokin niistä oikeasti yksityinen kulu?',
     rotation: FLAT,
     actions: (api) => [{ label: 'Lue paperit', run: () => api.read('receipts') }],
+  },
+  // Pulma 2b: laatikon B koodi = vuosi, josta Kalevi on ylpein (diplomi 1998)
+  note_pirjo: {
+    title: 'Pirjon lappu',
+    text: 'Pirjon siistiä käsialaa: ”Kalevi, laatikon B koodi on se vuosi, josta olet niin ylpeä. Kirjoitin sen tähän, koska unohdat sen aina. – P.” Vuosilukua ei ole kirjoitettu.',
+    rotation: [0, 0, 0],
   },
   drawer_b: {
     title: 'Pöytälaatikko B',
     text: () => (game.is('drawer_b_open')
       ? 'Laatikko on auki. Sisällä on puolikas lasku ja käsin kirjoitettu lappu.'
-      : 'Messinkikyltti: ”B”. Kolminumeroinen numerolukko. Lukon viereen on raapustettu tussilla: ”se mikä puuttuu”.'),
+      : 'Messinkikyltti: ”B”. Nelinumeroinen numerolukko.'),
     actions: (api) => (game.is('drawer_b_open') ? [] : [{
       label: 'Kokeile koodia',
       run: () => api.codeLock({
         title: 'Laatikko B',
-        digits: 3,
-        code: '385',
-        hint: 'Vihje: laske kuitit yhteen ja vertaa kirjanpidon edustuskuluihin.',
+        digits: 4,
+        code: '1998',
+        hint: 'Vihje: lue laatikon A lappu. Mistä vuodesta Kalevi on ylpein? Katso seiniä.',
         onOpen: () => {
           api.close();
           api.openDrawer('drawer_b');
@@ -124,7 +129,6 @@ export const ITEMS = {
     rotation: FLAT,
     actions: (api) => [{ label: 'Lue paperit', run: () => api.read('drawer_b_papers') }],
   },
-  note_silppu: { title: 'Muistilappu', text: '”Muista silputa!!!” Kolme huutomerkkiä. Kiireellinen asia.', rotation: [0, 0, 0] },
   note_avain: {
     title: 'Muistilappu',
     text: '”Varavain siellä missä taide kasvaa.” Kalevin muistisääntö, ilmeisesti. Mitä tässä huoneessa on kirjattu taiteeksi?',
@@ -145,7 +149,7 @@ export const ITEMS = {
       run: () => api.voicemail(MESSAGES, { onDone: () => game.set('messages_heard') }),
     }],
   },
-  // Pulma 3: kassakaapin koodi = kesäkuun maksettava ALV = 10 000 × 25,5 % − 1 290 = 1260
+  // Pulma 3: kassakaapin koodi = hääpäivä 12.6. (vaimon viesti puhelinvastaajassa)
   safe: {
     title: 'Kassakaappi',
     text: () => (game.is('safe_open')
@@ -157,8 +161,8 @@ export const ITEMS = {
       run: () => api.codeLock({
         title: 'Kassakaappi',
         digits: 4,
-        code: '1260',
-        hint: 'Vihje: maksettava ALV = myynnin ALV (25,5 % laskun verottomasta hinnasta) miinus ostojen ALV.',
+        code: '1206',
+        hint: 'Vihje: laatikon B lapussa lukee ”hääpäivä”. Kuka puhelinvastaajassa puhuu hääpäivästä?',
         onOpen: () => {
           api.close();
           api.openSafe();
@@ -176,7 +180,7 @@ export const ITEMS = {
   },
   binder_1: {
     title: 'Mappi: Kirjanpito 2025',
-    text: 'Virallinen kirjanpito. Siisti, järjestelmällinen ja epäilyttävän ohut. Päällimmäisenä on kesäkuun ALV-laskelma.',
+    text: 'Virallinen kirjanpito. Siisti, järjestelmällinen ja epäilyttävän ohut. Päällimmäisenä on puolivuotistuloslaskelma.',
     rotation: [0, -Math.PI / 2, 0],
     actions: (api) => [{ label: 'Selaa mappia', run: () => api.read('binder_1') }],
   },

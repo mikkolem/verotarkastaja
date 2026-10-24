@@ -11,14 +11,6 @@ const WARNINGS = [
   [2 * 60, 'Hissi kilahtaa alakerrassa! Kaksi minuuttia jäljellä.'],
   [30, 'Oven takaa kuuluu avainten kilinää!'],
 ];
-// Raportin harhautukset: totta, mutta eivät veropetoksia.
-const DECOYS = [
-  'Toimitusjohtajan tuoli on epäilyttävän mukava',
-  'Nitoja on kirjattu käyttöomaisuudeksi',
-  'Kunniakirja on itse itselle myönnetty',
-  'Viherkasvia ei ole kasteltu',
-];
-
 function el(tag, className, text) {
   const e = document.createElement(tag);
   if (className) e.className = className;
@@ -31,33 +23,6 @@ const storyClock = (elapsed) => {
   const m = START_CLOCK + Math.floor(elapsed / 60);
   return `${Math.floor(m / 60)}.${String(m % 60).padStart(2, '0')}`;
 };
-
-// Kalevin siluetti oviaukossa: musta hahmo läpinäkyvällä taustalla.
-function silhouetteTexture() {
-  const c = document.createElement('canvas');
-  c.width = 256;
-  c.height = 680;
-  const g = c.getContext('2d');
-  g.fillStyle = '#000';
-  g.beginPath();
-  g.arc(128, 70, 46, 0, Math.PI * 2);                      // pää
-  g.fill();
-  g.beginPath();                                            // hartiat, vatsa ja jalat
-  g.moveTo(40, 170);
-  g.quadraticCurveTo(128, 120, 216, 170);
-  g.quadraticCurveTo(250, 330, 214, 420);
-  g.lineTo(190, 680);
-  g.lineTo(140, 680);
-  g.lineTo(128, 460);
-  g.lineTo(116, 680);
-  g.lineTo(66, 680);
-  g.lineTo(42, 420);
-  g.quadraticCurveTo(6, 330, 40, 170);
-  g.fill();
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
-}
 
 export function createFinale({ scene, views, interaction, animations, toast, onDirty, nextHint }) {
   let elapsed = 0;
@@ -92,20 +57,12 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   };
   render();
 
-  // --- käytävän valo ja Kalevin siluetti (valmiina, mutta näkymättöminä) -------------
+  // --- käytävän valo (valmiina, mutta pois päältä) -----------------------------------
   // Valo luodaan heti latauksessa, jotta sen lisääminen ei käännä varjostimia
   // uudelleen kesken loppukohtauksen.
   const hallLight = new THREE.PointLight(0xffd9a0, 0, 7, 1.5);
   hallLight.position.set(-1.2, 2.3, 3.4);
   scene.add(hallLight);
-  const kalevi = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.62, 1.66),
-    new THREE.MeshBasicMaterial({ map: silhouetteTexture(), transparent: true, opacity: 0, depthWrite: false }),
-  );
-  kalevi.position.set(-1.2, 0.83, 2.6);
-  kalevi.rotation.y = Math.PI;
-  kalevi.visible = false;
-  scene.add(kalevi);
 
   function openDoor() {
     const slab = scene.getObjectByName('door_slab');
@@ -114,73 +71,60 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     scene.add(hinge);
     hinge.updateMatrixWorld(true);
     hinge.attach(slab);
-    kalevi.visible = true;
     let t = 0;
     animations.push((dt) => {
       t = Math.min(1, t + dt / 2.2);
       const k = 1 - Math.pow(1 - t, 3);
       hinge.rotation.y = 1.25 * k;
       hallLight.intensity = 5 * k;
-      kalevi.material.opacity = Math.min(1, t * 1.6);
       return t < 1;
     });
   }
 
-  // --- tarkastusraportti -------------------------------------------------------------
+  // --- tarkastusraportti: tarkistuslista todisteista ------------------------------------
   function openReport() {
     if (ending) return;
     interaction.close();
     const overlay = el('div', 'overlay lock');
-    const card = el('form', 'lock-card report');
-    const found = game.evidence;
+    const card = el('div', 'lock-card report');
+    const found = game.evidence.length;
     card.append(
       el('h2', null, 'Tarkastusraportti'),
       el('p', 'report-meta', `Kohde: Kivi & Kumppanit Oy · Kello ${storyClock(elapsed)}`),
-      el('p', 'report-help', 'Valitse raporttiin havainnot, jotka osoittavat veropetoksen. Turhat havainnot heikentävät raporttia.'),
     );
-    const list = el('div', 'report-list');
-    // löydetyt todisteet ja harhautukset sekaisin, mutta aina samassa järjestyksessä
-    const options = [
-      ...found.map((id) => ({ id, text: EVIDENCE[id], real: true })),
-      ...DECOYS.map((text, i) => ({ id: `decoy${i}`, text, real: false })),
-    ].sort((a, b) => a.text.localeCompare(b.text, 'fi'));
-    for (const o of options) {
-      const label = el('label', 'report-item');
-      const box = el('input');
-      box.type = 'checkbox';
-      box.value = o.id;
-      label.append(box, el('span', null, o.text));
-      list.appendChild(label);
-    }
-    const missing = EVIDENCE_TOTAL - found.length;
-    if (missing > 0) list.appendChild(el('p', 'report-missing', `Löytämättä: ${missing} todistetta.`));
-    const send = el('button', 'lock-open', 'Lähetä raportti');
-    send.type = 'submit';
+    const list = el('ol', 'report-list');
+    Object.keys(EVIDENCE).forEach((id, i) => {
+      const ok = game.hasEvidence(id);
+      const item = el('li', `report-item${ok ? ' found' : ''}`);
+      item.append(
+        el('span', 'report-check', ok ? '✓' : ''),
+        el('span', null, ok ? EVIDENCE[id] : `Todiste ${i + 1}: ei vielä löydetty`),
+      );
+      list.appendChild(item);
+    });
+    const status = found === EVIDENCE_TOTAL
+      ? 'Kaikki todisteet on koottu. Raportti on valmis lähetettäväksi.'
+      : `Todisteita ${found}/${EVIDENCE_TOTAL}. Voit lähettää raportin nyt tai jatkaa tutkimista.`;
+    const send = el('button', 'lock-open', found === EVIDENCE_TOTAL ? 'Lähetä raportti' : 'Lähetä keskeneräisenä');
     const cancel = el('button', 'lock-cancel', 'Jatka tutkimista');
-    cancel.type = 'button';
     const buttons = el('div', 'lock-buttons');
     buttons.append(cancel, send);
-    card.append(list, buttons);
+    card.append(list, el('p', 'report-help', status), buttons);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     cancel.addEventListener('click', () => overlay.remove());
-    card.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const chosen = [...list.querySelectorAll('input:checked')].map((i) => options.find((o) => o.id === i.value));
+    send.addEventListener('click', () => {
       overlay.remove();
-      finish({ reason: 'report', chosen });
+      finish({ reason: 'report' });
     });
   }
 
   // --- loppu --------------------------------------------------------------------------
-  function finish({ reason, chosen }) {
+  function finish({ reason }) {
     if (ending) return;
     running = false;
     interaction.close();
-    // aikaloppu: raporttiin menee se, mitä ehdittiin löytää
-    const picked = chosen ?? game.evidence.map((id) => ({ id, real: true }));
-    const correct = picked.filter((o) => o.real).length;
-    const wrong = picked.filter((o) => !o.real).length;
+    const found = game.evidence.length;
 
     views.locked = false;
     views.go(views.indexOf('door'));
@@ -188,24 +132,40 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     box.hidden = true;
     document.body.classList.add('ending');
     setTimeout(() => { openDoor(); onDirty(); }, 1500);
-    setTimeout(() => showResult({ reason, correct, wrong }), 4600);
+    setTimeout(() => showKalevi(reason, found), 3300);
+    setTimeout(() => showResult({ reason, found }), 6200);
   }
 
-  function grade(correct, wrong) {
-    const score = correct - wrong * 0.5;
-    if (correct === EVIDENCE_TOTAL && wrong === 0) return ['Erinomainen', 'Pirjon mielestä olisit loistava kirjanpitäjä. Verovirasto harkitsee ylennystäsi.'];
-    if (score >= 3) return ['Hyvä', 'Kalevin juristit joutuvat tekemään ylitöitä.'];
-    if (score >= 1.5) return ['Tyydyttävä', 'Kalevi saa jälkiveroja, mutta kesämökin sauna jää lämpiämään.'];
-    if (score > 0) return ['Välttävä', 'Tapaus siirtyy jatkoselvitykseen. Kalevi lähtee ”golfmatkalle”.'];
+  // Kalevi astuu ovesta: henkilökuva ja repliikki ruudun vasempaan laitaan.
+  function showKalevi(reason, found) {
+    const quote = reason === 'time'
+      ? '– Mitä te teette minun laatikoillani?!'
+      : found === EVIDENCE_TOTAL
+        ? '– No mutta. Te olette… perusteellinen. Kahvia?'
+        : '– Ai, tarkastus? Kukaan ei kertonut. Viskiä?';
+    const card = el('div', 'kalevi-arrives');
+    const img = new Image();
+    img.src = `${import.meta.env.BASE_URL}characters/kalevi.jpg`;
+    img.alt = 'Kalevi Kivi';
+    card.append(img, el('p', 'kalevi-quote', quote));
+    document.body.appendChild(card);
+  }
+
+  function grade(found) {
+    if (found === EVIDENCE_TOTAL && hintsUsed <= 1) return ['Erinomainen', 'Pirjon mielestä olisit loistava kirjanpitäjä. Verovirasto harkitsee ylennystäsi.'];
+    if (found === EVIDENCE_TOTAL) return ['Kiitettävä', 'Kaikki todisteet koossa – vihjeiden kanssa, mutta koossa. Kalevin juristit tekevät ylitöitä.'];
+    if (found === 3) return ['Hyvä', 'Kalevi saa jälkiverot ja veronkorotukset. Golfmatkat jäävät väliin.'];
+    if (found === 2) return ['Tyydyttävä', 'Tapaus siirtyy jatkoselvitykseen. Kesämökin sauna jää lämpiämään.'];
+    if (found === 1) return ['Välttävä', 'Yksi kiuas ei vielä kaada imperiumia. Kalevi lähtee ”golfmatkalle”.'];
     return ['Hylätty', 'Kalevi tarjoaa sinulle viskiä. Kieltäydyt, mutta todisteita ei ole.'];
   }
 
-  function showResult({ reason, correct, wrong }) {
-    const [title, line] = grade(correct, wrong);
+  function showResult({ reason, found }) {
+    const [title, line] = grade(found);
     const overlay = el('div', 'overlay lock result');
     const card = el('div', 'lock-card');
     const story = reason === 'report'
-      ? `Lähetit raportin kello ${storyClock(elapsed)}. Samalla ovi aukeaa: Kalevi palaa lounaalta ja löytää sinut työpöytänsä äärestä. – No mutta, hän sanoo. – Kahvia?`
+      ? `Lähetit raportin kello ${storyClock(elapsed)}. Samalla ovi aukeaa: Kalevi palaa lounaalta ja löytää sinut työpöytänsä äärestä.`
       : 'Ovi aukeaa ennen kuin raportti on valmis. Kalevi palaa lounaalta ja tuijottaa avattuja laatikoitaan. – Tämä on… rutiinitarkastus, sinä sanot.';
     card.append(
       el('div', 'result-kicker', reason === 'report' ? 'Tarkastus valmis' : 'Aika loppui'),
@@ -213,8 +173,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
       el('p', 'result-story', story),
       el('p', 'result-line', line),
       el('p', 'result-stats', [
-        `Todisteita raportissa ${correct}/${EVIDENCE_TOTAL}`,
-        wrong ? `turhia havaintoja ${wrong}` : null,
+        `Todisteita ${found}/${EVIDENCE_TOTAL}`,
         `aikaa kului ${fmt(Math.min(elapsed, TIME_LIMIT))}`,
         `vihjeitä ${hintsUsed}`,
       ].filter(Boolean).join(' · ')),

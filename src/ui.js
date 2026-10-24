@@ -61,35 +61,78 @@ export function inventoryHud(game, { onHelp }) {
 }
 
 // --- paperien lukunäkymä -----------------------------------------------------------
-// pages: [{ canvas, label, markable }] ; onMark(page) kutsutaan, kun pelaaja
-// merkitsee paperin epäilyttäväksi.
+// Yksi paperi kerrallaan ruudun kokoon sovitettuna; selaus nuolilla tai pienoiskuvista.
+// pages: [{ canvas, label, markable, evidence }] ; onMark(page, button) kutsutaan,
+// kun pelaaja merkitsee paperin epäilyttäväksi, isMarked(page) kertoo tilan.
 export function readView(title, pages, { onMark, isMarked } = {}) {
+  let index = 0;
   const overlay = el('div', 'overlay read');
   const head = el('div', 'overlay-head');
+  const counter = el('span', 'read-counter');
   const close = el('button', 'overlay-close', 'Sulje');
-  head.append(el('h2', null, title), close);
-  const strip = el('div', 'read-strip');
-  for (const page of pages) {
-    const fig = el('figure', 'read-page');
-    const img = new Image();
-    img.src = page.canvas.toDataURL('image/png');
-    img.alt = page.label ?? '';
-    fig.appendChild(img);
-    if (page.markable) {
-      const done = isMarked?.(page);
-      const mark = el('button', 'read-mark', done ? 'Merkitty todisteeksi' : 'Merkitse epäilyttäväksi');
-      mark.disabled = !!done;
-      mark.addEventListener('click', () => onMark?.(page, mark));
-      fig.appendChild(mark);
-    }
-    strip.appendChild(fig);
-  }
-  overlay.append(head, strip);
+  const heading = el('h2', null, title);
+  heading.appendChild(counter);
+  head.append(heading, close);
+
+  const main = el('div', 'read-main');
+  const prev = el('button', 'read-nav', '‹');
+  const next = el('button', 'read-nav', '›');
+  prev.setAttribute('aria-label', 'Edellinen paperi');
+  next.setAttribute('aria-label', 'Seuraava paperi');
+  const img = new Image();
+  img.className = 'read-image';
+  main.append(prev, img, next);
+
+  const foot = el('div', 'read-foot');
+  const mark = el('button', 'read-mark');
+  const thumbs = el('div', 'read-thumbs');
+  const sources = pages.map((p) => p.canvas.toDataURL('image/png'));
+  pages.forEach((p, i) => {
+    const t = new Image();
+    t.src = sources[i];
+    t.alt = p.label ?? '';
+    t.addEventListener('click', () => show(i));
+    thumbs.appendChild(t);
+  });
+  foot.append(mark, thumbs);
+  overlay.append(head, main, foot);
   document.body.appendChild(overlay);
+
+  function show(i) {
+    index = (i + pages.length) % pages.length;
+    const page = pages[index];
+    img.src = sources[index];
+    img.alt = page.label ?? '';
+    counter.textContent = pages.length > 1 ? ` · ${index + 1}/${pages.length}` : '';
+    const multi = pages.length > 1;
+    prev.style.visibility = next.style.visibility = multi ? 'visible' : 'hidden';
+    thumbs.hidden = !multi;
+    [...thumbs.children].forEach((t, j) => t.classList.toggle('active', j === index));
+    mark.hidden = !page.markable;
+    const done = isMarked?.(page);
+    mark.disabled = !!done;
+    mark.textContent = done ? '✓ Merkitty todisteeksi' : 'Merkitse epäilyttäväksi';
+  }
+  prev.addEventListener('click', () => show(index - 1));
+  next.addEventListener('click', () => show(index + 1));
+  mark.addEventListener('click', () => {
+    onMark?.(pages[index], mark);
+    show(index);
+  });
+  // nuolinäppäimet selaavat papereita eivätkä käännä kameraa
+  const keys = (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.stopImmediatePropagation();
+      show(index + (e.key === 'ArrowRight' ? 1 : -1));
+    }
+  };
+  addEventListener('keydown', keys, true);
   const off = onEscape(done);
   close.addEventListener('click', done);
+  show(0);
   function done() {
     off();
+    removeEventListener('keydown', keys, true);
     overlay.remove();
   }
 }

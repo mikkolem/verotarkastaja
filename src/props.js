@@ -33,7 +33,6 @@ export const PROPS = [
   { name: 'lamp', url: 'desk_lamp_arm_01', position: [-0.12, DESK_TOP + 0.088, -0.92], rotationY: 0.5 + PI },
   { name: 'laptop', url: 'classic_laptop', position: [0.95, DESK_TOP, -0.72], rotationY: PI, scale: 0.55 },
   { name: 'photo', url: 'standing_picture_frame_01', position: [1.38, DESK_TOP, -0.95], rotationY: 2.4 },
-  { name: 'notepads', url: 'office_notepads', position: [0.3, DESK_TOP, -0.45], rotationY: 0.15, scale: 0.4 },
   { name: 'stapler', url: 'vintage_stapler', position: [1.3, DESK_TOP + 0.013, -0.24], rotationY: 0.4 },
   { name: 'glasses', url: 'round_spectacles', position: [0.6, DESK_TOP + 0.023, -0.35], rotationY: -0.6 },
 
