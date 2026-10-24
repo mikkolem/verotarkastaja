@@ -122,7 +122,8 @@ let ready = false;
 async function loadRoom() {
   // Mallit latautuvat verkosta samaan aikaan, kun tekstuureja lasketaan.
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-  const urls = ['models/room.glb', ...PROPS.map((p) => p.url)];
+  const propUrls = [...new Set(PROPS.map((p) => p.url))];
+  const urls = ['models/room.glb', ...propUrls];
   const loaded = urls.map(() => 0);
   const modelPromises = urls.map((url, i) => loader.loadAsync(`${import.meta.env.BASE_URL}${url}`, (e) => {
     if (!e.total) return;
@@ -134,7 +135,7 @@ async function loadRoom() {
     showProgress('textures', p);
   });
   showProgress('textures', 1, 'Kannetaan huonekaluja…');
-  const [room, ...props] = await Promise.all(modelPromises);
+  const [room, ...propModels] = await Promise.all(modelPromises);
   showProgress('model', 1);
 
   room.scene.traverse((obj) => {
@@ -147,16 +148,21 @@ async function loadRoom() {
   });
   scene.add(room.scene);
 
-  props.forEach((gltf, i) => {
-    const { name, position, rotationY = 0 } = PROPS[i];
-    gltf.scene.name = name;
-    gltf.scene.position.set(...position);
-    gltf.scene.rotation.y = rotationY;
-    gltf.scene.traverse((obj) => {
-      if (obj.isMesh) obj.castShadow = obj.receiveShadow = true;
+  const used = new Set();
+  for (const { name, url, position, rotationY = 0, scale = 1 } of PROPS) {
+    // ensimmäinen käyttö saa alkuperäisen, seuraavat kopion (jakavat geometrian)
+    const source = propModels[propUrls.indexOf(url)].scene;
+    const obj = used.has(url) ? source.clone() : source;
+    used.add(url);
+    obj.name = name;
+    obj.position.set(...position);
+    obj.rotation.y = rotationY;
+    obj.scale.setScalar(scale);
+    obj.traverse((o) => {
+      if (o.isMesh) o.castShadow = o.receiveShadow = true;
     });
-    scene.add(gltf.scene);
-  });
+    scene.add(obj);
+  }
   renderer.shadowMap.needsUpdate = true;
 
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.

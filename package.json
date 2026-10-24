@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "model": "/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python blender/build_room.py",
-    "models": "gltf-transform optimize assets-src/modern_arm_chair_01/modern_arm_chair_01_1k.gltf public/models/chair.glb --compress meshopt --texture-compress webp --texture-size 1024"
+    "models": "node scripts/optimize-models.mjs"
   },
   "dependencies": {
     "three": "^0.186.1"

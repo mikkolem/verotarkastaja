@@ -312,9 +312,6 @@ def build_furniture():
         side.box("brass", (dx0 + dx1) / 2 - 0.01, (dx0 + dx1) / 2 + 0.01, 0.6, 0.7, bz0 - 0.03, bz0 - 0.015)
     side.build()
 
-    pot = Part("plant_pot")
-    pot.cylinder("terracotta", 1.95, -1.55, 0.0, 0.45, 0.17, 0.22)
-    pot.build()
 
 
 def main():
