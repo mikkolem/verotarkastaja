@@ -166,10 +166,174 @@ html, body {
   padding: 8px 18px;
   cursor: pointer;
 }
+.inspect-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.inspect-actions button.secondary {
+  color: var(--ui-text);
+  background: transparent;
+  border: 1px solid var(--ui-border);
+}
+.inspect-actions button.secondary:hover { background: rgba(255, 255, 255, 0.06); }
+
 body.inspecting .nav,
 body.inspecting .edge { display: none; }
 body.inspecting canvas { cursor: grab; }
 body.inspecting canvas:active { cursor: grabbing; }
+
+/* Ilmoitus ruudun alareunassa */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 90px;
+  transform: translate(-50%, 10px);
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px;
+  font-size: 15px;
+  color: var(--ui-text);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-accent);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 30;
+}
+.toast.visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* Tavarat ja todisteet oikeassa yläkulmassa */
+.hud {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  max-width: 60vw;
+}
+.hud-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.hud-chip, .hud-evidence {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ui-text);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.hud-chip::before { content: '🔑 '; }
+.hud-evidence { cursor: pointer; border-color: var(--ui-accent); }
+.hud-list {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  padding: 10px 14px 10px 28px;
+  font-size: 13px;
+  line-height: 1.45;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  max-width: 320px;
+  margin-left: auto;
+}
+.hud-empty { list-style: none; margin-left: -14px; font-style: italic; color: var(--ui-muted); }
+body.intro-open .hud,
+body.inspecting .hud { display: none; }
+
+/* Koko ruudun ikkunat: lukunäkymä ja numerolukko */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 6, 4, 0.82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.overlay-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+}
+.overlay-head h2 { margin: 0; font-size: 20px; font-weight: normal; color: var(--ui-accent); }
+.overlay-close, .lock-cancel, .lock-open, .read-mark {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.overlay-close, .lock-cancel {
+  color: var(--ui-text);
+  background: transparent;
+  border: 1px solid var(--ui-border);
+}
+.read-strip {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding: 8px 24px 32px;
+  scroll-snap-type: x mandatory;
+}
+.read-page { margin: 0 auto; flex: none; display: flex; flex-direction: column; align-items: center; gap: 12px; scroll-snap-align: center; }
+.read-page img {
+  display: block;
+  max-height: calc(100vh - 170px);
+  max-width: min(78vw, 520px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.read-mark { color: #1b140c; background: var(--ui-accent); border: 0; }
+.read-mark:disabled { opacity: 0.5; cursor: default; }
+
+.lock { align-items: center; justify-content: center; }
+.lock-card {
+  padding: 24px 28px;
+  text-align: center;
+  background: #1c1712;
+  border: 1px solid var(--ui-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.lock-card h2 { margin: 0 0 16px; font-size: 20px; font-weight: normal; color: var(--ui-accent); }
+.lock-wheels { display: flex; justify-content: center; gap: 12px; }
+.lock-wheel { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.lock-digit {
+  width: 58px;
+  padding: 10px 0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 40px;
+  font-weight: bold;
+  color: #1b140c;
+  background: linear-gradient(#b89558, #e8cc8e 45%, #b89558);
+  border-radius: 8px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.lock-step {
+  width: 58px;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--ui-text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.lock-message { min-height: 2.6em; margin: 14px 0 10px; font-size: 14px; color: var(--ui-muted); max-width: 280px; }
+.lock-buttons { display: flex; justify-content: center; gap: 10px; }
+.lock-open { color: #1b140c; background: var(--ui-accent); border: 0; }
+.shake { animation: shake 0.4s; }
+@keyframes shake {
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
 
 /* Aloitusruutu: tarkastusmääräys paperilla huoneen päällä */
 .intro {

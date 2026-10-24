@@ -49,7 +49,7 @@ export const RECEIPTS = [
   { shop: 'RAVINTOLA KULTAINEN HAARUKKA', date: '14.03.2025', rows: [['Liikelounas x4', '186,00'], ['Kahvit x4', '28,00']], total: '214,00' },
   { shop: 'GOLFKLUBI BIRDIE RY', date: '02.05.2025', rows: [['Greenfee', '120,00'], ['Pallot 12 kpl', '38,00']], total: '158,00' },
   { shop: 'KUKKAKAUPPA ORVOKKI', date: '21.05.2025', rows: [['Kukkakimppu', '90,00']], total: '90,00' },
-  { shop: 'RAUTA-ANTTI OY', date: '20.06.2025', rows: [['Puukiuas K16', '400,00']], total: '400,00' },
+  { shop: 'RAUTA-ANTTI OY', date: '20.06.2025', rows: [['Puukiuas K16', '400,00']], total: '400,00', evidence: 'kiuas' },
 ];
 
 function receiptTexture({ shop, date, rows, total }) {
@@ -204,14 +204,117 @@ function spineTexture(text, bg) {
   });
 }
 
+// --- pääkirjan ote laatikossa A (pulma 2: edustuskulut 1 247 €) --------------------
+const LEDGER = [
+  ['1100', 'Koneet ja kalusto', '340,00', 'nitoja'],
+  ['1120', 'Kalusteet', '8 900,00', 'neuvottelutila'],
+  ['1150', 'Taideteokset', '12 000,00', 'viherkasvi'],
+  ['6800', 'Edustuskulut', '1 247,00', 'kuitit liitteenä'],
+  ['6900', 'Valaistusinvestoinnit', '1 200,00', 'pöytälamppu'],
+];
+
+function ledgerTexture() {
+  return canvasTexture(600, 840, (g, w, h) => {
+    paperBackground(g, w, h, '#f1ede2');
+    g.fillStyle = '#1a1a1a';
+    g.textAlign = 'left';
+    g.font = `bold 26px ${MONO}`;
+    g.fillText('KIVI & KUMPPANIT OY', 40, 70);
+    g.font = `20px ${MONO}`;
+    g.fillText('Pääkirjan ote 1.1.–30.6.2025', 40, 105);
+    g.fillRect(40, 125, w - 80, 2);
+    g.font = `bold 17px ${MONO}`;
+    g.fillText('TILI', 40, 165);
+    g.fillText('NIMI', 110, 165);
+    g.textAlign = 'right';
+    g.fillText('EUROA', w - 40, 165);
+    LEDGER.forEach(([acc, name, sum, note], i) => {
+      const y = 215 + i * 78;
+      g.textAlign = 'left';
+      g.font = `18px ${MONO}`;
+      g.fillText(acc, 40, y);
+      g.fillText(name, 110, y);
+      g.textAlign = 'right';
+      g.font = `bold 20px ${MONO}`;
+      g.fillText(sum, w - 40, y);
+      g.textAlign = 'left';
+      g.font = `italic 15px ${SERIF}`;
+      g.fillStyle = '#555';
+      g.fillText(`(${note})`, 110, y + 24);
+      g.fillStyle = '#1a1a1a';
+    });
+    g.fillRect(40, 640, w - 80, 1);
+    g.font = `28px ${HAND}`;
+    g.fillStyle = '#1f3a8a';
+    g.fillText('Täsmätty – P.', 40, 720);
+  });
+}
+
+// --- laatikon B paperit (johtavat pulmaan 3) -----------------------------------------
+function invoiceHalfTexture() {
+  return canvasTexture(840, 600, (g, w, h) => {
+    // revitty alareuna: piirretään paperi sahalaitaisena monikulmiona
+    g.beginPath();
+    g.moveTo(0, 0);
+    g.lineTo(w, 0);
+    for (let x = w; x >= 0; x -= 24) g.lineTo(x, h - 30 - Math.random() * 40);
+    g.closePath();
+    g.save();
+    g.clip();
+    paperBackground(g, w, h, '#f3efe4');
+    g.fillStyle = '#1a1a1a';
+    g.font = `bold 40px ${SERIF}`;
+    g.fillText('MYYNTILASKU', 50, 80);
+    g.font = `20px ${MONO}`;
+    g.fillText('Nro 2025-117        Päiväys 30.6.2025', 50, 125);
+    g.fillRect(50, 145, w - 100, 2);
+    g.font = `bold 18px ${MONO}`;
+    g.fillText('MYYJÄ', 50, 190);
+    g.fillText('OSTAJA', 450, 190);
+    g.font = `18px ${MONO}`;
+    ['Kivi & Kumppanit Oy', 'Kivikatu 1', '00100 Helsinki'].forEach((l, i) => g.fillText(l, 50, 220 + i * 26));
+    ['Kivi Consulting Ltd', 'Harbour Road 7', 'George Town', 'CAYMAN ISLANDS'].forEach((l, i) => g.fillText(l, 450, 220 + i * 26));
+    g.font = `bold 18px ${MONO}`;
+    g.fillText('Erittely', 50, 370);
+    g.font = `18px ${MONO}`;
+    g.fillText('Konsultointipalvelut', 50, 400);
+    g.restore();
+  }, { flipY: true });
+}
+
+function safeNoteTexture() {
+  return canvasTexture(420, 420, (g, w, h) => {
+    paperBackground(g, w, h, '#fbfaf4');
+    g.strokeStyle = 'rgba(80, 120, 200, 0.35)';
+    for (let y = 70; y < h; y += 42) {
+      g.beginPath();
+      g.moveTo(0, y);
+      g.lineTo(w, y);
+      g.stroke();
+    }
+    g.fillStyle = '#1f3a8a';
+    g.font = `30px ${HAND}`;
+    ['Kassakaapin koodi =', 'tämän kuun', 'MAKSETTAVA ALV', '', 'Silppuri –', 'älä unohda!!!'].forEach((l, i) => g.fillText(l, 28, 62 + i * 42));
+  });
+}
+
+// Kaikkien arkkien kuvat nimen mukaan lukunäkymää varten.
+const PAGES = new Map();
+
 // Paperiarkki: etupuolella teksti, takapuolella tyhjä paperi (back = takapuolen väri),
 // jotta arkki ei katoa, kun sitä käännetään lähikuvassa.
-function sheet(name, texture, width, height, { back = 0xebe7dc } = {}) {
+function sheet(name, texture, width, height, { back = 0xebe7dc, torn = false } = {}) {
   const geometry = new THREE.PlaneGeometry(width, height);
-  const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture, roughness: 0.85 }));
+  // torn = revitty reuna: tekstuurin läpinäkyvät kohdat leikataan pois
+  const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+    map: texture, roughness: 0.85, alphaTest: torn ? 0.5 : 0,
+  }));
   mesh.name = name;
   mesh.receiveShadow = true;
-  const backside = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: back, roughness: 0.9 }));
+  PAGES.set(name, texture.image);
+  const backside = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+    color: back, roughness: 0.9, alphaMap: torn ? texture : null, alphaTest: torn ? 0.5 : 0,
+  }));
   backside.rotation.y = Math.PI;
   backside.position.z = -0.0002;
   mesh.add(backside);
@@ -223,18 +326,41 @@ function sheet(name, texture, width, height, { back = 0xebe7dc } = {}) {
 export function addPaperItems(scene) {
   const DESK = 0.783;
 
-  // kuittinippu pöydän oikealla puolella, hieman sikin sokin
+  // Laatikko A: kuittinippu viuhkana pääkirjan otteen päällä. Paperit ovat laatikon
+  // lapsia, joten ne liikkuvat sen mukana, kun laatikko avataan.
+  const drawerA = scene.getObjectByName('drawer_a');
+  const DRAWER_BOTTOM = 0.532;
   const receipts = new THREE.Group();
   receipts.name = 'receipts';
   RECEIPTS.forEach((r, i) => {
     const m = sheet(`receipt_${i + 1}`, receiptTexture(r), 0.075, 0.17, { back: 0xe9e4d6 });
-    // levitetty viuhkaksi, jotta jokainen kuitti erottuu
     m.rotation.set(-Math.PI / 2, 0, [0.12, -0.06, 0.08, -0.1][i]);
-    m.position.set([-0.12, -0.04, 0.04, 0.12][i], i * 0.0006, [0.01, -0.01, 0.015, -0.005][i]);
+    m.position.set([-0.12, -0.04, 0.04, 0.12][i], 0.002 + i * 0.0006, [0.01, -0.01, 0.015, -0.005][i]);
     receipts.add(m);
   });
-  receipts.position.set(1.25, DESK, -0.42);
-  scene.add(receipts);
+  const ledger = sheet('ledger', ledgerTexture(), 0.15, 0.21, { back: 0xece8dc });
+  ledger.rotation.set(-Math.PI / 2, 0, 0.04);
+  ledger.position.set(0.01, 0.001, -0.1);
+  receipts.add(ledger);
+  receipts.position.set(-0.045, DRAWER_BOTTOM, -0.3);
+  // attach säilyttää maailmasijainnin (pakattu malli ei ole origossa)
+  drawerA.updateMatrixWorld(true);
+  drawerA.attach(receipts);
+
+  // Laatikko B: puolikas lasku Caymansaarille ja lappu kassakaapin koodista
+  const drawerB = scene.getObjectByName('drawer_b');
+  const papersB = new THREE.Group();
+  papersB.name = 'drawer_b_papers';
+  const invoice = sheet('invoice_half', invoiceHalfTexture(), 0.21, 0.15, { torn: true });
+  invoice.rotation.set(-Math.PI / 2, 0, -0.05);
+  invoice.position.set(0, 0.001, -0.05);
+  const safeNote = sheet('note_safe', safeNoteTexture(), 0.09, 0.09, { back: 0xf4f2ea });
+  safeNote.rotation.set(-Math.PI / 2, 0, 0.25);
+  safeNote.position.set(0.09, 0.0025, 0.03);
+  papersB.add(invoice, safeNote);
+  papersB.position.set(1.245, DRAWER_BOTTOM, -0.3);
+  drawerB.updateMatrixWorld(true);
+  drawerB.attach(papersB);
 
   // muistilaput: pöydän reunalla ja lampun juurella
   const note1 = sheet('note_silppu', noteTexture('Muista\nsilputa!!!'), 0.076, 0.076, { back: 0xf2dc5e });
@@ -275,4 +401,27 @@ export function addPaperItems(scene) {
       o.material.map = cottagePhotoTexture();
     }
   });
+}
+
+// Lukunäkymän sivut esineelle. markable = sivun voi merkitä epäilyttäväksi,
+// evidence = todisteen tunnus, jos merkintä osuu oikeaan.
+export function pagesFor(key) {
+  if (key === 'receipts') {
+    return [
+      { canvas: PAGES.get('ledger'), label: 'Pääkirjan ote' },
+      ...RECEIPTS.map((r, i) => ({
+        canvas: PAGES.get(`receipt_${i + 1}`),
+        label: r.shop,
+        markable: true,
+        evidence: r.evidence,
+      })),
+    ];
+  }
+  if (key === 'drawer_b_papers') {
+    return [
+      { canvas: PAGES.get('invoice_half'), label: 'Puolikas myyntilasku' },
+      { canvas: PAGES.get('note_safe'), label: 'Käsin kirjoitettu lappu' },
+    ];
+  }
+  return [];
 }

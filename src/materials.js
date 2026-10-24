@@ -61,6 +61,8 @@ export async function createMaterials(anisotropy, onProgress = () => {}) {
     }),
     terracotta: new THREE.MeshStandardMaterial({ color: 0xa4593a, roughness: 0.85 }),
 
+    drawer_inner: new THREE.MeshStandardMaterial({ color: 0x9a7650, roughness: 0.75 }),
+
     // erikoisesineet (blender/build_props.py)
     plastic_black: new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.35 }),
     plastic_grey: new THREE.MeshStandardMaterial({ color: 0x55575a, roughness: 0.5 }),

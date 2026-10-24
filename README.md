@@ -24,6 +24,8 @@ Pelin idea ja vaiheet: [PELISUUNNITELMA.md](PELISUUNNITELMA.md).
 - `src/paper.js` – paperit ja tekstit: kuitit, muistilaput, diplomi, mökkikuva, ALV-juliste, mappien selkämykset
 - `src/items.js` – klikattavien esineiden nimet ja kuvaukset
 - `src/interact.js` – korostus hiiren alla ja esineen tarkastelu lähikuvassa
+- `src/game.js` – pelin tila: tavarat, todisteet ja tapahtumat
+- `src/ui.js` – ilmoitukset, tavaraluettelo, paperien lukunäkymä ja numerolukko
 - `src/dust.js` – auringonsäteessä leijuvat pölyhiukkaset
 
 Ohjaus: alapalkin napit, ruudun reunojen nuolet tai nuolinäppäimet ← →. Esinettä klikkaamalla se avautuu lähikuvaan (vedä pyörittääksesi, Esc sulkee).

@@ -85,13 +85,24 @@ export class Interaction {
     return [...this.roots].filter(([, k]) => k === key).map(([o]) => o);
   }
 
+  // Käy läpi esineen meshit, mutta ei sen sisällä olevia toisia esineitä
+  // (esim. laatikon sisällä olevat kuitit korostuvat erikseen).
+  meshesOf(root, fn) {
+    const visit = (o) => {
+      if (o !== root && this.roots.has(o)) return;
+      if (o.isMesh) fn(o);
+      o.children.forEach(visit);
+    };
+    visit(root);
+  }
+
   setHover(key) {
     if (key === this.hovered) return;
     for (const [k, on] of [[this.hovered, false], [key, true]]) {
       if (!k) continue;
       for (const root of this.objectsOf(k)) {
-        root.traverse((o) => {
-          if (!o.isMesh || !o.userData.baseEmissive) return;
+        this.meshesOf(root, (o) => {
+          if (!o.userData.baseEmissive) return;
           if (on) o.material.emissive.add(HIGHLIGHT);
           else o.material.emissive.copy(o.userData.baseEmissive);
         });
@@ -147,6 +158,10 @@ export class Interaction {
     const holder = new THREE.Group();
     for (const src of [main, ...rest]) {
       const copy = src.clone(true);
+      // sisäkkäiset esineet (esim. laatikon kuitit) eivät kuulu lähikuvaan
+      const nested = [];
+      copy.traverse((o) => { if (o !== copy && ITEMS[o.name]) nested.push(o); });
+      nested.forEach((o) => o.removeFromParent());
       copy.applyMatrix4(toLocal);
       holder.add(copy);
     }
@@ -167,11 +182,26 @@ export class Interaction {
     this.pivot.rotation.set(0.15, -0.35, 0);
 
     this.inspecting = key;
-    document.getElementById('inspect-title').textContent = item.title;
-    document.getElementById('inspect-text').textContent = item.text;
+    this.refresh();
     this.panel.hidden = false;
     document.body.classList.add('inspecting');
     this.onChange();
+  }
+
+  // Päivittää kuvauksen ja napit pelin tilan mukaan (kutsutaan myös tilan muuttuessa).
+  refresh() {
+    if (!this.inspecting) return;
+    const item = ITEMS[this.inspecting];
+    document.getElementById('inspect-title').textContent = item.title;
+    document.getElementById('inspect-text').textContent =
+      typeof item.text === 'function' ? item.text() : item.text;
+    const box = document.getElementById('inspect-buttons');
+    box.replaceChildren(...(item.actions?.(this.api) ?? []).map(({ label, run }) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.addEventListener('click', run);
+      return b;
+    }));
   }
 
   close() {

@@ -20,7 +20,6 @@ from build_room import MATERIALS, METALS, ROOT, Part, export  # noqa: E402
 OUT = os.path.join(ROOT, "public", "models", "custom_props.glb")
 
 MATERIALS.update({
-    "plastic_black": (0.02, 0.02, 0.02),
     "plastic_grey": (0.25, 0.25, 0.25),
     "led_red": (0.8, 0.05, 0.03),
     "steel_dark": (0.12, 0.12, 0.13),

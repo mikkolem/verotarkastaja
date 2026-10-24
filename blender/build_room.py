@@ -40,6 +40,8 @@ MATERIALS = {
     "desk_wood": (0.30, 0.13, 0.07),
     "leather": (0.20, 0.10, 0.06),
     "terracotta": (0.60, 0.30, 0.18),
+    "drawer_inner": (0.55, 0.40, 0.25),
+    "plastic_black": (0.02, 0.02, 0.02),
 }
 # metalliset materiaalit ja niiden karheus
 METALS = {"brass": 0.3}
@@ -287,6 +289,37 @@ def build_door():
     door.build()
 
 
+DRAWER_Y0 = 0.08 + 2 * 0.215     # ylimpien laatikoiden alareuna
+DRAWER_BACK = -0.6               # laatikon takaseinä (suljettuna)
+
+
+def build_drawer(name, px0, px1, z1):
+    """Avattava pöytälaatikko omana objektinaan (three.js liu'uttaa sitä +z-suuntaan).
+
+    drawer_a: avaimella aukeava (avaimenreikä), drawer_b: kolminumeroinen numerolukko.
+    """
+    p = Part(name)
+    y0 = DRAWER_Y0
+    fz0, fz1 = z1 - 0.03, z1 - 0.012
+    ix0, ix1 = px0 + 0.03, px1 - 0.03
+    p.box("desk_wood", px0 + 0.02, px1 - 0.02, y0, y0 + 0.19, fz0, fz1)          # etulevy
+    p.box("drawer_inner", ix0, ix0 + 0.012, y0 + 0.01, y0 + 0.17, DRAWER_BACK, fz0)  # sivut
+    p.box("drawer_inner", ix1 - 0.012, ix1, y0 + 0.01, y0 + 0.17, DRAWER_BACK, fz0)
+    p.box("drawer_inner", ix0, ix1, y0 + 0.01, y0 + 0.022, DRAWER_BACK, fz0)          # pohja
+    p.box("drawer_inner", ix0, ix1, y0 + 0.01, y0 + 0.17, DRAWER_BACK, DRAWER_BACK + 0.012)
+    hx = (px0 + px1) / 2
+    p.box("brass", hx - 0.05, hx + 0.05, y0 + 0.085, y0 + 0.105, fz1, fz1 + 0.017)
+    if name == "drawer_a":
+        p.box("brass", hx - 0.012, hx + 0.012, y0 + 0.135, y0 + 0.165, fz1, fz1 + 0.003)
+        p.box("plastic_black", hx - 0.003, hx + 0.003, y0 + 0.14, y0 + 0.158, fz1 + 0.003, fz1 + 0.004)
+    else:
+        p.box("brass", hx - 0.04, hx + 0.04, y0 + 0.13, y0 + 0.17, fz1, fz1 + 0.012)
+        for i in range(3):
+            wx = hx - 0.03 + i * 0.022
+            p.box("plastic_black", wx, wx + 0.016, y0 + 0.136, y0 + 0.164, fz1 + 0.012, fz1 + 0.016)
+    p.build(bevel=0.003)
+
+
 def build_furniture():
     # Työpöytä ikkunan edessä. Laatikot pelaajan puolella (etelään, +z),
     # jotta ne näkyvät "Työpöytä"-kuvakulmasta.
@@ -295,15 +328,23 @@ def build_furniture():
     x0, x1, z0, z1 = cx - w / 2, cx + w / 2, cz - d / 2, cz + d / 2
     desk.box("desk_wood", x0, x1, 0.74, 0.78, z0, z1)
     desk.box("leather", x0 + 0.35, x1 - 0.35, 0.78, 0.782, z0 + 0.15, z1 - 0.12)
-    for px0 in (x0 + 0.03, x1 - 0.48):
+    for name, px0 in (("drawer_a", x0 + 0.03), ("drawer_b", x1 - 0.48)):
         px1 = px0 + 0.45
-        desk.box("desk_wood", px0, px1, 0.04, 0.74, z0 + 0.03, z1 - 0.03)
+        # Jalusta on ontto ylimmän laatikon kohdalta, jotta avattu laatikko
+        # paljastaa oikean kolon eikä umpinaista puuta.
+        sy0, sy1, w_ = DRAWER_Y0 - 0.005, DRAWER_Y0 + 0.195, 0.025
+        desk.box("desk_wood", px0, px1, 0.04, sy0, z0 + 0.03, z1 - 0.03)
+        desk.box("desk_wood", px0, px1, sy1, 0.74, z0 + 0.03, z1 - 0.03)
+        desk.box("desk_wood", px0, px0 + w_, sy0, sy1, z0 + 0.03, z1 - 0.03)
+        desk.box("desk_wood", px1 - w_, px1, sy0, sy1, z0 + 0.03, z1 - 0.03)
+        desk.box("desk_wood", px0 + w_, px1 - w_, sy0, sy1, z0 + 0.03, DRAWER_BACK - 0.01)
         desk.box("desk_wood", px0 - 0.01, px1 + 0.01, 0.0, 0.05, z0 + 0.02, z1 - 0.02)
-        for i in range(3):
+        hx = (px0 + px1) / 2
+        for i in range(2):
             dy0 = 0.08 + i * 0.215
             desk.box("desk_wood", px0 + 0.02, px1 - 0.02, dy0, dy0 + 0.19, z1 - 0.03, z1 - 0.012)
-            hx = (px0 + px1) / 2
             desk.box("brass", hx - 0.05, hx + 0.05, dy0 + 0.085, dy0 + 0.105, z1 - 0.012, z1 + 0.005)
+        build_drawer(name, px0, px1, z1)
     desk.box("desk_wood", x0 + 0.48, x1 - 0.48, 0.3, 0.72, z0 + 0.05, z0 + 0.08)
     desk.build(bevel=0.006)
 

@@ -16,8 +16,11 @@ import { createDust } from './dust.js';
 import { skyTexture } from './textures.js';
 import { VIEWS, ViewController } from './views.js';
 import { PROPS } from './props.js';
-import { addPaperItems } from './paper.js';
+import { addPaperItems, pagesFor } from './paper.js';
 import { Interaction } from './interact.js';
+import { ITEMS } from './items.js';
+import { EVIDENCE, game } from './game.js';
+import { codeLock, inventoryHud, readView, toast } from './ui.js';
 import './style.css';
 
 // Ikkuna-aukko (vastaa blender/build_room.py:n mittoja)
@@ -294,6 +297,48 @@ interaction = new Interaction({
   environment: scene.environment,
   onChange: () => { roomDirty = true; },
 });
+
+// --- pulmat ---------------------------------------------------------------------
+// Käynnissä olevat animaatiot (esim. laatikon avaus). Niiden aikana huone ja
+// varjot piirretään joka kuvassa uudelleen.
+const animations = [];
+const DRAWER_TRAVEL = 0.32;
+
+function openDrawer(name) {
+  const drawer = scene.getObjectByName(name);
+  const start = drawer.position.z;
+  let t = 0;
+  animations.push((dt) => {
+    t = Math.min(1, t + dt / 0.9);
+    drawer.position.z = start + DRAWER_TRAVEL * (1 - Math.pow(1 - t, 3));
+    return t < 1;
+  });
+}
+
+// Esineiden toiminnot (items.js) käyttävät näitä.
+interaction.api = {
+  toast,
+  close: () => interaction.close(),
+  openDrawer,
+  codeLock,
+  read(key) {
+    readView(ITEMS[key].title, pagesFor(key), {
+      onMark(page, button) {
+        if (page.evidence && game.addEvidence(page.evidence)) {
+          toast(`Todiste löytyi: ${EVIDENCE[page.evidence]}`);
+          button.disabled = true;
+          button.textContent = 'Merkitty todisteeksi';
+        } else if (page.evidence) {
+          toast('Tämä on jo merkitty todisteeksi.');
+        } else {
+          toast('Tämä näyttää tavalliselta edustuskululta.');
+        }
+      },
+    });
+  },
+};
+game.onChange(() => interaction.refresh());
+inventoryHud(game);
 for (const [id, step] of [['prev', -1], ['next', 1], ['edge-prev', -1], ['edge-next', 1]]) {
   document.getElementById(id).addEventListener('click', () => views.go(views.index + step));
 }
@@ -360,7 +405,16 @@ renderer.setAnimationLoop(() => {
   sinceRender += dt;
   views.locked = !!interaction.inspecting || introOpen;
   const moving = views.moving;
-  const busy = interaction.busy;   // tarkasteltavaa esinettä pyöritetään
+  // käynnissä olevat animaatiot; valmiit poistetaan listalta
+  const animating = animations.length > 0;
+  for (let i = animations.length - 1; i >= 0; i--) {
+    if (!animations[i](dt)) animations.splice(i, 1);
+  }
+  if (animating) {
+    roomDirty = true;
+    renderer.shadowMap.needsUpdate = true;   // laatikko liikkuu, varjot mukana
+  }
+  const busy = interaction.busy || animating;   // esinettä pyöritetään tai jokin liikkuu
   views.update(dt);
   interaction.update(dt);
   if (!moving && !busy && sinceRender < IDLE_INTERVAL) return;
