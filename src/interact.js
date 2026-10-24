@@ -156,6 +156,7 @@ export class Interaction {
     // keskitys ja skaalaus niin, että esine mahtuu lähikuvaan
     this.pivot.scale.setScalar(1);
     this.pivot.rotation.set(0, 0, 0);
+    this.pivot.position.set(0, 0, 0);
     this.pivot.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(holder);
     const size = box.getSize(new THREE.Vector3());

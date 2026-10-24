@@ -204,13 +204,17 @@ function spineTexture(text, bg) {
   });
 }
 
-function sheet(name, texture, width, height, { color = 0xffffff } = {}) {
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(width, height),
-    new THREE.MeshStandardMaterial({ map: texture, color, roughness: 0.85 }),
-  );
+// Paperiarkki: etupuolella teksti, takapuolella tyhjä paperi (back = takapuolen väri),
+// jotta arkki ei katoa, kun sitä käännetään lähikuvassa.
+function sheet(name, texture, width, height, { back = 0xebe7dc } = {}) {
+  const geometry = new THREE.PlaneGeometry(width, height);
+  const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture, roughness: 0.85 }));
   mesh.name = name;
   mesh.receiveShadow = true;
+  const backside = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: back, roughness: 0.9 }));
+  backside.rotation.y = Math.PI;
+  backside.position.z = -0.0002;
+  mesh.add(backside);
   return mesh;
 }
 
@@ -223,7 +227,7 @@ export function addPaperItems(scene) {
   const receipts = new THREE.Group();
   receipts.name = 'receipts';
   RECEIPTS.forEach((r, i) => {
-    const m = sheet(`receipt_${i + 1}`, receiptTexture(r), 0.075, 0.17);
+    const m = sheet(`receipt_${i + 1}`, receiptTexture(r), 0.075, 0.17, { back: 0xe9e4d6 });
     // levitetty viuhkaksi, jotta jokainen kuitti erottuu
     m.rotation.set(-Math.PI / 2, 0, [0.12, -0.06, 0.08, -0.1][i]);
     m.position.set([-0.12, -0.04, 0.04, 0.12][i], i * 0.0006, [0.01, -0.01, 0.015, -0.005][i]);
@@ -233,17 +237,17 @@ export function addPaperItems(scene) {
   scene.add(receipts);
 
   // muistilaput: pöydän reunalla ja lampun juurella
-  const note1 = sheet('note_silppu', noteTexture('Muista\nsilputa!!!'), 0.076, 0.076);
+  const note1 = sheet('note_silppu', noteTexture('Muista\nsilputa!!!'), 0.076, 0.076, { back: 0xf2dc5e });
   note1.rotation.set(-Math.PI / 2, 0, 0.12);
   note1.position.set(0.02, DESK + 0.0008, -0.3);
   scene.add(note1);
-  const note2 = sheet('note_avain', noteTexture('Varavain\nsiellä missä\ntaide kasvaa'), 0.076, 0.076);
+  const note2 = sheet('note_avain', noteTexture('Varavain\nsiellä missä\ntaide kasvaa'), 0.076, 0.076, { back: 0xf2dc5e });
   note2.rotation.set(-Math.PI / 2, 0, -0.2);
   note2.position.set(0.48, DESK + 0.0008, -0.95);
   scene.add(note2);
 
   // ALV-juliste oven oikealla puolella
-  const poster = sheet('poster', posterTexture(), 0.42, 0.594);
+  const poster = sheet('poster', posterTexture(), 0.42, 0.594, { back: 0xf0ece0 });
   poster.rotation.y = Math.PI;
   poster.position.set(-0.15, 1.55, 1.995);
   scene.add(poster);
