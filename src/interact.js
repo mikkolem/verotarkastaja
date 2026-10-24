@@ -3,15 +3,16 @@
 import * as THREE from 'three';
 import { ALIASES, ITEMS } from './items.js';
 
-const HIGHLIGHT = new THREE.Color(0x3a2610);
+const HIGHLIGHT = new THREE.Color(0x4a3214);
 const INSPECT_SIZE = 0.27;       // esineen suurin mitta lähikuvassa (m)
 const CLICK_SLOP = 6;            // näin monta pikseliä saa liikkua, jotta painallus on klikkaus
 
 export class Interaction {
-  constructor({ camera, dom, environment, onChange }) {
+  constructor({ camera, dom, environment, onChange, onHover }) {
     this.camera = camera;
     this.dom = dom;
     this.onChange = onChange;   // kutsutaan, kun huonekuva pitää piirtää uudelleen
+    this.onHover = onHover;     // saa korostettavat objektit (ääriviiva)
     this.roots = new Map();     // objekti -> esineen avain
     this.hovered = null;
     this.inspecting = null;
@@ -110,22 +111,9 @@ export class Interaction {
     }
     this.hovered = key;
     this.dom.style.cursor = key ? 'pointer' : '';
-    // nimen alle maininta, jos esineellä on juuri nyt jotain tehtävää
-    const canAct = !!key && (ITEMS[key].actions?.(this.api)?.length ?? 0) > 0;
-    this.label.replaceChildren();
-    if (key) {
-      const title = document.createElement('span');
-      title.textContent = ITEMS[key].title;
-      this.label.append(title);
-      if (canAct) {
-        const hint = document.createElement('span');
-        hint.className = 'hover-action';
-        hint.textContent = 'Klikkaa – voit tehdä jotain';
-        this.label.append(hint);
-      }
-    }
-    this.label.classList.toggle('has-action', canAct);
+    this.label.textContent = key ? ITEMS[key].title : '';
     this.label.classList.toggle('visible', !!key);
+    this.onHover?.(key ? this.objectsOf(key) : []);
     this.onChange();
   }
 

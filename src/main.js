@@ -8,6 +8,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 
@@ -248,6 +249,12 @@ const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
 gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 8 });
 gtao.blendIntensity = 0.9;
 composer.addPass(gtao);
+// Hiiren alla olevan esineen kultainen ääriviiva (valitut objektit: interact.js)
+const outline = new OutlinePass(new THREE.Vector2(innerWidth, innerHeight), scene, camera);
+Object.assign(outline, { edgeStrength: 3.5, edgeGlow: 0.25, edgeThickness: 1.2 });
+outline.visibleEdgeColor.set(0xd9a04a);
+outline.hiddenEdgeColor.set(0x000000);   // ei piirretä muiden takana olevia osia (ei paljasta laatikon sisältöä)
+composer.addPass(outline);
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
 composer.addPass(new OutputPass());
 // Kaikki välivaiheet samaan kokoon renderöijän tarkkuuden kanssa
@@ -305,6 +312,7 @@ interaction = new Interaction({
   dom: renderer.domElement,
   environment: scene.environment,
   onChange: () => { roomDirty = true; },
+  onHover: (objects) => { outline.selectedObjects = objects; },
 });
 
 // --- pulmat ---------------------------------------------------------------------
