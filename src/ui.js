@@ -33,22 +33,26 @@ export function toast(message) {
 }
 
 // --- tavarat ja todisteet oikeassa yläkulmassa ----------------------------------------
-export function inventoryHud(game) {
+export function inventoryHud(game, { onHelp }) {
   const hud = el('div', 'hud');
   const items = el('div', 'hud-items');
   const evidence = el('button', 'hud-evidence');
+  evidence.title = 'Näytä löydetyt todisteet';
+  const help = el('button', 'hud-help', 'Ohjeet');
+  help.addEventListener('click', onHelp);
   const list = el('ul', 'hud-list');
   list.hidden = true;
   evidence.addEventListener('click', () => { list.hidden = !list.hidden; });
-  hud.append(items, evidence, list);
+  hud.append(items, evidence, help, list);
   document.body.appendChild(hud);
 
   game.onChange(() => {
-    items.replaceChildren(...game.inventory.map((id) => el('span', 'hud-chip', INVENTORY[id])));
+    const owned = game.inventory.map((id) => el('span', 'hud-chip', INVENTORY[id]));
+    items.replaceChildren(...(owned.length ? [el('span', 'hud-label', 'Tavarat'), ...owned] : []));
     evidence.textContent = `Todisteet ${game.evidence.length}/${EVIDENCE_TOTAL}`;
     list.replaceChildren(...(game.evidence.length
       ? game.evidence.map((id) => el('li', null, EVIDENCE[id]))
-      : [el('li', 'hud-empty', 'Ei vielä todisteita.')]));
+      : [el('li', 'hud-empty', 'Ei vielä todisteita. Kun luet papereita, merkitse epäilyttävät kohdat todisteiksi.')]));
   });
 }
 

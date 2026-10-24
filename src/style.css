@@ -227,6 +227,20 @@ body.inspecting canvas:active { cursor: grabbing; }
 }
 .hud-chip::before { content: '🔑 '; }
 .hud-evidence { cursor: pointer; border-color: var(--ui-accent); }
+.hud-help {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ui-muted);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.hud-help:hover { color: var(--ui-text); }
+.hud-label { align-self: center; font-size: 12px; font-style: italic; color: var(--ui-muted); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8); }
 .hud-list {
   flex-basis: 100%;
   margin: 4px 0 0;
@@ -398,6 +412,9 @@ body.intro-open .title { display: none; }
   background: rgba(163, 39, 29, 0.06);
 }
 .memo-label { color: var(--stamp); margin-bottom: 2px; }
+.memo-section { margin: 0 0 16px; }
+.memo-steps { margin: 6px 0 0; padding-left: 22px; font-size: 15px; }
+.memo-steps li { margin: 6px 0; padding-left: 4px; }
 .memo-help {
   list-style: none;
   margin: 0 0 14px;

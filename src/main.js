@@ -214,19 +214,28 @@ async function loadRoom() {
 
 // Aloitusruutu (tarkastusmääräys) näkyy latauksen jälkeen huoneen päällä.
 // Sillä aikaa kuvakulmia ei voi vaihtaa.
+// Ohjeet-nappi avaa saman muistion uudelleen kesken pelin.
 let introOpen = false;
+let started = false;
 function showIntro() {
   const intro = document.getElementById('intro');
+  intro.classList.remove('leaving');
   intro.hidden = false;
+  intro.scrollTop = 0;
   introOpen = true;
   document.body.classList.add('intro-open');
   const start = document.getElementById('intro-start');
+  start.textContent = started ? 'Jatka tarkastusta' : 'Aloita tarkastus';
   start.focus({ preventScroll: true });   // puhelimella muistio alkaa ylhäältä
   start.addEventListener('click', () => {
     introOpen = false;
     document.body.classList.remove('intro-open');
     intro.classList.add('leaving');
     setTimeout(() => { intro.hidden = true; }, 600);
+    if (!started) {
+      started = true;
+      hints.start();
+    }
   }, { once: true });
 }
 loadRoom();
@@ -338,7 +347,29 @@ interaction.api = {
   },
 };
 game.onChange(() => interaction.refresh());
-inventoryHud(game);
+inventoryHud(game, { onHelp: () => { interaction.close(); showIntro(); } });
+
+// Vihjeet: jos peli ei etene HINT_DELAY sekuntiin, näytetään vihje siihen
+// vaiheeseen, jossa pelaaja on. Jokainen edistysaskel nollaa ajastimen.
+const HINT_DELAY = 90;
+const HINTS = [
+  [() => !game.has('key'), 'Vihje: lue työpöydän muistilaput. Mitä tässä huoneessa on kirjattu taiteeksi?'],
+  [() => !game.is('drawer_a_open'), 'Vihje: messinkiavain sopii johonkin työpöydän laatikkoon.'],
+  [() => !game.hasEvidence('kiuas'), 'Vihje: lue laatikon A kuitit. Onko jokin niistä päivätty oudosti – vaikka juhannukseksi?'],
+  [() => !game.is('drawer_b_open'), 'Vihje: laske kuitit yhteen ja vertaa pääkirjan edustuskuluihin. Erotus on ”se mikä puuttuu”.'],
+  [() => true, 'Vihje: lue laatikon B paperit. Tarina jatkuu pian – loput pulmat ovat työn alla.'],
+];
+const hints = {
+  timer: null,
+  start() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      if (!introOpen) toast(HINTS.find(([when]) => when())[1]);
+      this.start();
+    }, HINT_DELAY * 1000);
+  },
+};
+game.onChange(() => { if (started) hints.start(); });
 for (const [id, step] of [['prev', -1], ['next', 1], ['edge-prev', -1], ['edge-next', 1]]) {
   document.getElementById(id).addEventListener('click', () => views.go(views.index + step));
 }
