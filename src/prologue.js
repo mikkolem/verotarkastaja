@@ -3,13 +3,14 @@
 //
 // Henkilökuvat: jos kansiossa public/characters/ on kuva (esim. kalevi.jpg),
 // sitä käytetään; muuten näytetään piirretty siluetti.
+import { SECRETS } from './game.js';
 
 const CHARACTERS = {
   kalevi: {
     name: 'Kalevi Kivi',
     role: 'Toimitusjohtaja, Kivi & Kumppanit Oy',
     lines: [
-      'Vuoden veronmaksaja 1998 – oman ilmoituksensa mukaan.',
+      `Vuoden veronmaksaja ${SECRETS.year} – oman ilmoituksensa mukaan.`,
       'Pelaa golfia aina, kun kalenterissa lukee ”työmatka”.',
       'Lähtee lounaalle joka päivä tasan kello 12.',
     ],

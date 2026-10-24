@@ -138,12 +138,18 @@ export function readView(title, pages, { onMark, isMarked } = {}) {
 }
 
 // --- numerolukko -------------------------------------------------------------------
-export function codeLock({ title, digits, code, hint, onOpen }) {
+// labels: valinnaiset otsikot rullien puoliskoille (esim. kassakaapin DEBET / KREDIT).
+export function codeLock({ title, digits, code, hint, onOpen, labels }) {
   const values = Array(digits).fill(0);
   let fails = 0;
   const overlay = el('div', 'overlay lock');
   const card = el('div', 'lock-card');
   const wheels = el('div', 'lock-wheels');
+  if (labels) {
+    const row = el('div', 'lock-labels');
+    labels.forEach((t) => row.appendChild(el('span', null, t)));
+    card.appendChild(row);
+  }
   const message = el('p', 'lock-message', 'Pyöritä numerot oikeiksi.');
   values.forEach((_, i) => {
     const wheel = el('div', 'lock-wheel');
@@ -166,7 +172,8 @@ export function codeLock({ title, digits, code, hint, onOpen }) {
   const cancel = el('button', 'lock-cancel', 'Peruuta');
   const buttons = el('div', 'lock-buttons');
   buttons.append(cancel, open);
-  card.append(el('h2', null, title), wheels, message, buttons);
+  card.prepend(el('h2', null, title));
+  card.append(wheels, message, buttons);
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
@@ -226,6 +233,7 @@ export function voicemail(messages, { onDone } = {}) {
 
   function show() {
     const m = messages[index];
+    const body = typeof m.text === 'function' ? m.text() : m.text;
     counter.textContent = `Viesti ${index + 1}/${messages.length}`;
     from.textContent = `${m.from} · ${m.time}`;
     text.textContent = '';
@@ -234,9 +242,9 @@ export function voicemail(messages, { onDone } = {}) {
     let shown = 0;
     clearInterval(show.timer);
     show.timer = setInterval(() => {
-      shown = Math.min(m.text.length, shown + 3);
-      text.textContent = m.text.slice(0, shown);
-      if (shown >= m.text.length) {
+      shown = Math.min(body.length, shown + 3);
+      text.textContent = body.slice(0, shown);
+      if (shown >= body.length) {
         clearInterval(show.timer);
         wave.classList.remove('playing');
       }
@@ -299,6 +307,80 @@ export function passwordPrompt({ title, hint, check, failHint, onOpen }) {
     message.textContent = fails >= 3 && failHint ? failHint : 'Väärä salasana.';
     input.select();
   });
+  function done() {
+    off();
+    overlay.remove();
+  }
+}
+
+// --- silppuripulma: suikaleet oikeaan järjestykseen ----------------------------------
+// canvas leikataan pystysuikaleiksi, jotka sekoitetaan. Pelaaja vetää suikaleen
+// toisen päälle, jolloin ne vaihtavat paikkaa. Kun järjestys on oikea, onDone().
+export function shredPuzzle({ canvas, strips = 5, title = 'Silppurin säiliö', onDone, onCancel }) {
+  const overlay = el('div', 'overlay lock');
+  const card = el('div', 'lock-card shred');
+  const row = el('div', 'shred-row');
+  const message = el('p', 'lock-message', 'Suikaleet ovat sekaisin. Vedä suikale toisen päälle vaihtaaksesi niiden paikkaa.');
+  const w = canvas.width / strips;
+  const order = [...Array(strips).keys()];
+  do { order.sort(() => Math.random() - 0.5); } while (order.every((v, i) => v === i));
+  const slots = order.map((src) => {
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = canvas.height;
+    c.getContext('2d').drawImage(canvas, src * w, 0, w, canvas.height, 0, 0, w, canvas.height);
+    const img = new Image();
+    img.src = c.toDataURL('image/png');
+    img.className = 'shred-strip';
+    img.draggable = false;
+    img.dataset.src = String(src);
+    row.appendChild(img);
+    return img;
+  });
+  const cancel = el('button', 'lock-cancel', 'Jätä kesken');
+  const buttons = el('div', 'lock-buttons');
+  buttons.append(cancel);
+  card.append(el('h2', null, title), row, message, buttons);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  let drag = null;
+  function swap(a, b) {
+    if (a === b) return;
+    const next = a.nextSibling === b ? a : a.nextSibling;
+    row.insertBefore(a, b);
+    row.insertBefore(b, next);
+  }
+  function solved() {
+    return [...row.children].every((img, i) => Number(img.dataset.src) === i);
+  }
+  row.addEventListener('pointerdown', (e) => {
+    const strip = e.target.closest('.shred-strip');
+    if (!strip) return;
+    drag = strip;
+    strip.classList.add('dragging');
+    strip.setPointerCapture(e.pointerId);
+  });
+  row.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.shred-strip');
+    [...row.children].forEach((c) => c.classList.toggle('over', c === over && c !== drag));
+  });
+  row.addEventListener('pointerup', (e) => {
+    if (!drag) return;
+    const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.shred-strip');
+    drag.classList.remove('dragging');
+    [...row.children].forEach((c) => c.classList.remove('over'));
+    if (over && over !== drag) swap(drag, over);
+    drag = null;
+    if (solved()) {
+      message.textContent = 'Lasku on koossa!';
+      row.classList.add('solved');
+      setTimeout(() => { done(); onDone?.(); }, 700);
+    }
+  });
+  const off = onEscape(() => { done(); onCancel?.(); });
+  cancel.addEventListener('click', () => { done(); onCancel?.(); });
   function done() {
     off();
     overlay.remove();

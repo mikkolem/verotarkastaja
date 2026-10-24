@@ -2,17 +2,36 @@
 // rotation = esineen asento tarkastelussa (litteät paperit käännetään kohti katsojaa).
 // text voi olla funktio, jolloin kuvaus riippuu pelin tilasta. actions(api) palauttaa
 // tarkastelunäkymän napit; api tarjoaa pelin toiminnot (ks. main.js: puzzleApi).
-import { game } from './game.js';
+import { SECRETS, game } from './game.js';
 
-// Puhelinvastaajan viestit (pulmat 3 ja 4: kassakaapin koodi ja golftasoitus)
+// Puhelinvastaajan viestit (pulmat 3 ja 4: kassakaapin koodi ja golftasoitus).
+// Pirjo jättää lisäksi uuden viestin aina, kun pelaaja löytää todisteen.
 const MESSAGES = [
   { from: 'Pirjo, kirjanpito', time: 'tänään 9.12',
     text: 'Kalevi, Pirjo täällä. Kesäkuun myyntilasku numero 117 puuttuu kirjanpidosta, eikä liikevaihto täsmää pankkitiliin. Laitoitko sen taas silppuriin? Soita!' },
   { from: 'Marjatta', time: 'tänään 10.40',
-    text: 'Kalle, kulta. Muistathan, että ensi viikolla on meidän hääpäivä, kahdestoista kesäkuuta – ja että se on myös sen sinun kassakaappisi koodi. Ja juhannuksena saunotaan uudella kiukaalla!' },
+    text: () => `Kalle, kulta. Muistathan, että meidän hääpäivä on ${SECRETS.weddingText}, niin kuin joka vuosi. Älä unohda tällä kertaa! Ja juhannuksena saunotaan uudella kiukaalla.` },
   { from: 'Raimo, golfklubi', time: 'tänään 11.05',
-    text: 'Kalevi, Raimo tässä! Lauantaina klo 9 ykkösteellä. Ja muistutan: tasoitus 36 ei ole tasoitus vaan toive, hahhah! Perjantain ”golfmatka” meni kai läpi?' },
+    text: 'Kalevi, Raimo tässä! Lauantaina klo 9 ykkösteellä. Ja se tasoitus, jonka kaiverrutit siihen hyllysi pokaaliin, ei ole tasoitus vaan toive, hahhah! Perjantain ”golfmatka” meni kai läpi?' },
 ];
+
+// Pirjon jatkoviestit todisteiden mukaan (järjestyksessä, jossa ne löytyvät)
+const PIRJO_FOLLOWUPS = {
+  kiuas: 'Kalevi, Pirjo. Rauta-Antin kuitti on edustuskuluissa. Se on kiuas. Mökille. Minä en kirjaa sitä, kirjaa itse.',
+  cayman_invoice: 'Lasku 117 näkyy tiliotteella mutta ei mapissa. Jos se on silppurissa, minä en ole koskaan ollut täällä töissä.',
+  second_ledger: 'Se musta kirja kassakaapissa ei ole kirjanpitoa, Kalevi. Se on tunnustus.',
+  cayman_transfer: 'Perjantain siirto. Minä irtisanoudun. Varavain on kukkaruukun alla, niin kuin aina.',
+};
+let heard = 0;   // montako viestiä pelaaja on kuunnellut
+
+// Kaikki tällä hetkellä vastaajassa olevat viestit.
+export function messages() {
+  const extra = game.evidence
+    .filter((id) => PIRJO_FOLLOWUPS[id])
+    .map((id, i) => ({ from: 'Pirjo, kirjanpito', time: `tänään 12.${String(9 + i * 2).padStart(2, '0')}`, text: PIRJO_FOLLOWUPS[id] }));
+  return [...MESSAGES, ...extra];
+}
+export const unheardMessages = () => Math.max(0, messages().length - heard);
 
 const FLAT = [Math.PI / 2, 0, 0];
 const BOOKS = {
@@ -38,7 +57,7 @@ export const ITEMS = {
       },
     }]),
   },
-  diploma: { title: 'Kunniakirja', text: 'Vuoden veronmaksaja 1998. Myöntäjä: Kalevi Kivi. Saaja: Kalevi Kivi.' },
+  diploma: { title: 'Kunniakirja', text: () => `Vuoden veronmaksaja ${SECRETS.year}. Myöntäjä: Kalevi Kivi. Saaja: Kalevi Kivi.` },
   clock: { title: 'Seinäkello', text: 'Tik, tak. Kalevin lounas ei kestä ikuisesti.' },
   books1: BOOKS, books2: BOOKS, books3: BOOKS, books4: BOOKS, books5: BOOKS,
 
@@ -58,8 +77,8 @@ export const ITEMS = {
       run: () => api.passwordPrompt({
         title: 'Kirjaudu',
         hint: 'Salasanan vihje: ”tasoitukseni”',
-        failHint: 'Vihje: joku puhelinvastaajassa tietää Kalevin golftasoituksen.',
-        check: (v) => v.replace(/\s/g, '') === '36',
+        failHint: 'Vihje: Kalevin golftasoitus on kaiverrettu johonkin tässä huoneessa.',
+        check: (v) => v.replace(/\s/g, '') === SECRETS.handicap,
         onOpen: () => {
           game.set('laptop_open');
           api.toast('Sisällä! Kalevin kalenteri aukesi.', 'success');
@@ -68,7 +87,10 @@ export const ITEMS = {
       }),
     }],
   },
-  photo: { title: 'Mökkikuva', text: 'Kalevi laiturilla. Taustalla uusi sauna, jota ei löydy yhdenkään yhtiön taseesta.' },
+  photo: {
+    title: 'Mökkikuva',
+    text: () => `Kalevi laiturilla. Taustalla uusi sauna, jota ei löydy yhdenkään yhtiön taseesta. Kulmaan on kirjoitettu: ”Hääpäivä ${SECRETS.weddingShort}${SECRETS.weddingYear}, mökillä”.`,
+  },
   stapler: { title: 'Nitoja', text: 'Kirjattu käyttöomaisuudeksi. Poistoajaksi on merkitty 25 vuotta.' },
   glasses: { title: 'Lukulasit', text: 'Pientä präntättyä tekstiä varten. Näyttävät käyttämättömiltä.' },
   // Pulma 1 -> 2: laatikko A aukeaa avaimella
@@ -112,7 +134,7 @@ export const ITEMS = {
       run: () => api.codeLock({
         title: 'Laatikko B',
         digits: 4,
-        code: '1998',
+        code: SECRETS.year,
         hint: 'Vihje: lue laatikon A lappu. Mistä vuodesta Kalevi on ylpein? Katso seiniä.',
         onOpen: () => {
           api.close();
@@ -140,13 +162,20 @@ export const ITEMS = {
   poster: { title: 'ALV-juliste', text: 'Yleinen arvonlisäverokanta 25,5 %. Joku on piirtänyt kulmaan surullisen naaman.', rotation: [0, 0, 0] },
   answering_machine: {
     title: 'Puhelinvastaaja',
-    text: () => (game.is('messages_heard')
-      ? 'Kolme kuunneltua viestiä: Pirjo, vaimo ja golfkaveri Raimo.'
-      : 'Punainen valo vilkkuu: 3 uutta viestiä.'),
+    text: () => {
+      const n = unheardMessages();
+      if (n > 0) return `Punainen valo vilkkuu: ${n} ${n === 1 ? 'uusi viesti' : 'uutta viestiä'}.`;
+      return `${messages().length} kuunneltua viestiä. Pirjo, vaimo ja golfkaveri Raimo${messages().length > 3 ? ' – ja Pirjo uudestaan' : ''}.`;
+    },
     rotation: [0, Math.PI, 0],
     actions: (api) => [{
-      label: game.is('messages_heard') ? 'Kuuntele uudelleen' : 'Kuuntele viestit',
-      run: () => api.voicemail(MESSAGES, { onDone: () => game.set('messages_heard') }),
+      label: unheardMessages() > 0 ? 'Kuuntele viestit' : 'Kuuntele uudelleen',
+      run: () => {
+        // uudet viestit ensin; vanhat voi kuunnella uudelleen alusta
+        const all = messages();
+        const list = unheardMessages() > 0 ? all.slice(heard) : all;
+        api.voicemail(list, { onDone: () => { heard = all.length; game.set('messages_heard'); game.set(`heard_${heard}`); } });
+      },
     }],
   },
   // Pulma 3: kassakaapin koodi = hääpäivä 12.6. (vaimon viesti puhelinvastaajassa)
@@ -161,8 +190,9 @@ export const ITEMS = {
       run: () => api.codeLock({
         title: 'Kassakaappi',
         digits: 4,
-        code: '1206',
-        hint: 'Vihje: laatikon B lapussa lukee ”hääpäivä”. Kuka puhelinvastaajassa puhuu hääpäivästä?',
+        code: SECRETS.weddingCode,
+        labels: ['DEBET', 'KREDIT'],
+        hint: 'Vihje: laatikon B lapussa lukee ”hääpäivä” (päivä ja kuukausi). Vaimo puhuu siitä puhelinvastaajassa, ja mökkikuvassakin lukee jotain.',
         onOpen: () => {
           api.close();
           api.openSafe();
@@ -180,28 +210,45 @@ export const ITEMS = {
   },
   binder_1: {
     title: 'Mappi: Kirjanpito 2025',
-    text: 'Virallinen kirjanpito. Siisti, järjestelmällinen ja epäilyttävän ohut. Päällimmäisenä on puolivuotistuloslaskelma.',
+    text: 'Virallinen kirjanpito. Siisti, järjestelmällinen ja epäilyttävän ohut. Tuloslaskelma, tositeluettelo ja pankin tiliote.',
     rotation: [0, -Math.PI / 2, 0],
     actions: (api) => [{ label: 'Selaa mappia', run: () => api.read('binder_1') }],
   },
   binder_2: { title: 'Mappi: Kirjanpito 2024', text: 'Edellisen vuoden kirjanpito. Pölyinen.', rotation: [0, -Math.PI / 2, 0] },
-  binder_3: { title: 'Mappi: Tilinpäätös', text: 'Liikevaihto on pyöristetty alaspäin. Reippaasti.', rotation: [0, -Math.PI / 2, 0] },
+  binder_3: {
+    title: 'Mappi: Tilinpäätös',
+    text: 'Edellisen vuoden tilinpäätös. Liikevaihto on pyöristetty alaspäin. Reippaasti. Taseessa on yksi taide-esine.',
+    rotation: [0, -Math.PI / 2, 0],
+    actions: (api) => [{ label: 'Selaa mappia', run: () => api.read('binder_3') }],
+  },
   // Pulma 3: laskun alaosa on jäänyt jumiin silppuriin
   shredder: {
     title: 'Paperisilppuri',
     text: () => (game.has('invoice_bottom')
       ? 'Säiliö on tutkittu. Silppuri oli jumittunut kesken laskun.'
-      : 'Säiliö on melkein täynnä. Raosta roikkuu vielä suikaleita.'),
+      : 'Säiliö on melkein täynnä. Silppuri on jumittunut kesken arkin: suikaleet ovat leveitä ja melkein ehjiä.'),
     actions: (api) => (game.is('drawer_b_open') && !game.has('invoice_bottom') ? [{
       label: 'Kaiva silppurin säiliötä',
-      run: () => {
+      run: () => api.shred(() => {
         game.give('invoice_bottom');
-        api.toast('Silppuri oli jumittunut: laskun alaosa löytyi melkein ehjänä!', 'item');
+        api.toast('Laskun alaosa koossa! Se on nyt tavaroissasi.', 'item');
         api.read('invoice_assembled');
-      },
+      }),
     }] : []),
   },
   waste_bin: { title: 'Roskakori', text: 'Pari rypistettyä kahvikupin kantta. Siivooja kävi aamulla.' },
+
+  // --- sisustus (decor.js) ---
+  mug: { title: 'Kahvikuppi', text: '”Maailman paras johtaja.” Kirjattu edustuskuluksi. Kahvi on vielä lämmintä.' },
+  pens: { title: 'Kynäpurkki', text: 'Neljä kynää, joista yksikään ei toimi. Allekirjoitukset tehdään ilmeisesti muualla.' },
+  papers: { title: 'Paperipino', text: 'Päällimmäisenä pankin tiliote. Joku on yliviivannut siitä kesäkuun panot. Tarkempi ote on Kirjanpito 2025 -mapissa.' },
+  decanter: { title: 'Viskikarahvi', text: 'Single malt, 18 vuotta. Kirjanpidossa: ”neuvottelutarjoilut”. Lasissa on vielä tilkka – lounaalle lähdettiin kiireellä.' },
+  trophy: {
+    title: 'Golfpokaali',
+    text: () => `Kesäkisat, Kalevi Kivi. Laattaan on kaiverrettu ”Tasoitus ${SECRETS.handicap}”. Kalevi on ylpeä luvusta, jota kukaan muu ei pidä saavutuksena.`,
+    rotation: [0, -Math.PI / 2, 0],
+  },
+  pillow: { title: 'Sohvatyyny', text: 'Kukkakuvioinen tyyny. Kirjanpidossa: ”neuvottelutilan tekstiilit”. Tyynyn alla on golfkentän tuloskortti.' },
 };
 
 // Mappien selkämyslaput (paper.js) kuuluvat samaan esineeseen kuin itse mappi.

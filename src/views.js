@@ -65,8 +65,18 @@ export class ViewController {
     const view = VIEWS[this.index];
     this.progress = Math.min(1, this.progress + dt / 1.4);
     const k = ease(this.progress);
-    this.pos.lerpVectors(this.from.pos, new THREE.Vector3(...view.pos), k);
-    this.target.lerpVectors(this.from.target, new THREE.Vector3(...view.target), k);
+    const toPos = new THREE.Vector3(...view.pos);
+    const toTarget = new THREE.Vector3(...view.target);
+    this.pos.lerpVectors(this.from.pos, toPos, k);
+    // Katseen suunta kierretään (slerp) eikä kohdepistettä siirretä suoraan:
+    // muuten kamera tuijottaisi välillä suoraan lattiaan, kun kohdepiste
+    // kulkee kameran alitse.
+    const d0 = this.from.target.clone().sub(this.from.pos);
+    const d1 = toTarget.clone().sub(toPos);
+    const q0 = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), d0.clone().normalize());
+    const q1 = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), d1.clone().normalize());
+    const look = new THREE.Vector3(0, 0, -1).applyQuaternion(q0.slerp(q1, k));
+    this.target.copy(this.pos).addScaledVector(look, THREE.MathUtils.lerp(d0.length(), d1.length(), k));
 
     // katseen pieni seuranta hiiren mukaan (pehmennettynä)
     this.look.lerp(this.mouse, 1 - Math.exp(-dt * 3));

@@ -33,6 +33,12 @@ export class Interaction {
     this.scene.add(this.pivot);
     this.rotTarget = new THREE.Vector2();
     this.drag = null;
+    // Lähikuvaan lento: esine lähtee siitä kohdasta ruutua, jossa se huoneessa
+    // näkyy, ja liukuu keskelle (fly = 0…1).
+    this.fly = 1;
+    this.flyFrom = new THREE.Vector3();
+    this.flyScale = 1;
+    this.home = new THREE.Vector3(0, 0.06, 0);
 
     this.label = document.getElementById('hover-label');
     this.panel = document.getElementById('inspect');
@@ -191,10 +197,22 @@ export class Interaction {
     const cam = this.inspectCamera;
     const visibleWidth = 2 * cam.position.z * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * cam.aspect;
     const fit = Math.min(INSPECT_SIZE, visibleWidth * 0.65);   // varaa tilaa alkukierrolle
-    this.pivot.scale.setScalar(fit / Math.max(size.x, size.y, size.z));
-    this.pivot.position.set(0, 0.06, 0);   // hieman ylös, ettei tekstilaatikko peitä
+    this.flyScale = fit / Math.max(size.x, size.y, size.z);
     this.rotTarget.set(0.15, -0.35);
     this.pivot.rotation.set(0.15, -0.35, 0);
+
+    // Lähtöpiste: esineen paikka ruudulla huonekamerasta katsottuna, siirrettynä
+    // lähikuvakameran koordinaatistoon pivotin syvyydelle.
+    const ndc = new THREE.Box3().setFromObject(main).getCenter(new THREE.Vector3()).project(this.camera);
+    const half = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * cam.position.z;
+    this.flyFrom.set(
+      THREE.MathUtils.clamp(ndc.x, -1.2, 1.2) * half * cam.aspect,
+      THREE.MathUtils.clamp(ndc.y, -1.2, 1.2) * half,
+      0,
+    );
+    this.fly = 0;
+    this.pivot.position.copy(this.flyFrom);
+    this.pivot.scale.setScalar(this.flyScale * 0.3);
 
     this.inspecting = key;
     this.refresh();
@@ -232,6 +250,12 @@ export class Interaction {
   // Pehmeä kääntö kohti vetämällä asetettua asentoa.
   update(dt) {
     if (!this.inspecting) return;
+    if (this.fly < 1) {
+      this.fly = Math.min(1, this.fly + dt / 0.45);
+      const e = 1 - Math.pow(1 - this.fly, 3);
+      this.pivot.position.lerpVectors(this.flyFrom, this.home, e);
+      this.pivot.scale.setScalar(this.flyScale * (0.3 + 0.7 * e));
+    }
     const k = 1 - Math.exp(-dt * 10);
     this.pivot.rotation.x += (this.rotTarget.x - this.pivot.rotation.x) * k;
     this.pivot.rotation.y += (this.rotTarget.y - this.pivot.rotation.y) * k;
@@ -239,7 +263,7 @@ export class Interaction {
 
   get busy() {
     if (!this.inspecting) return false;
-    return !!this.drag
+    return !!this.drag || this.fly < 1
       || Math.abs(this.rotTarget.x - this.pivot.rotation.x) > 0.001
       || Math.abs(this.rotTarget.y - this.pivot.rotation.y) > 0.001;
   }

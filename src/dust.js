@@ -1,7 +1,7 @@
 // Pölyhiukkaset, jotka leijuvat ilmassa ja hehkuvat vain auringonsäteen sisällä.
 import * as THREE from 'three';
 
-export function createDust({ count = 900, box, sunDir, window: win }) {
+export function createDust({ count = 700, box, sunDir, window: win }) {
   const positions = new Float32Array(count * 3);
   const seeds = new Float32Array(count);
   for (let i = 0; i < count; i++) {
@@ -39,15 +39,21 @@ export function createDust({ count = 900, box, sunDir, window: win }) {
         // Osuuko hiukkasesta aurinkoa kohti lähtevä säde ikkuna-aukkoon?
         float k = (uWindowZ - p.z) / uSunDir.z;
         vec2 hit = p.xy + uSunDir.xy * k;
-        float inside = step(uWindow.x, hit.x) * step(hit.x, uWindow.y) * step(uWindow.z, hit.y) * step(hit.y, uWindow.w);
+        // pehmeät reunat ikkunan laidoilla, ja lamellit varjostavat raitoina
+        float inside = smoothstep(uWindow.x, uWindow.x + 0.08, hit.x) * smoothstep(uWindow.y, uWindow.y - 0.08, hit.x)
+          * smoothstep(uWindow.z, uWindow.z + 0.08, hit.y) * smoothstep(uWindow.w, uWindow.w - 0.08, hit.y);
+        float slat = 0.55 + 0.45 * smoothstep(0.25, 0.5, abs(fract((uWindow.w - 0.09 - hit.y) / 0.042) - 0.5));
         // Pöly piirretään valmiin kuvan päälle ilman syvyystietoa, joten
         // työpöydän sisään jäävät hiukkaset piilotetaan tässä erikseen.
         float inDesk = step(-0.32, p.x) * step(p.x, 1.52) * step(p.y, 0.8) * step(-1.07, p.z) * step(p.z, -0.13);
         float twinkle = 0.6 + 0.4 * sin(uTime * (1.0 + seed * 2.0) + seed * 30.0);
-        vLight = mix(0.003, 0.18, inside * step(0.0, k)) * twinkle * (1.0 - inDesk);
+        // säteen ulkopuolella hiukkanen on näkymätön: pöly näkyy vain valossa
+        vLight = 0.16 * inside * slat * step(0.0, k) * twinkle * (1.0 - inDesk);
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         // kameran lähellä olevat hiukkaset eivät saa kasvaa isoiksi palloiksi
-        gl_PointSize = min((2.0 + seed * 3.0) * uPixelRatio * (1.0 / -mv.z), 4.0 * uPixelRatio);
+        gl_PointSize = min((1.6 + seed * 2.4) * uPixelRatio * (1.0 / -mv.z), 3.5 * uPixelRatio);
+        // aivan kameran vieressä olevat häivytetään, etteivät ne vilku isoina
+        vLight *= smoothstep(0.15, 0.6, -mv.z);
         gl_Position = projectionMatrix * mv;
       }
     `,
@@ -67,5 +73,6 @@ export function createDust({ count = 900, box, sunDir, window: win }) {
   const points = new THREE.Points(geometry, material);
   points.frustumCulled = false;
   points.userData.update = (time) => { material.uniforms.uTime.value = time; };
+  points.userData.setSun = (dir) => { material.uniforms.uSunDir.value.copy(dir).normalize(); };
   return points;
 }

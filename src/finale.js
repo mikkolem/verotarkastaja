@@ -1,7 +1,7 @@
 // Pelin loppuosa: 15 minuutin aikaraja, tarkastusraportti ja loppukohtaus,
 // jossa ovi aukeaa ja Kalevi palaa lounaalta.
 import * as THREE from 'three';
-import { EVIDENCE, EVIDENCE_TOTAL, game } from './game.js';
+import { EVIDENCE, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
 
 const TIME_LIMIT = 15 * 60;            // sekuntia
 const HINT_COST = 60;                  // vihje vähentää aikaa näin monta sekuntia
@@ -28,6 +28,11 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   let elapsed = 0;
   let hintsUsed = 0;
   let running = false;
+  // raportissa valitut perusteet: todiste -> valitun vaihtoehdon teksti
+  const chosen = {};
+  // vaihtoehtojen järjestys arvotaan kerran, jotta oikea ei ole aina ensimmäinen
+  const shuffled = Object.fromEntries(Object.entries(REASONS).map(([id, list]) => [id, [...list].sort(() => Math.random() - 0.5)]));
+  const correctReasons = () => Object.keys(REASONS).filter((id) => game.hasEvidence(id) && chosen[id] === REASONS[id][0]).length;
   let warned = 0;
   let ending = false;
 
@@ -96,15 +101,29 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     Object.keys(EVIDENCE).forEach((id, i) => {
       const ok = game.hasEvidence(id);
       const item = el('li', `report-item${ok ? ' found' : ''}`);
-      item.append(
-        el('span', 'report-check', ok ? '✓' : ''),
-        el('span', null, ok ? EVIDENCE[id] : `Todiste ${i + 1}: ei vielä löydetty`),
-      );
+      const body = el('div', 'report-item-body');
+      body.appendChild(el('div', null, ok ? EVIDENCE[id] : `Todiste ${i + 1}: ei vielä löydetty`));
+      if (ok) {
+        // peruste valitaan kolmesta vaihtoehdosta
+        const reasons = el('div', 'report-reason');
+        shuffled[id].forEach((text) => {
+          const lab = el('label');
+          const input = el('input');
+          input.type = 'radio';
+          input.name = `reason-${id}`;
+          input.checked = chosen[id] === text;
+          input.addEventListener('change', () => { chosen[id] = text; });
+          lab.append(input, el('span', null, text));
+          reasons.appendChild(lab);
+        });
+        body.appendChild(reasons);
+      }
+      item.append(el('span', 'report-check', ok ? '✓' : ''), body);
       list.appendChild(item);
     });
     const status = found === EVIDENCE_TOTAL
-      ? 'Kaikki todisteet on koottu. Raportti on valmis lähetettäväksi.'
-      : `Todisteita ${found}/${EVIDENCE_TOTAL}. Voit lähettää raportin nyt tai jatkaa tutkimista.`;
+      ? 'Kaikki todisteet on koottu. Valitse jokaiselle peruste ja lähetä raportti.'
+      : `Todisteita ${found}/${EVIDENCE_TOTAL}. Valitse löydöille peruste. Voit lähettää raportin nyt tai jatkaa tutkimista.`;
     const send = el('button', 'lock-open', found === EVIDENCE_TOTAL ? 'Lähetä raportti' : 'Lähetä keskeneräisenä');
     const cancel = el('button', 'lock-cancel', 'Jatka tutkimista');
     const buttons = el('div', 'lock-buttons');
@@ -152,8 +171,10 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   }
 
   function grade(found) {
-    if (found === EVIDENCE_TOTAL && hintsUsed <= 1) return ['Erinomainen', 'Pirjon mielestä olisit loistava kirjanpitäjä. Verovirasto harkitsee ylennystäsi.'];
-    if (found === EVIDENCE_TOTAL) return ['Kiitettävä', 'Kaikki todisteet koossa – vihjeiden kanssa, mutta koossa. Kalevin juristit tekevät ylitöitä.'];
+    const reasons = correctReasons();
+    if (found === EVIDENCE_TOTAL && hintsUsed <= 1 && reasons === EVIDENCE_TOTAL) return ['Erinomainen', 'Kahdenkertainen kirjanpito, kaksinkertainen tarkastaja. Pirjon mielestä olisit loistava kirjanpitäjä.'];
+    if (found === EVIDENCE_TOTAL && reasons >= EVIDENCE_TOTAL - 1) return ['Kiitettävä', 'Kaikki todisteet koossa ja perusteet lähes kohdallaan. Kalevin juristit tekevät ylitöitä.'];
+    if (found === EVIDENCE_TOTAL) return ['Hyvä', 'Todisteet löytyivät, mutta perustelut horjuvat. Kalevin juristit löytävät aukon.'];
     if (found === 3) return ['Hyvä', 'Kalevi saa jälkiverot ja veronkorotukset. Golfmatkat jäävät väliin.'];
     if (found === 2) return ['Tyydyttävä', 'Tapaus siirtyy jatkoselvitykseen. Kesämökin sauna jää lämpiämään.'];
     if (found === 1) return ['Välttävä', 'Yksi kiuas ei vielä kaada imperiumia. Kalevi lähtee ”golfmatkalle”.'];
@@ -174,9 +195,11 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
       el('p', 'result-line', line),
       el('p', 'result-stats', [
         `Todisteita ${found}/${EVIDENCE_TOTAL}`,
+        `perusteista oikein ${correctReasons()}/${found}`,
         `aikaa kului ${fmt(Math.min(elapsed, TIME_LIMIT))}`,
         `vihjeitä ${hintsUsed}`,
       ].filter(Boolean).join(' · ')),
+      el('p', 'result-terms', `Tarkastuksessa vastaan tulleet termit: ${TERMS.join(', ')}.`),
     );
     const again = el('button', 'lock-open', 'Pelaa uudelleen');
     again.addEventListener('click', () => location.reload());
@@ -189,6 +212,9 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
 
   return {
     get ending() { return ending; },
+    get elapsed() { return elapsed; },
+    get hintsUsed() { return hintsUsed; },
+    timeLimit: TIME_LIMIT,
     openReport,
     skip(seconds) { elapsed += seconds; },   // kehitystyön apu
     start() { running = true; },

@@ -406,6 +406,18 @@ body.inspecting .hud { display: none; }
 }
 .lock-card h2 { margin: 0 0 16px; font-size: 22px; font-weight: 700; color: var(--ui-accent); }
 .lock-wheels { display: flex; justify-content: center; gap: 12px; }
+/* kassakaapin rullien yläpuolella: vasen pari DEBET, oikea pari KREDIT */
+.lock-labels { display: flex; justify-content: center; gap: 12px; margin: -6px 0 8px; }
+.lock-labels span {
+  flex: 1;
+  max-width: 128px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--ui-muted);
+  border-bottom: 1px solid var(--ui-border);
+  padding-bottom: 4px;
+}
 .lock-wheel { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .lock-digit {
   width: 58px;
@@ -861,3 +873,52 @@ body.intro-open .title { display: none; }
   .inspect-hint { font-size: 13px; }
   .toast { top: auto; bottom: 84px; font-size: 16px; }
 }
+
+/* Silppuripulma: laskun suikaleet vedetään oikeaan järjestykseen */
+.shred { width: min(760px, calc(100vw - 32px)); }
+.shred-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  background: #0f0c09;
+  border-radius: 10px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.shred-strip {
+  display: block;
+  width: calc((100% - 24px) / 5);
+  max-height: 46vh;
+  object-fit: contain;
+  cursor: grab;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.shred-strip.dragging { cursor: grabbing; transform: scale(1.04) rotate(-1.5deg); opacity: 0.85; }
+.shred-strip.over { border-color: var(--ui-accent); }
+.shred-row.solved { gap: 0; }
+.shred-row.solved .shred-strip { border-color: transparent; }
+
+/* Raportin perusteet: jokaiselle löydölle valitaan peruste */
+.report-reason { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.report-reason label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ui-text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.report-reason label:hover { border-color: var(--ui-accent); }
+.report-reason input { margin: 3px 0 0; accent-color: var(--ui-accent); }
+.report-reason label:has(input:checked) { border-color: var(--ui-accent); background: rgba(216, 176, 106, 0.14); }
+.report-item-body { flex: 1; min-width: 0; }
+.result-terms { margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: var(--ui-muted); }

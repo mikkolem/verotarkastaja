@@ -1,18 +1,68 @@
 // Pelin tila: mukana kulkevat tavarat, löydetyt todisteet ja tapahtumaliput
 // (esim. "laatikko A avattu"). Käyttöliittymä kuuntelee muutoksia onChange-kutsulla.
 
+// Pelikohtaiset salaisuudet arvotaan joka latauksella, jotta koodeja ei voi
+// muistaa ulkoa: diplomin vuosi (laatikko B), hääpäivä (kassakaappi) ja
+// golftasoitus (tietokone). Kaikki paperit ja viestit piirretään näistä.
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const MONTHS = ['tammikuuta', 'helmikuuta', 'maaliskuuta', 'huhtikuuta', 'toukokuuta', 'kesäkuuta',
+  'heinäkuuta', 'elokuuta', 'syyskuuta', 'lokakuuta', 'marraskuuta', 'joulukuuta'];
+const year = rnd(1994, 2006);
+const day = rnd(1, 28);
+const month = rnd(1, 12);
+const handicap = rnd(21, 48);
+export const SECRETS = {
+  year: String(year),
+  weddingDay: day,
+  weddingMonth: month,
+  weddingText: `${day}. ${MONTHS[month - 1]}`,          // esim. "12. kesäkuuta"
+  weddingShort: `${day}.${month}.`,                     // esim. "12.6."
+  weddingCode: `${String(day).padStart(2, '0')}${String(month).padStart(2, '0')}`,
+  weddingYear: String(year - rnd(3, 9)),
+  handicap: String(handicap),
+};
+
 export const INVENTORY = {
   key: '🔑 Messinkiavain',
   invoice_bottom: '📄 Laskun alaosa',
 };
 
+// Todisteet nimetään kirjanpidon ja verotuksen omilla termeillä.
 export const EVIDENCE = {
-  kiuas: 'Kesämökin kiuas (400 €) kirjattu edustuskuluksi – yksityinen kulu, verotuksessa peiteltyä osinkoa',
-  cayman_invoice: 'Myyntilasku 10 000 € Kalevin Cayman-yhtiölle – tuloa ei ole kirjattu kirjanpitoon',
-  second_ledger: 'Salainen B-kirjanpito: todellinen liikevaihto 1,48 milj. € (virallinen 0,61 milj. €)',
-  cayman_transfer: 'Kalenterimerkintä: 870 000 € siirto Caymansaarille ”golfmatkana”',
+  kiuas: 'Peitelty osinko: kesämökin kiuas (400 €) kirjattu yhtiön edustuskuluksi',
+  cayman_invoice: 'Ohimyynti: myyntilasku 117, 10 000 € Cayman-yhtiölle, tuloa ei kirjattu',
+  second_ledger: 'Kaksoiskirjanpito: todellinen liikevaihto 1,48 milj. €, virallinen 0,61 milj. €',
+  cayman_transfer: 'Lähipiirisiirto: 870 000 € omalle Cayman-yhtiölle ”golfmatkana”',
 };
 export const EVIDENCE_TOTAL = Object.keys(EVIDENCE).length;
+
+// Tarkastusraportissa jokaiselle todisteelle valitaan peruste kolmesta.
+// Ensimmäinen on oikea; vaihtoehdot sekoitetaan näytettäessä.
+export const REASONS = {
+  kiuas: [
+    'Osakkaan yksityinen kulu yhtiön kuluna → peitelty osinko',
+    'Edustuskulusta vain 50 % on vähennyskelpoista',
+    'Kiukaan poistoaika on liian lyhyt',
+  ],
+  cayman_invoice: [
+    'Myyntitulo jätetty kirjaamatta → ohimyynti, kirjausketju katkeaa',
+    'Laskussa olisi pitänyt olla ALV 25,5 %',
+    'Laskun numero on väärän mallinen',
+  ],
+  second_ledger: [
+    'Kaksi kirjanpitoa: virallinen ei anna oikeaa kuvaa → kirjanpitorikos',
+    'Kirjanpito pitää tehdä sähköisesti, ei nahkakantiseen kirjaan',
+    'Liikevaihto on pyöristetty väärään suuntaan',
+  ],
+  cayman_transfer: [
+    'Varojen siirto omaan yhtiöön ilman liiketoimintaa → veronkierto',
+    'Golfmatka on edustuskulu, josta puuttuu kuitti',
+    'Ulkomaanmaksusta puuttuu valuuttakurssi',
+  ],
+};
+
+// Pelissä esiintyvät termit tuloksen loppuun
+export const TERMS = ['debet ja kredit', 'tosite ja kirjausketju', 'täsmäytys tiliotteeseen', 'peitelty osinko', 'ohimyynti', 'lähipiiriliiketoimi', 'ALV 0 % EU:n ulkopuolelle'];
 
 const state = {
   inventory: new Set(),

@@ -2,9 +2,9 @@
 // mappien selkämykset. Kaikki piirretään canvakselle, joten tekstiä on helppo
 // muuttaa (ja myöhemmin pulmat voivat lukea samat luvut täältä).
 import * as THREE from 'three';
-import { game } from './game.js';
+import { SECRETS, game } from './game.js';
 
-const HAND = '"Marker Felt", "Bradley Hand", "Comic Sans MS", cursive';
+const HAND = 'Kalam, "Marker Felt", "Bradley Hand", cursive';
 const MONO = '"Courier New", Courier, monospace';
 const SERIF = 'Georgia, "Times New Roman", serif';
 
@@ -46,14 +46,20 @@ function lines(g, rows, x, y, step) {
 }
 
 // --- kuitit (pelisuunnitelman pulma 2: yhteensä 862 €) ---------------------------
+// Kolme kuittia on selvästi asiakastilaisuuksia (vieraat merkitty), yksi on
+// Kalevin oma mökkihankinta: peiteltyä osinkoa.
 export const RECEIPTS = [
-  { shop: 'RAVINTOLA KULTAINEN HAARUKKA', date: '14.03.2025', rows: [['Liikelounas x4', '186,00'], ['Kahvit x4', '28,00']], total: '214,00' },
-  { shop: 'GOLFKLUBI BIRDIE RY', date: '02.05.2025', rows: [['Greenfee', '120,00'], ['Pallot 12 kpl', '38,00']], total: '158,00' },
-  { shop: 'KUKKAKAUPPA ORVOKKI', date: '21.05.2025', rows: [['Kukkakimppu', '90,00']], total: '90,00' },
-  { shop: 'RAUTA-ANTTI OY', date: '20.06.2025', rows: [['Puukiuas K16', '400,00']], total: '400,00', evidence: 'kiuas' },
+  { shop: 'RAVINTOLA KULTAINEN HAARUKKA', date: '14.03.2025', rows: [['Liikelounas x4', '186,00'], ['Kahvit x4', '28,00']], total: '214,00',
+    note: 'Vieraat: Rakennus-Virtanen Oy' },
+  { shop: 'GOLFKLUBI BIRDIE RY', date: '02.05.2025', rows: [['Greenfee x2', '120,00'], ['Pallot 12 kpl', '38,00']], total: '158,00',
+    note: 'Asiakaspeli: Betoni-Bertta Oy' },
+  { shop: 'KUKKAKAUPPA ORVOKKI', date: '21.05.2025', rows: [['Kukkakimppu', '90,00']], total: '90,00',
+    note: 'Toimitus: asiakkaan avajaiset' },
+  { shop: 'RAUTA-ANTTI OY', date: '20.06.2025', rows: [['Puukiuas K16', '400,00']], total: '400,00', evidence: 'kiuas',
+    note: 'Toimitus: Kivi, Mökkitie 3' },
 ];
 
-function receiptTexture({ shop, date, rows, total }) {
+function receiptTexture({ shop, date, rows, total, note }) {
   // piirretään 2x tarkkuudella, jotta teksti on terävää myös lähikuvassa
   return canvasTexture(512, 1152, (g) => {
     const w = 256, h = 576;
@@ -81,6 +87,13 @@ function receiptTexture({ shop, date, rows, total }) {
     g.textAlign = 'center';
     g.fillText('ALV 25,5 % sis.', w / 2, 470);
     g.fillText('KIITOS KÄYNNISTÄ!', w / 2, 520);
+    // kuittiin kynällä kirjoitettu merkintä: kenelle tai minne
+    if (note) {
+      g.fillStyle = '#1f3a8a';
+      g.font = `17px ${HAND}`;
+      g.textAlign = 'left';
+      g.fillText(note, 14, 555);
+    }
   });
 }
 
@@ -115,7 +128,7 @@ function diplomaTexture() {
     g.font = `bold 72px ${SERIF}`;
     g.fillText('VUODEN VERONMAKSAJA', w / 2, 290);
     g.font = `bold 96px ${SERIF}`;
-    g.fillText('1998', w / 2, 410);
+    g.fillText(SECRETS.year, w / 2, 410);
     g.font = `italic 34px ${SERIF}`;
     g.fillText('myönnetään', w / 2, 490);
     g.font = `48px ${SERIF}`;
@@ -161,6 +174,12 @@ function cottagePhotoTexture() {
     g.beginPath();
     g.arc(163, h * 0.6 - 84, 16, 0, Math.PI * 2);
     g.fill();
+    // käsin kirjoitettu päiväys kuvan alareunassa (kassakaapin koodi)
+    g.fillStyle = '#f6f1e4';
+    g.fillRect(0, h - 70, w, 70);
+    g.fillStyle = '#2b3e7a';
+    g.font = `28px ${HAND}`;
+    g.fillText(`Hääpäivä ${SECRETS.weddingShort}${SECRETS.weddingYear}, mökillä`, 24, h - 26);
   }, { flipY: false });
 }
 
@@ -359,6 +378,169 @@ function officialPnlCanvas() {
   g.font = `28px ${HAND}`;
   ['Kalevi! Liikevaihto ei', 'täsmää pankkitiliin.', 'Missä on kesäkuun', 'lasku nro 117?? – Pirjo'].forEach((l, i) => g.fillText(l, 40, 560 + i * 44));
   return c;
+}
+
+// Tositeluettelo (Kirjanpito 2025 -mappi): myyntilaskujen numerot juoksevat,
+// mutta 117 puuttuu välistä. Kirjausketjun aukko ohjaa silppurille.
+function voucherListCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 600;
+  c.height = 840;
+  const g = c.getContext('2d');
+  paperBackground(g, c.width, c.height, '#f1ede2');
+  g.fillStyle = '#1a1a1a';
+  g.font = `bold 24px ${MONO}`;
+  g.fillText('TOSITELUETTELO 6/2025', 40, 70);
+  g.font = `18px ${MONO}`;
+  g.fillText('Myyntilaskut (tositelaji ML)', 40, 102);
+  g.fillRect(40, 122, c.width - 80, 2);
+  const rows = [
+    ['ML 113', '03.06.', 'Rakennus-Virtanen Oy', '4 860,00'],
+    ['ML 114', '09.06.', 'As Oy Kivirinne', '12 400,00'],
+    ['ML 115', '16.06.', 'Betoni-Bertta Oy', '7 150,00'],
+    ['ML 116', '24.06.', 'Kaupunki, katutyöt', '31 900,00'],
+    ['ML 118', '30.06.', 'As Oy Mäntypiha', '9 300,00'],
+    ['ML 119', '30.06.', 'Rakennus-Virtanen Oy', '2 210,00'],
+  ];
+  g.font = `bold 15px ${MONO}`;
+  ['Tosite', 'Pvm', 'Asiakas', 'Summa'].forEach((h, i) => g.fillText(h, [40, 150, 240, 470][i], 160));
+  g.font = `17px ${MONO}`;
+  rows.forEach((r, i) => {
+    const y = 205 + i * 46;
+    r.forEach((v, k) => {
+      g.textAlign = k === 3 ? 'right' : 'left';
+      g.fillText(v, k === 3 ? c.width - 40 : [40, 150, 240][k], y);
+    });
+  });
+  g.textAlign = 'left';
+  g.fillRect(40, 500, c.width - 80, 1);
+  g.font = `bold 17px ${MONO}`;
+  g.fillText('Yhteensä', 40, 540);
+  g.textAlign = 'right';
+  g.fillText('67 820,00', c.width - 40, 540);
+  g.textAlign = 'left';
+  g.font = `15px ${MONO}`;
+  g.fillStyle = '#555';
+  g.fillText('Tositteet numerojärjestyksessä, ei aukkoja.', 40, 600);
+  g.fillText('Tarkastanut: P.', 40, 628);
+  // joku on ympyröinyt kynällä kohdan, josta 117 puuttuu
+  g.strokeStyle = '#1f3a8a';
+  g.lineWidth = 3;
+  g.beginPath();
+  g.ellipse(72, 366, 48, 20, -0.05, 0, Math.PI * 2);
+  g.stroke();
+  g.fillStyle = '#1f3a8a';
+  g.font = `26px ${HAND}`;
+  g.fillText('117?', 135, 376);
+  return c;
+}
+
+// Pankin tiliote: yksi pano, jolle ei löydy tositetta. Täsmäytys paljastaa sen.
+function bankStatementCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 600;
+  c.height = 840;
+  const g = c.getContext('2d');
+  paperBackground(g, c.width, c.height, '#f4f2ec');
+  g.fillStyle = '#1f4e79';
+  g.fillRect(0, 0, c.width, 70);
+  g.fillStyle = '#fff';
+  g.font = `bold 26px ${SERIF}`;
+  g.fillText('POHJOLAN SÄÄSTÖPANKKI', 30, 46);
+  g.fillStyle = '#222';
+  g.font = `17px ${MONO}`;
+  g.fillText('Tiliote 6/2025 · Kivi & Kumppanit Oy · FI12 3456 7890 1234 56', 30, 105);
+  const rows = [
+    ['03.06.', 'PANO', 'Rakennus-Virtanen Oy', 'ML 113', '4 860,00'],
+    ['10.06.', 'PANO', 'As Oy Kivirinne', 'ML 114', '12 400,00'],
+    ['12.06.', 'OTTO', 'Kukkakauppa Orvokki', 'kortti', '−90,00'],
+    ['17.06.', 'PANO', 'Betoni-Bertta Oy', 'ML 115', '7 150,00'],
+    ['20.06.', 'OTTO', 'Rauta-Antti Oy', 'kortti', '−400,00'],
+    ['25.06.', 'PANO', 'Kaupunki', 'ML 116', '31 900,00'],
+    ['30.06.', 'PANO', 'KIVI CONSULTING LTD', 'ML 117', '10 000,00'],
+    ['30.06.', 'PANO', 'As Oy Mäntypiha', 'ML 118', '9 300,00'],
+  ];
+  g.font = `bold 14px ${MONO}`;
+  ['Pvm', 'Tapahtuma', 'Vastapuoli', 'Viite', 'Summa'].forEach((h, i) => g.fillText(h, [30, 105, 190, 400, 500][i], 150));
+  g.fillRect(30, 162, c.width - 60, 1);
+  rows.forEach((r, i) => {
+    const y = 196 + i * 44;
+    if (i % 2) {
+      g.fillStyle = '#e9e5db';
+      g.fillRect(30, y - 28, c.width - 60, 40);
+    }
+    g.fillStyle = '#222';
+    g.font = `16px ${MONO}`;
+    r.forEach((v, k) => {
+      g.textAlign = k === 4 ? 'right' : 'left';
+      g.fillText(v, k === 4 ? c.width - 30 : [30, 105, 190, 400][k], y);
+    });
+  });
+  g.textAlign = 'left';
+  g.fillStyle = '#222';
+  g.font = `bold 16px ${MONO}`;
+  g.fillText('Saldo 30.06.2025', 30, 580);
+  g.textAlign = 'right';
+  g.fillText('148 212,40', c.width - 30, 580);
+  g.textAlign = 'left';
+  // yliviivaus kynällä
+  g.strokeStyle = '#b02a1f';
+  g.lineWidth = 3;
+  g.beginPath();
+  g.moveTo(24, 452);
+  g.lineTo(c.width - 24, 466);
+  g.stroke();
+  g.fillStyle = '#b02a1f';
+  g.font = `24px ${HAND}`;
+  g.fillText('ei mapissa!', 380, 548);
+  return c;
+}
+
+// Tase (Tilinpäätös-mappi): taide-esineet 12 000 € – yksi viherkasvi.
+function balanceSheetCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 600;
+  c.height = 840;
+  const g = c.getContext('2d');
+  paperBackground(g, c.width, c.height, '#f1ede2');
+  g.fillStyle = '#1a1a1a';
+  g.font = `bold 26px ${MONO}`;
+  g.fillText('KIVI & KUMPPANIT OY', 40, 70);
+  g.font = `20px ${MONO}`;
+  g.fillText('Tase 31.12.2024 · Vastaavaa', 40, 105);
+  g.fillRect(40, 125, c.width - 80, 2);
+  const rows = [
+    ['PYSYVÄT VASTAAVAT', ''],
+    ['  Koneet ja kalusto', '48 200'],
+    ['    josta nitoja (poistoaika 25 v)', '39'],
+    ['  Taide-esineet (ei poistoja)', '12 000'],
+    ['    1 kpl, ”Monstera”, ruukussa', ''],
+    ['  Neuvottelutilan kalustus', '8 900'],
+    ['VAIHTUVAT VASTAAVAT', ''],
+    ['  Myyntisaamiset', '61 300'],
+    ['  Rahat ja pankkisaamiset', '148 212'],
+    ['VASTAAVAA YHTEENSÄ', '278 651'],
+  ];
+  rows.forEach(([label, value], i) => {
+    const y = 175 + i * 50;
+    const head = label === label.toUpperCase() && label.trim() !== '';
+    g.font = head ? `bold 18px ${MONO}` : `18px ${MONO}`;
+    g.fillStyle = label.startsWith('    ') ? '#666' : '#1a1a1a';
+    g.textAlign = 'left';
+    g.fillText(label, 40, y);
+    g.textAlign = 'right';
+    g.fillText(value, c.width - 40, y);
+  });
+  g.textAlign = 'left';
+  g.fillStyle = '#1f3a8a';
+  g.font = `26px ${HAND}`;
+  g.fillText('Taide kasvaa, Kalevi?', 40, 740);
+  return c;
+}
+
+// Silppurin säiliöstä löytyvä laskun alaosa (silppuripulmaa varten).
+export function shredderCanvas() {
+  return once('invoice_bottom', invoiceBottomCanvas);
 }
 
 // --- pulma 4: kassakaapin B-kirjanpito ja tietokoneen kalenteri ----------------------
@@ -563,7 +745,7 @@ export function pagesFor(key) {
   }
   const assembled = () => {
     if (!PAGES.has('invoice_assembled')) {
-      PAGES.set('invoice_assembled', assembledInvoiceCanvas(PAGES.get('invoice_half'), invoiceBottomCanvas()));
+      PAGES.set('invoice_assembled', assembledInvoiceCanvas(PAGES.get('invoice_half'), shredderCanvas()));
     }
     return { canvas: PAGES.get('invoice_assembled'), label: 'Koottu myyntilasku', markable: true, evidence: 'cayman_invoice' };
   };
@@ -574,7 +756,14 @@ export function pagesFor(key) {
     ];
   }
   if (key === 'invoice_assembled') return [assembled()];
-  if (key === 'binder_1') return [{ canvas: once('pnl', officialPnlCanvas), label: 'Tuloslaskelma' }];
+  if (key === 'binder_1') {
+    return [
+      { canvas: once('pnl', officialPnlCanvas), label: 'Tuloslaskelma' },
+      { canvas: once('vouchers', voucherListCanvas), label: 'Tositeluettelo' },
+      { canvas: once('bank', bankStatementCanvas), label: 'Tiliote' },
+    ];
+  }
+  if (key === 'binder_3') return [{ canvas: once('balance', balanceSheetCanvas), label: 'Tase' }];
   if (key === 'ledger_book') {
     return [{ canvas: once('secret', secretLedgerCanvas), label: 'B-kirjanpito', markable: true, evidence: 'second_ledger' }];
   }

@@ -14,22 +14,29 @@ import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 
 import { createMaterials } from './materials.js';
 import { createDust } from './dust.js';
+import { createShafts } from './shafts.js';
+import { addDecor } from './decor.js';
 import { skyTexture } from './textures.js';
 import { VIEWS, ViewController } from './views.js';
 import { PROPS } from './props.js';
-import { addPaperItems, pagesFor } from './paper.js';
+import { addPaperItems, pagesFor, shredderCanvas } from './paper.js';
 import { Interaction } from './interact.js';
 import { createFinale } from './finale.js';
 import { runPrologue } from './prologue.js';
-import { ITEMS } from './items.js';
-import { EVIDENCE, EVIDENCE_TOTAL, game } from './game.js';
-import { codeLock, inventoryHud, passwordPrompt, readView, toast, voicemail } from './ui.js';
+import { ITEMS, unheardMessages } from './items.js';
+import { EVIDENCE, EVIDENCE_TOTAL, SECRETS, game } from './game.js';
+import { codeLock, inventoryHud, passwordPrompt, readView, shredPuzzle, toast, voicemail } from './ui.js';
 import './style.css';
 
 // Ikkuna-aukko (vastaa blender/build_room.py:n mittoja)
 const WINDOW = { x0: -0.2, x1: 1.4, y0: 0.9, y1: 2.3, z: -2.0 };
-// Suunta kohti aurinkoa: ylhäältä, ikkunan takaa ja hieman sivusta
+// Suunta kohti aurinkoa: ylhäältä, ikkunan takaa ja hieman sivusta.
+// Pelin 15 minuutin aikana aurinko laskee kohti SUN_DIR_END-suuntaa ja
+// valo lämpenee (ks. updateSun).
 const SUN_DIR = new THREE.Vector3(3, 4.5, -7).normalize();
+const SUN_DIR_END = new THREE.Vector3(3.6, 2.4, -7).normalize();
+const SUN_COLOR = new THREE.Color(0xfff0d8);
+const SUN_COLOR_END = new THREE.Color(0xffb878);
 const DESK_HEIGHT = 0.78;
 
 // --- renderöijä ja kamera ---------------------------------------------------
@@ -75,10 +82,11 @@ sun.target.position.set(0.6, 0.8, -0.6);
 sun.position.copy(sun.target.position).addScaledVector(SUN_DIR, 12);
 sun.castShadow = true;
 sun.shadow.mapSize.set(4096, 4096);
-Object.assign(sun.shadow.camera, { left: -4.5, right: 4.5, top: 4.5, bottom: -4.5, near: 4, far: 22 });
+Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 4, far: 24 });
 sun.shadow.bias = -0.0002;
 sun.shadow.normalBias = 0.012;
 scene.add(sun, sun.target);
+const sunNow = SUN_DIR.clone();
 
 // Ikkunasta tuleva pehmeä taivaanvalo
 RectAreaLightUniformsLib.init();
@@ -98,7 +106,7 @@ scene.add(new THREE.HemisphereLight(0xc2d3ef, 0x4a3020, 0.35));
 // Taivas ikkunan takana
 const sky = new THREE.Mesh(
   new THREE.PlaneGeometry(40, 20),
-  new THREE.MeshBasicMaterial({ map: skyTexture(), color: new THREE.Color(2.4, 2.4, 2.4) }),
+  new THREE.MeshBasicMaterial({ map: skyTexture(), color: new THREE.Color(1.7, 1.7, 1.7) }),
 );
 sky.position.set(0.6, 4, -9);
 scene.add(sky);
@@ -113,6 +121,11 @@ const dust = createDust({
   window: WINDOW,
 });
 dustScene.add(dust);
+
+// Valonsäteet kaihtimien raoista (shafts.js). Ne kuuluvat huoneen kuvaan, jotta
+// pöytä ja tuoli peittävät ne oikein.
+const shafts = createShafts({ window: WINDOW, sunDir: SUN_DIR });
+scene.add(shafts);
 
 // Latauksen vaiheet ja niiden osuus edistymispalkista
 const progress = { textures: 0, model: 0, compile: 0 };
@@ -150,6 +163,26 @@ function addLampLight(lamp) {
   light.shadow.bias = -0.0005;
   light.shadow.normalBias = 0.01;
   scene.add(light, light.target);
+}
+
+// Aurinko laskee ja lämpenee pelin edetessä: t = 0…1 kuluneesta ajasta.
+// Varjot lasketaan uudelleen vain tässä, joten kutsu harvoin (ks. silmukka).
+let sunT = -1;
+function updateSun(t) {
+  t = THREE.MathUtils.clamp(t, 0, 1);
+  if (Math.abs(t - sunT) < 0.002) return false;
+  sunT = t;
+  sunNow.lerpVectors(SUN_DIR, SUN_DIR_END, t).normalize();
+  sun.position.copy(sun.target.position).addScaledVector(sunNow, 12);
+  sun.color.lerpColors(SUN_COLOR, SUN_COLOR_END, t);
+  sun.intensity = 7 - 1.2 * t;
+  bounce.color.lerpColors(new THREE.Color(0xffb27a), new THREE.Color(0xff8a4a), t);
+  shafts.userData.update(sunNow);
+  shafts.userData.setColor(new THREE.Color(1.0, 0.82, 0.58).lerp(new THREE.Color(1.0, 0.62, 0.36), t), 0.03 + 0.01 * t);
+  dust.userData.setSun(sunNow);
+  renderer.shadowMap.needsUpdate = true;
+  roomDirty = true;
+  return true;
 }
 
 async function loadRoom() {
@@ -200,7 +233,10 @@ async function loadRoom() {
     scene.add(obj);
   }
   addLampLight(scene.getObjectByName('lamp'));
+  // Käsialafontti ladataan verkosta (index.html); paperit piirretään vasta sen jälkeen.
+  try { await Promise.race([document.fonts.load('30px Kalam'), new Promise((r) => setTimeout(r, 2500))]); } catch { /* ilman fonttia */ }
   addPaperItems(scene);
+  addDecor(scene);
   interaction.register(scene);
   finale = createFinale({ scene, views, interaction, animations, toast, nextHint, onDirty: () => { roomDirty = true; } });
   renderer.shadowMap.needsUpdate = true;
@@ -208,6 +244,21 @@ async function loadRoom() {
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
   showProgress('model', 1, 'Avataan sälekaihtimia…');
   await renderer.compileAsync(scene, camera);
+
+  // Heijastukset: huone kuvataan kerran kuutiokameralla keskeltä huonetta, ja
+  // kuvasta tehdään ympäristökartta. Lakattu pöytä ja messinki heijastavat sitten
+  // oikeasti ikkunaa ja seiniä. Yksi kertalasku latauksessa, ei kuluta pelin aikana.
+  const probeTarget = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType });
+  const probe = new THREE.CubeCamera(0.1, 30, probeTarget);
+  probe.position.set(0.4, 1.3, -0.2);
+  shafts.visible = false;
+  dust.visible = false;
+  probe.update(renderer, scene);
+  shafts.visible = true;
+  dust.visible = true;
+  scene.environment = pmrem.fromCubemap(probeTarget.texture).texture;
+  scene.environmentIntensity = 0.5;
+  probeTarget.dispose();
   showProgress('compile', 1);
 
   ready = true;
@@ -273,6 +324,16 @@ Object.assign(outline, { edgeStrength: 3.5, edgeGlow: 0.25, edgeThickness: 1.2 }
 outline.visibleEdgeColor.set(0xd9a04a);
 outline.hiddenEdgeColor.set(0x000000);   // ei piirretä muiden takana olevia osia (ei paljasta laatikon sisältöä)
 composer.addPass(outline);
+// AO- ja ääriviivapassit piirtävät huoneen syvyyden uudelleen: valonsäteet eivät
+// saa olla silloin mukana, muuten ne näkyisivät pintoina ilmassa.
+for (const pass of [gtao, outline]) {
+  const render = pass.render.bind(pass);
+  pass.render = (...args) => {
+    shafts.visible = false;
+    render(...args);
+    shafts.visible = true;
+  };
+}
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
 composer.addPass(new OutputPass());
 // Kaikki välivaiheet samaan kokoon renderöijän tarkkuuden kanssa
@@ -285,23 +346,41 @@ composer.renderToScreen = false;
 const copyQuad = new FullScreenQuad(new THREE.ShaderMaterial({
   ...CopyShader, uniforms: THREE.UniformsUtils.clone(CopyShader.uniforms), depthTest: false, depthWrite: false,
 }));
-// Tarkastelun aikana huone näkyy taustalla himmennettynä.
+// Tarkastelun aikana huone näkyy taustalla himmennettynä ja sumennettuna
+// (syväterävyyden tuntu). Yksi 12 näytteen sumennus koko ruudulle: halpa.
 const dimQuad = new FullScreenQuad(new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: null } },
+  uniforms: { tDiffuse: { value: null }, uBlur: { value: 0 }, uTexel: { value: new THREE.Vector2(1 / innerWidth, 1 / innerHeight) } },
   vertexShader: CopyShader.vertexShader,
   fragmentShader: /* glsl */ `
     uniform sampler2D tDiffuse;
+    uniform float uBlur;
+    uniform vec2 uTexel;
     varying vec2 vUv;
     void main() {
       vec2 d = vUv - 0.5;
       float vignette = 1.0 - dot(d, d) * 1.2;
-      gl_FragColor = vec4(texture2D(tDiffuse, vUv).rgb * 0.28 * vignette, 1.0);
+      vec2 r = uTexel * uBlur * 9.0;
+      vec3 c = texture2D(tDiffuse, vUv).rgb * 0.16;
+      c += texture2D(tDiffuse, vUv + r * vec2( 1.0,  0.0)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2(-1.0,  0.0)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2( 0.0,  1.0)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2( 0.0, -1.0)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2( 0.7,  0.7)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2(-0.7,  0.7)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2( 0.7, -0.7)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2(-0.7, -0.7)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2( 2.0,  0.5)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2(-2.0, -0.5)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2( 0.5, -2.0)).rgb * 0.07;
+      c += texture2D(tDiffuse, vUv + r * vec2(-0.5,  2.0)).rgb * 0.07;
+      gl_FragColor = vec4(c * mix(1.0, 0.3, uBlur) * vignette, 1.0);
     }
   `,
   depthTest: false,
   depthWrite: false,
 }));
 let roomDirty = true;
+let blur = 0;   // taustan sumennus 0…1, liukuu tarkastelun alkaessa
 
 // --- kuvakulmat ja käyttöliittymä ----------------------------------------------
 const nav = document.getElementById('views');
@@ -367,14 +446,20 @@ function openSafe() {
   });
 }
 
-// Puhelinvastaajan merkkivalo sammuu, kun viestit on kuunneltu.
+// Puhelinvastaajan merkkivalo palaa, kun kuuntelemattomia viestejä on, ja
+// sammuu, kun kaikki on kuunneltu. Pirjo jättää uuden viestin joka todisteesta.
+let ledOn = null;
 game.onChange(() => {
-  if (!game.is('messages_heard')) return;
+  const on = unheardMessages() > 0;
+  if (on === ledOn) return;
+  ledOn = on;
   scene.getObjectByName('answering_machine')?.traverse((o) => {
-    if (o.isMesh && o.material.name === 'led_red') o.material.emissiveIntensity = 0.3;
+    if (o.isMesh && o.material.name === 'led_red') o.material.emissiveIntensity = on ? 4 : 0.3;
   });
   roomDirty = true;
 });
+
+const WRONG_MARK_COST = 30;   // sekuntia aikaa väärästä merkinnästä
 
 // Lukunäkymät, jotka eivät ole huoneessa omina esineinään
 const READ_TITLES = {
@@ -391,6 +476,11 @@ interaction.api = {
   codeLock,
   voicemail,
   passwordPrompt,
+  // silppurin suikaleet järjestykseen (ui.js); onDone kun lasku on koossa
+  shred(onDone) {
+    interaction.close();
+    shredPuzzle({ canvas: shredderCanvas(), strips: 5, onDone, onCancel: () => toast('Suikaleet jäivät säiliöön. Voit palata niihin myöhemmin.') });
+  },
   read(key) {
     readView(ITEMS[key]?.title ?? READ_TITLES[key], pagesFor(key), {
       isMarked: (page) => page.evidence && game.hasEvidence(page.evidence),
@@ -401,11 +491,15 @@ interaction.api = {
           button.textContent = 'Merkitty todisteeksi';
           if (game.evidence.length === EVIDENCE_TOTAL) {
             setTimeout(() => toast('Kaikki todisteet löytyivät! Avaa tarkastusraportti oikeasta yläkulmasta.', 'success'), 4600);
+          } else {
+            setTimeout(() => { if (unheardMessages() > 0) toast('Puhelinvastaajan valo alkoi vilkkua: uusi viesti.', 'hint'); }, 5200);
           }
         } else if (page.evidence) {
           toast('Tämä on jo merkitty todisteeksi.');
         } else {
-          toast(page.wrongText ?? 'Tässä ei näytä olevan mitään epäilyttävää.');
+          // väärä epäily maksaa puoli minuuttia: todisteita ei kannata arvata läpi
+          finale?.skip(WRONG_MARK_COST);
+          toast(`${page.wrongText ?? 'Tässä ei näytä olevan mitään epäilyttävää.'} (−${WRONG_MARK_COST} s)`);
         }
       },
     });
@@ -424,9 +518,9 @@ const HINTS = [
   [() => !game.is('drawer_b_open'), 'Laatikon A lappu: koodi on vuosi, josta Kalevi on ylpein. Katso sohvan yläpuolelle.'],
   [() => !game.has('invoice_bottom'), 'Laatikon B lappu muistuttaa silppurista. Löytyisikö sieltä laskun loppuosa?'],
   [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku ja merkitse se. Löytyykö tämä tulo virallisesta kirjanpidosta?'],
-  [() => !game.is('safe_open'), 'Kassakaapin koodi on hääpäivä. Kuuntele puhelinvastaajan viestit.'],
+  [() => !game.is('safe_open'), 'Kassakaapin koodi on hääpäivä, päivä ja kuukausi. Vaimo mainitsee sen puhelinvastaajassa, ja mökkikuvassa lukee sama.'],
   [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapista löytynyt musta kirja.'],
-  [() => !game.is('laptop_open'), 'Tietokoneen salasanavihje on ”tasoitukseni”. Golfkaveri mainitsee sen puhelinvastaajassa.'],
+  [() => !game.is('laptop_open'), 'Tietokoneen salasanavihje on ”tasoitukseni”. Golfkaveri sanoo, että se on kaiverrettu kirjahyllyn pokaaliin.'],
   [() => !game.hasEvidence('cayman_transfer'), 'Katso Kalevin kalenteria tietokoneelta. Mitä perjantaina tapahtuu?'],
   [() => true, 'Kaikki todisteet on löydetty. Lähetä tarkastusraportti (oikea yläkulma) ennen kuin Kalevi palaa.'],
 ];
@@ -450,12 +544,13 @@ addEventListener('resize', () => {
   fitCamera();
   renderer.setSize(innerWidth, innerHeight);
   composer.setSize(innerWidth, innerHeight);
+  dimQuad.material.uniforms.uTexel.value.set(1 / innerWidth, 1 / innerHeight);
   roomDirty = true;
 });
 
 if (import.meta.env.DEV) {
   window.__debug = {
-    scene, camera, sun, bounce, skyLight, gtao, renderer, views, interaction,
+    scene, camera, sun, bounce, skyLight, gtao, renderer, views, interaction, game, SECRETS, updateSun,
     get finale() { return finale; },
     // peek([x,y,z], [x,y,z]) vie kameran haluttuun paikkaan, peek() palauttaa
     peek(pos, target) {
@@ -473,6 +568,7 @@ const SLOW_FRAME = 1 / 40;
 const clock = new THREE.Clock();
 let sinceRender = 0;
 let slowFrames = 0;
+let sunStep = 0;
 
 function lowerQuality() {
   if (pixelRatio <= MIN_PIXEL_RATIO) return;
@@ -491,6 +587,7 @@ function drawRoomAndDust() {
   renderer.autoClear = false;
   if (interaction.inspecting) {
     dimQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
+    dimQuad.material.uniforms.uBlur.value = blur;
     dimQuad.render(renderer);
     renderer.clearDepth();
     renderer.render(interaction.scene, interaction.inspectCamera);
@@ -509,6 +606,14 @@ renderer.setAnimationLoop(() => {
   sinceRender += dt;
   views.locked = !!interaction.inspecting || introOpen || !!finale?.ending;
   finale?.update(dt);
+  // aurinko liikkuu noin 20 sekunnin välein, ei joka kuvassa (varjot ovat kalliita)
+  if (finale && !views.moving && !interaction.inspecting) {
+    const step = Math.floor(finale.elapsed / 20) * 20;
+    if (step !== sunStep) {
+      sunStep = step;
+      updateSun(step / finale.timeLimit);
+    }
+  }
   const moving = views.moving;
   // käynnissä olevat animaatiot; valmiit poistetaan listalta
   const animating = animations.length > 0;
@@ -519,7 +624,12 @@ renderer.setAnimationLoop(() => {
     roomDirty = true;
     renderer.shadowMap.needsUpdate = true;   // laatikko liikkuu, varjot mukana
   }
-  const busy = interaction.busy || animating;   // esinettä pyöritetään tai jokin liikkuu
+  // sumennus liukuu päälle lähikuvan alkaessa (ja nollautuu, kun se suljetaan)
+  const blurTarget = interaction.inspecting ? 1 : 0;
+  const blurring = Math.abs(blur - blurTarget) > 0.002;
+  if (blurring) blur += (blurTarget - blur) * (1 - Math.exp(-dt * 8));
+  else blur = blurTarget;
+  const busy = interaction.busy || animating || blurring;   // esinettä pyöritetään tai jokin liikkuu
   views.update(dt);
   interaction.update(dt);
   if (!moving && !busy && sinceRender < IDLE_INTERVAL) return;
