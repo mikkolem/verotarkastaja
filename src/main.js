@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -14,6 +15,7 @@ import { createMaterials } from './materials.js';
 import { createDust } from './dust.js';
 import { skyTexture } from './textures.js';
 import { VIEWS, ViewController } from './views.js';
+import { PROPS } from './props.js';
 import './style.css';
 
 // Ikkuna-aukko (vastaa blender/build_room.py:n mittoja)
@@ -118,19 +120,24 @@ function showProgress(stage, value, label) {
 let ready = false;
 
 async function loadRoom() {
-  // Malli latautuu verkosta samaan aikaan, kun tekstuureja lasketaan.
-  const modelPromise = new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/room.glb`, (e) => {
-    if (e.total) showProgress('model', e.loaded / e.total);
-  });
+  // Mallit latautuvat verkosta samaan aikaan, kun tekstuureja lasketaan.
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const urls = ['models/room.glb', ...PROPS.map((p) => p.url)];
+  const loaded = urls.map(() => 0);
+  const modelPromises = urls.map((url, i) => loader.loadAsync(`${import.meta.env.BASE_URL}${url}`, (e) => {
+    if (!e.total) return;
+    loaded[i] = e.loaded / e.total;
+    showProgress('model', loaded.reduce((a, b) => a + b, 0) / urls.length);
+  }));
   showProgress('textures', 0, 'Lakataan puupintoja…');
   const materials = await createMaterials(renderer.capabilities.getMaxAnisotropy(), (p) => {
     showProgress('textures', p);
   });
   showProgress('textures', 1, 'Kannetaan huonekaluja…');
-  const gltf = await modelPromise;
+  const [room, ...props] = await Promise.all(modelPromises);
   showProgress('model', 1);
 
-  gltf.scene.traverse((obj) => {
+  room.scene.traverse((obj) => {
     if (!obj.isMesh) return;
     const replacement = materials[obj.material.name];
     if (replacement) obj.material = replacement;
@@ -138,7 +145,18 @@ async function loadRoom() {
     obj.castShadow = !isGlass;
     obj.receiveShadow = !isGlass;
   });
-  scene.add(gltf.scene);
+  scene.add(room.scene);
+
+  props.forEach((gltf, i) => {
+    const { name, position, rotationY = 0 } = PROPS[i];
+    gltf.scene.name = name;
+    gltf.scene.position.set(...position);
+    gltf.scene.rotation.y = rotationY;
+    gltf.scene.traverse((obj) => {
+      if (obj.isMesh) obj.castShadow = obj.receiveShadow = true;
+    });
+    scene.add(gltf.scene);
+  });
   renderer.shadowMap.needsUpdate = true;
 
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
@@ -206,7 +224,16 @@ addEventListener('resize', () => {
   roomDirty = true;
 });
 
-if (import.meta.env.DEV) window.__debug = { scene, camera, sun, bounce, skyLight, gtao, renderer, views };
+if (import.meta.env.DEV) {
+  window.__debug = {
+    scene, camera, sun, bounce, skyLight, gtao, renderer, views,
+    // peek([x,y,z], [x,y,z]) vie kameran haluttuun paikkaan, peek() palauttaa
+    peek(pos, target) {
+      views.override = pos ? { pos, target } : null;
+      roomDirty = true;
+    },
+  };
+}
 
 // --- silmukka --------------------------------------------------------------------
 // Kun kamera on paikallaan, vain pöly liikkuu, joten 30 kuvaa sekunnissa riittää.

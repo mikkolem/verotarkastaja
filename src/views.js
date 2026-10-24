@@ -50,6 +50,12 @@ export class ViewController {
   }
 
   update(dt) {
+    // Kehitystyön apu: kamera pakotettuun paikkaan (ks. window.__debug.peek)
+    if (this.override) {
+      this.camera.position.set(...this.override.pos);
+      this.camera.lookAt(...this.override.target);
+      return;
+    }
     const view = VIEWS[this.index];
     this.progress = Math.min(1, this.progress + dt / 1.4);
     const k = ease(this.progress);

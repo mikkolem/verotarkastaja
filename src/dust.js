@@ -44,9 +44,10 @@ export function createDust({ count = 900, box, sunDir, window: win }) {
         // työpöydän sisään jäävät hiukkaset piilotetaan tässä erikseen.
         float inDesk = step(-0.32, p.x) * step(p.x, 1.52) * step(p.y, 0.8) * step(-1.07, p.z) * step(p.z, -0.13);
         float twinkle = 0.6 + 0.4 * sin(uTime * (1.0 + seed * 2.0) + seed * 30.0);
-        vLight = mix(0.006, 0.8, inside * step(0.0, k)) * twinkle * (1.0 - inDesk);
+        vLight = mix(0.003, 0.18, inside * step(0.0, k)) * twinkle * (1.0 - inDesk);
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
-        gl_PointSize = (2.0 + seed * 3.0) * uPixelRatio * (1.0 / -mv.z);
+        // kameran lähellä olevat hiukkaset eivät saa kasvaa isoiksi palloiksi
+        gl_PointSize = min((2.0 + seed * 3.0) * uPixelRatio * (1.0 / -mv.z), 4.0 * uPixelRatio);
         gl_Position = projectionMatrix * mv;
       }
     `,

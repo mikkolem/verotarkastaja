@@ -289,17 +289,6 @@ def build_furniture():
     desk.box("desk_wood", x0 + 0.48, x1 - 0.48, 0.3, 0.72, z0 + 0.05, z0 + 0.08)
     desk.build()
 
-    # tuoli hieman sivussa, ettei selkänoja varjosta koko pöytää
-    chair = Part("chair")
-    cx, cz = 0.05, -1.45
-    chair.box("leather", cx - 0.28, cx + 0.28, 0.45, 0.55, cz - 0.28, cz + 0.28)
-    chair.box("leather", cx - 0.28, cx + 0.28, 0.55, 1.2, cz - 0.38, cz - 0.26, rot_x=math.radians(-8))
-    chair.box("leather", cx - 0.32, cx - 0.26, 0.55, 0.72, cz - 0.25, cz + 0.22)
-    chair.box("leather", cx + 0.26, cx + 0.32, 0.55, 0.72, cz - 0.25, cz + 0.22)
-    chair.cylinder("brass", cx, cz, 0.08, 0.45, 0.03)
-    chair.cylinder("brass", cx, cz, 0.04, 0.08, 0.3, 0.05)
-    chair.build()
-
     shelf = Part("bookshelf")
     sx0, sx1, sz0, sz1, sh = X0 + 0.02, X0 + 0.38, -1.0, 1.0, 2.25
     shelf.box("desk_wood", sx0, sx1, 0, 0.1, sz0, sz1)
