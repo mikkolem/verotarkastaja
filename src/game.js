@@ -2,13 +2,17 @@
 // (esim. "laatikko A avattu"). Käyttöliittymä kuuntelee muutoksia onChange-kutsulla.
 
 export const INVENTORY = {
-  key: 'Messinkiavain',
+  key: '🔑 Messinkiavain',
+  invoice_bottom: '📄 Laskun alaosa',
 };
 
 export const EVIDENCE = {
   kiuas: 'Kesämökin kiuas kirjattu edustuskuluksi (400 €, juhannusaatto)',
+  cayman_invoice: 'Myyntilasku 10 000 € Caymansaarille – puuttuu virallisesta kirjanpidosta',
+  second_ledger: 'Salainen B-kirjanpito: todellinen liikevaihto 1,48 milj. € (virallinen 0,61 milj. €)',
+  cayman_transfer: 'Kalenterimerkintä: 870 000 € siirto Caymansaarille ”golfmatkana”',
 };
-export const EVIDENCE_TOTAL = 3;
+export const EVIDENCE_TOTAL = Object.keys(EVIDENCE).length;
 
 const state = {
   inventory: new Set(),

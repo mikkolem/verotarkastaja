@@ -63,7 +63,7 @@ export function inventoryHud(game, { onHelp }) {
 // --- paperien lukunäkymä -----------------------------------------------------------
 // pages: [{ canvas, label, markable }] ; onMark(page) kutsutaan, kun pelaaja
 // merkitsee paperin epäilyttäväksi.
-export function readView(title, pages, { onMark } = {}) {
+export function readView(title, pages, { onMark, isMarked } = {}) {
   const overlay = el('div', 'overlay read');
   const head = el('div', 'overlay-head');
   const close = el('button', 'overlay-close', 'Sulje');
@@ -76,7 +76,9 @@ export function readView(title, pages, { onMark } = {}) {
     img.alt = page.label ?? '';
     fig.appendChild(img);
     if (page.markable) {
-      const mark = el('button', 'read-mark', 'Merkitse epäilyttäväksi');
+      const done = isMarked?.(page);
+      const mark = el('button', 'read-mark', done ? 'Merkitty todisteeksi' : 'Merkitse epäilyttäväksi');
+      mark.disabled = !!done;
       mark.addEventListener('click', () => onMark?.(page, mark));
       fig.appendChild(mark);
     }
@@ -156,6 +158,106 @@ export function codeLock({ title, digits, code, hint, onOpen }) {
   function done() {
     off();
     removeEventListener('keydown', keys);
+    overlay.remove();
+  }
+}
+
+// --- puhelinvastaajan viestit --------------------------------------------------------
+// messages: [{ from, time, text }] ; näytetään yksi kerrallaan ”toistona”.
+export function voicemail(messages, { onDone } = {}) {
+  let index = 0;
+  const overlay = el('div', 'overlay lock');
+  const card = el('div', 'lock-card voicemail');
+  const counter = el('div', 'vm-counter');
+  const from = el('div', 'vm-from');
+  const wave = el('div', 'vm-wave');
+  for (let i = 0; i < 28; i++) wave.appendChild(el('span'));
+  const text = el('p', 'vm-text');
+  const next = el('button', 'lock-open');
+  const close = el('button', 'lock-cancel', 'Sulje');
+  const buttons = el('div', 'lock-buttons');
+  buttons.append(close, next);
+  card.append(el('h2', null, 'Puhelinvastaaja'), counter, from, wave, text, buttons);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  function show() {
+    const m = messages[index];
+    counter.textContent = `Viesti ${index + 1}/${messages.length}`;
+    from.textContent = `${m.from} · ${m.time}`;
+    text.textContent = '';
+    wave.classList.add('playing');
+    // teksti ”puhutaan” näkyviin pätkä kerrallaan
+    let shown = 0;
+    clearInterval(show.timer);
+    show.timer = setInterval(() => {
+      shown = Math.min(m.text.length, shown + 3);
+      text.textContent = m.text.slice(0, shown);
+      if (shown >= m.text.length) {
+        clearInterval(show.timer);
+        wave.classList.remove('playing');
+      }
+    }, 30);
+    next.textContent = index < messages.length - 1 ? 'Seuraava viesti' : 'Valmis';
+  }
+  next.addEventListener('click', () => {
+    if (index < messages.length - 1) {
+      index++;
+      show();
+    } else {
+      done();
+    }
+  });
+  const off = onEscape(done);
+  close.addEventListener('click', done);
+  show();
+  function done() {
+    clearInterval(show.timer);
+    off();
+    overlay.remove();
+    onDone?.();
+  }
+}
+
+// --- salasanakenttä (tietokone) ------------------------------------------------------
+export function passwordPrompt({ title, hint, check, failHint, onOpen }) {
+  let fails = 0;
+  const overlay = el('div', 'overlay lock');
+  const card = el('form', 'lock-card login');
+  const input = el('input', 'login-input');
+  input.type = 'password';
+  input.autocomplete = 'off';
+  input.placeholder = 'Salasana';
+  const message = el('p', 'lock-message', hint);
+  const open = el('button', 'lock-open', 'Kirjaudu');
+  open.type = 'submit';
+  const cancel = el('button', 'lock-cancel', 'Peruuta');
+  cancel.type = 'button';
+  const buttons = el('div', 'lock-buttons');
+  buttons.append(cancel, open);
+  card.append(el('h2', null, title), el('div', 'login-user', 'Kalevi Kivi'), input, message, buttons);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  input.focus();
+
+  const off = onEscape(done);
+  cancel.addEventListener('click', done);
+  card.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (check(input.value.trim())) {
+      done();
+      onOpen();
+      return;
+    }
+    fails++;
+    card.classList.remove('shake');
+    void card.offsetWidth;
+    card.classList.add('shake');
+    message.textContent = fails >= 3 && failHint ? failHint : 'Väärä salasana.';
+    input.select();
+  });
+  function done() {
+    off();
     overlay.remove();
   }
 }

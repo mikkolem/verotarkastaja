@@ -2,6 +2,7 @@
 // mappien selkämykset. Kaikki piirretään canvakselle, joten tekstiä on helppo
 // muuttaa (ja myöhemmin pulmat voivat lukea samat luvut täältä).
 import * as THREE from 'three';
+import { game } from './game.js';
 
 const HAND = '"Marker Felt", "Bradley Hand", "Comic Sans MS", cursive';
 const MONO = '"Courier New", Courier, monospace';
@@ -298,6 +299,184 @@ function safeNoteTexture() {
   });
 }
 
+// --- pulma 3: laskun alaosa silppurista, koottu lasku ja ALV-laskelma -------------
+// Laskelma: myynnin ALV 10 000 € × 25,5 % = 2 550 €, ostojen ALV 1 290 €,
+// maksettava 1 260 € = kassakaapin koodi.
+function invoiceBottomCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 840;
+  c.height = 480;
+  const g = c.getContext('2d');
+  // revitty yläreuna
+  g.beginPath();
+  g.moveTo(0, c.height);
+  g.lineTo(c.width, c.height);
+  for (let x = c.width; x >= 0; x -= 24) g.lineTo(x, 20 + Math.random() * 40);
+  g.closePath();
+  g.clip();
+  paperBackground(g, c.width, c.height, '#f3efe4');
+  // silppurin terien jäljet
+  g.fillStyle = 'rgba(0,0,0,0.07)';
+  for (let x = 30; x < c.width; x += 60) g.fillRect(x, 0, 2, c.height);
+  g.fillStyle = '#1a1a1a';
+  g.font = `18px ${MONO}`;
+  g.fillText('kesäkuu 2025 (sopimus KK/CI-04)', 50, 105);
+  g.fillRect(50, 130, c.width - 100, 1);
+  g.font = `bold 20px ${MONO}`;
+  g.fillText('Veroton hinta', 50, 175);
+  g.textAlign = 'right';
+  g.fillText('10 000,00 €', c.width - 50, 175);
+  g.textAlign = 'left';
+  g.font = `20px ${MONO}`;
+  g.fillText('ALV 25,5 %', 50, 215);
+  // ALV:n ja loppusumman kohdalle on kaatunut kahvia
+  g.fillStyle = 'rgba(110, 70, 30, 0.55)';
+  g.beginPath();
+  g.ellipse(c.width - 170, 235, 150, 55, 0.1, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = '#1a1a1a';
+  g.font = `16px ${MONO}`;
+  g.fillText('Maksuehto: heti netto', 50, 330);
+  g.fillText('Tilille: Cayman National Bank, George Town', 50, 360);
+  g.font = `italic 15px ${SERIF}`;
+  g.fillStyle = '#555';
+  g.fillText('Ei kirjata Suomeen. – K.K.', 50, 420);
+  return c;
+}
+
+function assembledInvoiceCanvas(top, bottom) {
+  const c = document.createElement('canvas');
+  c.width = 840;
+  c.height = 600 + 480 - 100;
+  const g = c.getContext('2d');
+  // puoliskot limittäin, jotta revityt reunat peittävät toisensa lähes kokonaan
+  g.drawImage(bottom, 0, 600 - 100);
+  g.drawImage(top, 0, 0);
+  // teippiliuskat saumassa
+  g.fillStyle = 'rgba(240, 235, 200, 0.55)';
+  for (const x of [120, 400, 680]) {
+    g.save();
+    g.translate(x, 535);
+    g.rotate(-0.08 + Math.random() * 0.16);
+    g.fillRect(-60, -18, 120, 36);
+    g.restore();
+  }
+  return c;
+}
+
+function vatSheetCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 600;
+  c.height = 840;
+  const g = c.getContext('2d');
+  paperBackground(g, c.width, c.height, '#f1ede2');
+  g.fillStyle = '#1a1a1a';
+  g.font = `bold 26px ${MONO}`;
+  g.fillText('KIRJANPITO 2025', 40, 70);
+  g.font = `20px ${MONO}`;
+  g.fillText('ALV-laskelma, kesäkuu', 40, 105);
+  g.fillRect(40, 125, c.width - 80, 2);
+  const rows = [['Myynnin ALV (25,5 %)', ''], ['Ostojen ALV', '1 290,00'], ['Maksettava ALV', '']];
+  rows.forEach(([label, value], i) => {
+    const y = 200 + i * 80;
+    g.font = `20px ${MONO}`;
+    g.textAlign = 'left';
+    g.fillText(label, 40, y);
+    g.textAlign = 'right';
+    g.font = `bold 22px ${MONO}`;
+    g.fillText(value || '________', c.width - 40, y);
+  });
+  g.textAlign = 'left';
+  g.fillStyle = '#1f3a8a';
+  g.font = `28px ${HAND}`;
+  ['Kalevi!', 'Myynnin ALV:sta puuttuu', 'kesäkuun lasku nro 117.', 'Missä se on?? – Pirjo'].forEach((l, i) => g.fillText(l, 40, 520 + i * 44));
+  return c;
+}
+
+// --- pulma 4: kassakaapin B-kirjanpito ja tietokoneen kalenteri ----------------------
+function secretLedgerCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 640;
+  c.height = 860;
+  const g = c.getContext('2d');
+  paperBackground(g, c.width, c.height, '#ece6d6');
+  g.fillStyle = '#7a1410';
+  g.font = `bold 30px ${MONO}`;
+  g.fillText('KIRJANPITO ”B”', 40, 70);
+  g.fillStyle = '#1a1a1a';
+  g.font = `18px ${MONO}`;
+  g.fillText('Henkilökohtainen – EI VEROTTAJALLE', 40, 105);
+  g.fillRect(40, 125, c.width - 80, 2);
+  const rows = [
+    ['', 'virallinen', 'todellinen'],
+    ['Liikevaihto', '610 000', '1 480 000'],
+    ['  josta Kivi Consulting', '–', '870 000'],
+    ['Edustus (”mökki”)', '1 247', '14 300'],
+    ['Taideteokset', '12 000', '89'],
+  ];
+  rows.forEach(([label, a, b], i) => {
+    const y = 175 + i * 62;
+    g.font = i === 0 ? `bold 16px ${MONO}` : `18px ${MONO}`;
+    g.textAlign = 'left';
+    g.fillText(label, 40, y);
+    g.textAlign = 'right';
+    g.fillText(a, 440, y);
+    g.font = i === 0 ? `bold 16px ${MONO}` : `bold 18px ${MONO}`;
+    g.fillText(b, c.width - 40, y);
+  });
+  g.textAlign = 'left';
+  g.fillStyle = '#1f3a8a';
+  g.font = `28px ${HAND}`;
+  ['Ero siirretty Caymanille', '”golfmatkoina”.', 'Ks. kalenteri!'].forEach((l, i) => g.fillText(l, 40, 560 + i * 46));
+  g.fillStyle = '#7a1410';
+  g.font = `italic 17px ${SERIF}`;
+  g.fillText('(Viherkasvin todellinen hinta: 89 € Plantagenista.)', 40, 780);
+  return c;
+}
+
+export const CALENDAR = [
+  ['Ma 23.6.', '10–11', 'Hallituksen kokous (= minä)'],
+  ['Ti 24.6.', '12–15', 'Liikelounas, Kultainen Haarukka'],
+  ['Ke 25.6.', '8–16', 'Golf (työmatka)'],
+  ['To 26.6.', '9–10', 'Verotarkastus?? EI KOSKAAN'],
+  ['Pe 27.6.', '14:00', 'SIIRTO CAYMANILLE 870 000 € – ”golfmatka”'],
+];
+
+function calendarCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 1000;
+  c.height = 640;
+  const g = c.getContext('2d');
+  g.fillStyle = '#e9eef5';
+  g.fillRect(0, 0, c.width, c.height);
+  g.fillStyle = '#1f4e79';
+  g.fillRect(0, 0, c.width, 70);
+  g.fillStyle = '#fff';
+  g.font = `bold 26px ${SERIF}`;
+  g.fillText('Kalenteri – Kalevi Kivi', 30, 45);
+  g.font = `18px ${SERIF}`;
+  g.textAlign = 'right';
+  g.fillText('Viikko 26 / 2025', c.width - 30, 45);
+  g.textAlign = 'left';
+  CALENDAR.forEach(([day, time, text], i) => {
+    const y = 100 + i * 104;
+    const urgent = text.startsWith('SIIRTO');
+    g.fillStyle = urgent ? '#fde2df' : '#ffffff';
+    g.fillRect(30, y, c.width - 60, 88);
+    g.fillStyle = urgent ? '#c0392b' : '#1f4e79';
+    g.fillRect(30, y, 8, 88);
+    g.fillStyle = '#333';
+    g.font = `bold 20px ${SERIF}`;
+    g.fillText(day, 60, y + 36);
+    g.font = `18px ${MONO}`;
+    g.fillText(time, 60, y + 66);
+    g.font = `${urgent ? 'bold ' : ''}24px ${SERIF}`;
+    g.fillStyle = urgent ? '#a5281b' : '#222';
+    g.fillText(text, 220, y + 53);
+  });
+  return c;
+}
+
 // Kaikkien arkkien kuvat nimen mukaan lukunäkymää varten.
 const PAGES = new Map();
 
@@ -414,14 +593,35 @@ export function pagesFor(key) {
         label: r.shop,
         markable: true,
         evidence: r.evidence,
+        wrongText: 'Tämä näyttää tavalliselta edustuskululta.',
       })),
     ];
   }
+  const assembled = () => {
+    if (!PAGES.has('invoice_assembled')) {
+      PAGES.set('invoice_assembled', assembledInvoiceCanvas(PAGES.get('invoice_half'), invoiceBottomCanvas()));
+    }
+    return { canvas: PAGES.get('invoice_assembled'), label: 'Koottu myyntilasku', markable: true, evidence: 'cayman_invoice' };
+  };
   if (key === 'drawer_b_papers') {
     return [
-      { canvas: PAGES.get('invoice_half'), label: 'Puolikas myyntilasku' },
+      game.has('invoice_bottom') ? assembled() : { canvas: PAGES.get('invoice_half'), label: 'Puolikas myyntilasku' },
       { canvas: PAGES.get('note_safe'), label: 'Käsin kirjoitettu lappu' },
     ];
   }
+  if (key === 'invoice_assembled') return [assembled()];
+  if (key === 'binder_1') return [{ canvas: once('vat', vatSheetCanvas), label: 'ALV-laskelma' }];
+  if (key === 'ledger_book') {
+    return [{ canvas: once('secret', secretLedgerCanvas), label: 'B-kirjanpito', markable: true, evidence: 'second_ledger' }];
+  }
+  if (key === 'calendar') {
+    return [{ canvas: once('calendar', calendarCanvas), label: 'Kalenteri', markable: true, evidence: 'cayman_transfer' }];
+  }
   return [];
+}
+
+// Lukusivut, jotka eivät ole huoneessa omina arkkeinaan, piirretään vasta tarvittaessa.
+function once(name, draw) {
+  if (!PAGES.has(name)) PAGES.set(name, draw());
+  return PAGES.get(name);
 }

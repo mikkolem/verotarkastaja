@@ -156,10 +156,14 @@ export class Interaction {
     this.pivot.clear();
     // Kopiot siirretään pääobjektin omaan koordinaatistoon (sijainti ja kierto
     // nollataan, koko säilyy). Mukana kulkevat esim. mapin selkämyslaput.
+    // Käytetään maailmasijainteja, koska osa voi olla toisen objektin lapsena
+    // (esim. kassakaapin ovi saranassaan tai paperit laatikossa).
     const [main, ...rest] = this.objectsOf(key);
-    const toLocal = new THREE.Matrix4()
-      .compose(main.position, main.quaternion, new THREE.Vector3(1, 1, 1))
-      .invert();
+    main.updateWorldMatrix(true, false);
+    const mainPos = new THREE.Vector3();
+    const mainRot = new THREE.Quaternion();
+    main.matrixWorld.decompose(mainPos, mainRot, new THREE.Vector3());
+    const toLocal = new THREE.Matrix4().compose(mainPos, mainRot, new THREE.Vector3(1, 1, 1)).invert();
     const holder = new THREE.Group();
     for (const src of [main, ...rest]) {
       const copy = src.clone(true);
@@ -167,6 +171,8 @@ export class Interaction {
       const nested = [];
       copy.traverse((o) => { if (o !== copy && ITEMS[o.name]) nested.push(o); });
       nested.forEach((o) => o.removeFromParent());
+      src.updateWorldMatrix(true, false);
+      src.matrixWorld.decompose(copy.position, copy.quaternion, copy.scale);
       copy.applyMatrix4(toLocal);
       holder.add(copy);
     }

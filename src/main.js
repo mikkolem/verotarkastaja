@@ -20,8 +20,8 @@ import { PROPS } from './props.js';
 import { addPaperItems, pagesFor } from './paper.js';
 import { Interaction } from './interact.js';
 import { ITEMS } from './items.js';
-import { EVIDENCE, game } from './game.js';
-import { codeLock, inventoryHud, readView, toast } from './ui.js';
+import { EVIDENCE, EVIDENCE_TOTAL, game } from './game.js';
+import { codeLock, inventoryHud, passwordPrompt, readView, toast, voicemail } from './ui.js';
 import './style.css';
 
 // Ikkuna-aukko (vastaa blender/build_room.py:n mittoja)
@@ -332,23 +332,62 @@ function openDrawer(name) {
   });
 }
 
+// Kassakaapin ovi kääntyy saranansa ympäri. Ovi liitetään saranan kohdalle
+// tehtyyn apuobjektiin, jota kierretään.
+function openSafe() {
+  const door = scene.getObjectByName('safe_door');
+  const hinge = new THREE.Group();
+  hinge.position.set(-2.154, 0, -0.58);
+  scene.add(hinge);
+  hinge.updateMatrixWorld(true);
+  hinge.attach(door);
+  let t = 0;
+  animations.push((dt) => {
+    t = Math.min(1, t + dt / 1.2);
+    hinge.rotation.y = 1.75 * (1 - Math.pow(1 - t, 3));
+    return t < 1;
+  });
+}
+
+// Puhelinvastaajan merkkivalo sammuu, kun viestit on kuunneltu.
+game.onChange(() => {
+  if (!game.is('messages_heard')) return;
+  scene.getObjectByName('answering_machine')?.traverse((o) => {
+    if (o.isMesh && o.material.name === 'led_red') o.material.emissiveIntensity = 0.3;
+  });
+  roomDirty = true;
+});
+
+// Lukunäkymät, jotka eivät ole huoneessa omina esineinään
+const READ_TITLES = {
+  invoice_assembled: 'Koottu myyntilasku',
+  calendar: 'Kalevin kalenteri',
+};
+
 // Esineiden toiminnot (items.js) käyttävät näitä.
 interaction.api = {
   toast,
   close: () => interaction.close(),
   openDrawer,
+  openSafe,
   codeLock,
+  voicemail,
+  passwordPrompt,
   read(key) {
-    readView(ITEMS[key].title, pagesFor(key), {
+    readView(ITEMS[key]?.title ?? READ_TITLES[key], pagesFor(key), {
+      isMarked: (page) => page.evidence && game.hasEvidence(page.evidence),
       onMark(page, button) {
         if (page.evidence && game.addEvidence(page.evidence)) {
           toast(`Todiste löytyi: ${EVIDENCE[page.evidence]}`, 'evidence');
           button.disabled = true;
           button.textContent = 'Merkitty todisteeksi';
+          if (game.evidence.length === EVIDENCE_TOTAL) {
+            setTimeout(() => toast('Kaikki todisteet löytyivät! Tarkastusraportti ja loppu ovat vielä työn alla.', 'success'), 4600);
+          }
         } else if (page.evidence) {
           toast('Tämä on jo merkitty todisteeksi.');
         } else {
-          toast('Tämä näyttää tavalliselta edustuskululta.');
+          toast(page.wrongText ?? 'Tässä ei näytä olevan mitään epäilyttävää.');
         }
       },
     });
@@ -365,7 +404,13 @@ const HINTS = [
   [() => !game.is('drawer_a_open'), 'Messinkiavain sopii johonkin työpöydän laatikkoon.'],
   [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit. Onko jokin niistä päivätty oudosti – vaikka juhannukseksi?'],
   [() => !game.is('drawer_b_open'), 'Laske kuitit yhteen ja vertaa pääkirjan edustuskuluihin. Erotus on ”se mikä puuttuu”.'],
-  [() => true, 'Lue laatikon B paperit. Tarina jatkuu pian – loput pulmat ovat työn alla.'],
+  [() => !game.has('invoice_bottom'), 'Laatikon B lappu muistuttaa silppurista. Löytyisikö sieltä laskun loppuosa?'],
+  [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku. Kuuluuko Caymansaarille myyty lasku virallisiin kirjoihin?'],
+  [() => !game.is('safe_open'), 'Kassakaapin koodi on maksettava ALV: 25,5 % laskun verottomasta hinnasta miinus ostojen ALV (Kirjanpito 2025 -mappi).'],
+  [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapista löytynyt musta kirja.'],
+  [() => !game.is('laptop_open'), 'Tietokoneen salasanavihje on ”tasoitukseni”. Kuuntele puhelinvastaajan viestit.'],
+  [() => !game.hasEvidence('cayman_transfer'), 'Katso Kalevin kalenteria tietokoneelta. Mitä perjantaina tapahtuu?'],
+  [() => true, 'Kaikki todisteet on löydetty. Tarkastusraportti on vielä työn alla.'],
 ];
 const hints = {
   timer: null,

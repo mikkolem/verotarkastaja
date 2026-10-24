@@ -73,6 +73,7 @@ export async function createMaterials(anisotropy, onProgress = () => {}) {
     chrome: new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.15, metalness: 1 }),
     binder_blue: new THREE.MeshStandardMaterial({ color: 0x1d3466, roughness: 0.55 }),
     binder_red: new THREE.MeshStandardMaterial({ color: 0x7a1410, roughness: 0.55 }),
+    binder_black: new THREE.MeshStandardMaterial({ color: 0x0b0b0c, roughness: 0.45 }),
     paper: new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.9 }),
   };
 }

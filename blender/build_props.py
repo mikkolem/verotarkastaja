@@ -27,6 +27,7 @@ MATERIALS.update({
     "binder_blue": (0.08, 0.15, 0.35),
     "binder_red": (0.45, 0.06, 0.05),
     "paper": (0.9, 0.9, 0.86),
+    "binder_black": (0.03, 0.03, 0.035),
 })
 METALS.update({"steel_dark": 0.45, "chrome": 0.15})
 
@@ -61,21 +62,38 @@ def answering_machine():
 
 
 def safe():
-    """Pieni kassakaappi kirjahyllyn alimmalla tasolla, ovi kohti huonetta (+x)."""
+    """Pieni kassakaappi kirjahyllyn alimmalla tasolla, ovi kohti huonetta (+x).
+
+    Runko on ontto ja ovi on oma objektinsa (safe_door), jota three.js kääntää
+    saranan ympäri. Sisällä on ”se toinen mappi” (ledger_book).
+    """
     p = Part("safe")
     x0, x1, y0, y1, z0, z1 = -2.44, -2.16, SHELF_BASE, 0.42, -0.6, -0.22
-    p.box("steel_dark", x0, x1, y0, y1, z0, z1)
-    # ovi hieman runkoa ulompana, ja sen ympärillä sauma
-    p.box("steel_dark", x1, x1 + 0.012, y0 + 0.02, y1 - 0.02, z0 + 0.02, z1 - 0.02)
-    # numerolukko ja kahva
-    p.cylinder_x("chrome", 0.29, -0.36, x1 + 0.012, x1 + 0.03, 0.032)
-    p.cylinder_x("plastic_black", 0.29, -0.36, x1 + 0.03, x1 + 0.034, 0.024)
-    p.box("chrome", x1 + 0.012, x1 + 0.03, 0.2, 0.215, -0.33, -0.25)
-    p.box("chrome", x1 + 0.012, x1 + 0.045, 0.195, 0.22, -0.26, -0.24)
+    t = 0.02
+    p.box("steel_dark", x0, x0 + t, y0, y1, z0, z1)              # takaseinä
+    p.box("steel_dark", x0, x1, y0, y0 + t, z0, z1)              # pohja
+    p.box("steel_dark", x0, x1, y1 - t, y1, z0, z1)              # katto
+    p.box("steel_dark", x0, x1, y0, y1, z0, z0 + t)              # sivut
+    p.box("steel_dark", x0, x1, y0, y1, z1 - t, z1)
+    p.box("plastic_grey", x0 + t, x0 + t + 0.003, y0 + t, y1 - t, z0 + t, z1 - t)   # vaalea sisäpinta
     # saranat vasemmalla
     for y in (y0 + 0.06, y1 - 0.08):
         p.box("chrome", x1, x1 + 0.016, y, y + 0.04, z0 + 0.005, z0 + 0.02)
-    p.build(bevel=0.006)
+    p.build(bevel=0.004)
+
+    d = Part("safe_door")
+    d.box("steel_dark", x1, x1 + 0.012, y0 + t, y1 - t, z0 + t, z1 - t)
+    d.cylinder_x("chrome", 0.29, -0.36, x1 + 0.012, x1 + 0.03, 0.032)
+    d.cylinder_x("plastic_black", 0.29, -0.36, x1 + 0.03, x1 + 0.034, 0.024)
+    d.box("chrome", x1 + 0.012, x1 + 0.03, 0.2, 0.215, -0.33, -0.25)
+    d.box("chrome", x1 + 0.012, x1 + 0.045, 0.195, 0.22, -0.26, -0.24)
+    d.build(bevel=0.004)
+
+    # ”se toinen mappi”: musta, paksu kirjanpitokirja punaisella nimilapulla
+    b = Part("ledger_book")
+    b.box("binder_black", -2.40, -2.20, y0 + t, y0 + t + 0.055, -0.52, -0.30)
+    b.box("binder_red", -2.36, -2.24, y0 + t + 0.055, y0 + t + 0.057, -0.47, -0.35)
+    b.build(bevel=0.004)
 
 
 def binders():

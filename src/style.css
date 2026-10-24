@@ -274,7 +274,6 @@ body.inspecting canvas:active { cursor: grabbing; }
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
-.hud-chip::before { content: '🔑 '; }
 .hud-evidence { cursor: pointer; border-color: var(--ui-accent); }
 .hud-help {
   padding: 8px 14px;
@@ -398,6 +397,37 @@ body.inspecting .hud { display: none; }
   40%, 80% { transform: translateX(8px); }
 }
 @media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+
+/* Puhelinvastaaja ja kirjautuminen */
+.voicemail, .login { width: min(460px, calc(100vw - 32px)); }
+.vm-counter { font-size: 14px; color: var(--ui-muted); }
+.vm-from { margin: 4px 0 12px; font-size: 18px; font-weight: 700; }
+.vm-wave { display: flex; justify-content: center; align-items: center; gap: 3px; height: 40px; }
+.vm-wave span {
+  width: 4px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--ui-accent);
+  opacity: 0.5;
+}
+.vm-wave.playing span { animation: wave 0.9s ease-in-out infinite; opacity: 1; }
+.vm-wave span:nth-child(3n) { animation-delay: -0.3s; }
+.vm-wave span:nth-child(3n + 1) { animation-delay: -0.6s; }
+@keyframes wave { 50% { height: 34px; } }
+.vm-text { min-height: 6.5em; margin: 14px 0; font-size: 17px; line-height: 1.5; text-align: left; }
+.login-user { margin-bottom: 12px; font-size: 16px; color: var(--ui-muted); }
+.login-input {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 18px;
+  color: var(--ui-text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+}
+.login-input:focus { outline: 2px solid var(--ui-accent); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .vm-wave.playing span { animation: none; } }
 
 /* Aloitusruutu: tarkastusmääräys paperilla huoneen päällä */
 .intro {
