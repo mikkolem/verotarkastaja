@@ -20,11 +20,19 @@ const WINDOW = { x0: -0.2, x1: 1.4, y0: 0.9, y1: 2.3, z: -2.0 };
 const SUN_DIR = new THREE.Vector3(3, 4.5, -7).normalize();
 
 // --- renderöijä ja kamera ---------------------------------------------------
+// Tarkkuus: piirretään näytön CSS-pikseleinä myös retina-näytöllä, koska
+// jälkikäsittely ja reunojen pehmennys tasoittavat kuvan joka tapauksessa.
+// Laskee automaattisesti, jos kone ei jaksa (ks. silmukka).
+let pixelRatio = Math.min(window.devicePixelRatio, 1);
+const MIN_PIXEL_RATIO = 0.75;
+
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(pixelRatio);
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
+// Huone ei liiku, joten varjot lasketaan vain kerran latauksen jälkeen.
+renderer.shadowMap.autoUpdate = false;
 renderer.toneMapping = THREE.AgXToneMapping;
 renderer.toneMappingExposure = 1.1;
 document.getElementById('app').appendChild(renderer.domElement);
@@ -102,6 +110,8 @@ function showProgress(stage, value, label) {
   if (label) document.getElementById('loading-label').textContent = label;
 }
 
+let ready = false;
+
 async function loadRoom() {
   // Malli latautuu verkosta samaan aikaan, kun tekstuureja lasketaan.
   const modelPromise = new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/room.glb`, (e) => {
@@ -124,12 +134,14 @@ async function loadRoom() {
     obj.receiveShadow = !isGlass;
   });
   scene.add(gltf.scene);
+  renderer.shadowMap.needsUpdate = true;
 
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
   showProgress('model', 1, 'Avataan sälekaihtimia…');
   await renderer.compileAsync(scene, camera);
   showProgress('compile', 1);
 
+  ready = true;
   const loading = document.getElementById('loading');
   loading.classList.add('hidden');
   setTimeout(() => loading.remove(), 1000);
@@ -141,11 +153,14 @@ const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THRE
 const composer = new EffectComposer(renderer, target);
 composer.addPass(new RenderPass(scene, camera));
 const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
-gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 16 });
+gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 8 });
 gtao.blendIntensity = 0.9;
 composer.addPass(gtao);
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
 composer.addPass(new OutputPass());
+// Kaikki välivaiheet samaan kokoon renderöijän tarkkuuden kanssa
+composer.setPixelRatio(pixelRatio);
+composer.setSize(innerWidth, innerHeight);
 
 // --- kuvakulmat ja käyttöliittymä ----------------------------------------------
 const nav = document.getElementById('views');
@@ -180,10 +195,37 @@ addEventListener('resize', () => {
 if (import.meta.env.DEV) window.__debug = { scene, camera, sun, bounce, skyLight, gtao, renderer, views };
 
 // --- silmukka --------------------------------------------------------------------
+// Kun kamera on paikallaan, vain pöly liikkuu, joten 30 kuvaa sekunnissa riittää.
+const IDLE_INTERVAL = 1 / 30;
+// Jos liikkeen aikana kuvia tulee alle noin 40 sekunnissa, tarkkuutta lasketaan.
+const SLOW_FRAME = 1 / 40;
 const clock = new THREE.Clock();
+let sinceRender = 0;
+let slowFrames = 0;
+
+function lowerQuality() {
+  if (pixelRatio <= MIN_PIXEL_RATIO) return;
+  pixelRatio = Math.max(MIN_PIXEL_RATIO, pixelRatio - 0.25);
+  renderer.setPixelRatio(pixelRatio);
+  composer.setPixelRatio(pixelRatio);
+}
+
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
+  if (!ready) return;   // latausnäkymä peittää ruudun, ei piirretä turhaan
+  sinceRender += dt;
+  const moving = views.moving;
   views.update(dt);
+  if (!moving && sinceRender < IDLE_INTERVAL) return;
+
+  if (moving) {
+    slowFrames = sinceRender > SLOW_FRAME ? slowFrames + 1 : Math.max(0, slowFrames - 1);
+    if (slowFrames > 30) {
+      lowerQuality();
+      slowFrames = 0;
+    }
+  }
+  sinceRender = 0;
   dust.userData.update(clock.elapsedTime);
   composer.render();
 });
