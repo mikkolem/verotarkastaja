@@ -203,9 +203,28 @@ async function loadRoom() {
   showProgress('compile', 1);
 
   ready = true;
+  showIntro();
   const loading = document.getElementById('loading');
   loading.classList.add('hidden');
   setTimeout(() => loading.remove(), 1000);
+}
+
+// Aloitusruutu (tarkastusmääräys) näkyy latauksen jälkeen huoneen päällä.
+// Sillä aikaa kuvakulmia ei voi vaihtaa.
+let introOpen = false;
+function showIntro() {
+  const intro = document.getElementById('intro');
+  intro.hidden = false;
+  introOpen = true;
+  document.body.classList.add('intro-open');
+  const start = document.getElementById('intro-start');
+  start.focus({ preventScroll: true });   // puhelimella muistio alkaa ylhäältä
+  start.addEventListener('click', () => {
+    introOpen = false;
+    document.body.classList.remove('intro-open');
+    intro.classList.add('leaving');
+    setTimeout(() => { intro.hidden = true; }, 600);
+  }, { once: true });
 }
 loadRoom();
 
@@ -339,7 +358,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!ready) return;   // latausnäkymä peittää ruudun, ei piirretä turhaan
   sinceRender += dt;
-  views.locked = !!interaction.inspecting;
+  views.locked = !!interaction.inspecting || introOpen;
   const moving = views.moving;
   const busy = interaction.busy;   // tarkasteltavaa esinettä pyöritetään
   views.update(dt);

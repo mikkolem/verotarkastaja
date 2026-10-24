@@ -171,6 +171,125 @@ body.inspecting .edge { display: none; }
 body.inspecting canvas { cursor: grab; }
 body.inspecting canvas:active { cursor: grabbing; }
 
+/* Aloitusruutu: tarkastusmääräys paperilla huoneen päällä */
+.intro {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+  background: rgba(10, 8, 6, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  transition: opacity 0.6s;
+}
+.intro[hidden] { display: none; }
+.intro.leaving { opacity: 0; pointer-events: none; }
+body.intro-open .nav,
+body.intro-open .edge,
+body.intro-open .title { display: none; }
+
+.memo {
+  --ink: #2a2118;
+  --ink-soft: #6b5d4c;
+  --stamp: #a3271d;
+  position: relative;
+  width: min(560px, 100%);
+  margin: auto;
+  padding: 34px 38px 30px;
+  color: var(--ink);
+  background: #f3ecdc;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 100% 28px;
+  border-radius: 3px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.3);
+  transform: rotate(-0.6deg);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.memo-head { border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 16px; }
+.memo-org, .memo-ref, .memo-label, .memo-meta dt {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.memo h1 { margin: 4px 0 2px; font-size: 30px; font-weight: normal; letter-spacing: 0.02em; }
+.memo-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 16px;
+  margin: 0 0 16px;
+}
+.memo-meta dt { padding-top: 3px; }
+.memo-meta dd { margin: 0; }
+.memo p { margin: 0 0 12px; }
+.memo-goal {
+  margin: 18px 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--stamp);
+  background: rgba(163, 39, 29, 0.06);
+}
+.memo-label { color: var(--stamp); margin-bottom: 2px; }
+.memo-help {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.memo-help li { margin: 4px 0; }
+.memo-help span {
+  display: inline-block;
+  min-width: 64px;
+  margin-right: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  color: var(--ink);
+}
+.memo-dev { font-size: 13px; font-style: italic; color: var(--ink-soft); }
+.memo-start {
+  display: block;
+  margin: 18px auto 0;
+  padding: 12px 30px;
+  font: inherit;
+  font-size: 17px;
+  color: #f3ecdc;
+  background: var(--ink);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+.memo-start:hover { background: #4a3a28; transform: translateY(-1px); }
+.memo-start:focus-visible { outline: 3px solid var(--stamp); outline-offset: 3px; }
+.memo-stamp {
+  position: absolute;
+  top: 26px;
+  right: 24px;
+  padding: 4px 10px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stamp);
+  border: 3px solid var(--stamp);
+  border-radius: 4px;
+  opacity: 0.75;
+  transform: rotate(8deg);
+}
+
+@media (max-width: 560px) {
+  .memo { padding: 26px 20px 22px; font-size: 15px; transform: none; }
+  .memo h1 { font-size: 25px; }
+  /* kapealla näytöllä leima omalle rivilleen, ettei se peitä otsikkoa */
+  .memo-stamp { position: static; display: inline-block; margin-bottom: 10px; font-size: 12px; transform: rotate(-3deg); }
+}
+
 #loading {
   position: fixed;
   inset: 0;
