@@ -541,6 +541,7 @@ body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
+  object-position: center 18%;   /* rajaus kasvoihin */
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
@@ -632,8 +633,8 @@ h1.pro-title { margin: 14px 0 6px; font-size: clamp(56px, 12vw, 110px); font-wei
 .pro-character { display: flex; align-items: center; gap: 36px; }
 .portrait {
   flex: none;
-  width: min(260px, 38vw);
-  aspect-ratio: 3 / 4;
+  width: min(250px, 36vw);
+  aspect-ratio: 444 / 765;   /* piirroskuvien muoto, näkyvät kokonaisina */
   margin: 0;
   overflow: hidden;
   border-radius: 12px;
@@ -670,7 +671,7 @@ h1.pro-title { margin: 14px 0 6px; font-size: clamp(56px, 12vw, 110px); font-wei
 .pro-next { color: #1b140c; background: var(--ui-accent); border: 0; min-width: 140px; }
 @media (max-width: 560px) {
   .pro-character { flex-direction: column; gap: 20px; text-align: center; }
-  .portrait { width: min(200px, 60vw); }
+  .portrait { width: min(170px, 48vw); }
   .pro-paper { padding: 28px 22px; }
   .pro-paper .pro-line { font-size: 17px; }
   .pro-skip, .pro-next { padding: 10px 16px; font-size: 15px; }
