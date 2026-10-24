@@ -141,6 +141,40 @@ function showProgress(stage, value, label) {
 
 let ready = false;
 let finale = null;   // aikaraja, raportti ja loppu (luodaan latauksen jälkeen)
+let roomReady;       // täyttyy, kun huone on ladattu (prologin kohtaus 2 odottaa tätä)
+const whenRoomReady = new Promise((resolve) => { roomReady = resolve; });
+
+// Ovi saranassaan ja käytävän valo. Prologi avaa oven, kun kamera ajaa sisään,
+// ja loppukohtaus, kun Kalevi palaa. set(k): 0 = kiinni, 1 = auki.
+function createDoor(scene) {
+  const hallLight = new THREE.PointLight(0xffd9a0, 0, 7, 1.5);
+  hallLight.position.set(-1.2, 2.3, 3.4);
+  scene.add(hallLight);
+  const hinge = new THREE.Group();
+  hinge.position.set(-1.62, 0, 2.04);
+  scene.add(hinge);
+  hinge.updateMatrixWorld(true);
+  hinge.attach(scene.getObjectByName('door_slab'));
+  let current = 0;
+  let hall = 0;
+  return {
+    set(k) {
+      if (k === current) return;
+      current = k;
+      hinge.rotation.y = 1.25 * k;
+      hallLight.intensity = Math.max(hall, 5 * k);
+      renderer.shadowMap.needsUpdate = true;
+      roomDirty = true;
+    },
+    // käytävän oma valaistus (prologissa kamera on käytävässä)
+    hall(intensity) {
+      hall = intensity;
+      hallLight.intensity = Math.max(hall, 5 * current);
+      roomDirty = true;
+    },
+  };
+}
+let door = null;
 
 // Pöytälampun lämmin kohdevalo kuvun kohdalle, ja itse polttimo hehkumaan.
 function addLampLight(lamp) {
@@ -238,7 +272,8 @@ async function loadRoom() {
   addPaperItems(scene);
   addDecor(scene);
   interaction.register(scene);
-  finale = createFinale({ scene, views, interaction, animations, toast, nextHint, onDirty: () => { roomDirty = true; } });
+  door = createDoor(scene);
+  finale = createFinale({ scene, views, interaction, animations, toast, nextHint, door, onDirty: () => { roomDirty = true; } });
   renderer.shadowMap.needsUpdate = true;
 
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
@@ -262,21 +297,66 @@ async function loadRoom() {
   showProgress('compile', 1);
 
   ready = true;
+  // Latausnäkymä pois: prologi (tai tarkastusmääräys) peittää ruudun tästä eteenpäin.
+  const loading = document.getElementById('loading');
+  loading.classList.add('hidden');
+  setTimeout(() => loading.remove(), 1000);
+  roomReady();
   maybeShowIntro();
 }
+
+// --- prologin kohtaus 2: kamera käytävästä huoneeseen ----------------------------
+// Prologi (prologue.js) kutsuu update(t) joka kuvassa, t = sekuntia kohtauksen alusta.
+// 0–9,5 s kamera lähestyy ovea, 9,5–11,5 s ovi aukeaa, 11–14 s kamera ajaa sisään
+// ja laskeutuu työpöytänäkymään, josta peli alkaa.
+// Avainasennot ja niiden ajat sekunteina; väli interpoloidaan pehmeästi.
+const KEYS = [
+  [0, { pos: [-0.3, 1.5, 4.2], target: [-1.3, 1.2, 2.06] }],       // käytävän perällä, viistosti
+  [9.5, { pos: [-0.95, 1.5, 3.15], target: [-1.25, 1.15, 2.06] }], // oven edessä
+  [11.5, { pos: [-0.45, 1.5, 2.9], target: [-1.3, 1.1, 1.2] }],    // ovi auennut (levy kääntyy käytävään), katse sisään
+  [12.8, { pos: [-1.05, 1.55, 1.5], target: [0.2, 1.0, -0.5] }],   // oviaukossa
+  [14, { pos: [...VIEWS[0].pos], target: [...VIEWS[0].target] }],  // työpöytänäkymä
+];
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+function poseAt(t) {
+  let i = 0;
+  while (i < KEYS.length - 2 && t >= KEYS[i + 1][0]) i++;
+  const [t0, a] = KEYS[i];
+  const [t1, b] = KEYS[i + 1];
+  const k = easeInOut(THREE.MathUtils.clamp((t - t0) / (t1 - t0), 0, 1));
+  return {
+    pos: a.pos.map((v, j) => THREE.MathUtils.lerp(v, b.pos[j], k)),
+    target: a.target.map((v, j) => THREE.MathUtils.lerp(v, b.target[j], k)),
+  };
+}
+const cinematic = {
+  whenReady: whenRoomReady,
+  duration: KEYS[KEYS.length - 1][0],
+  update(t) {
+    views.override = poseAt(t);
+    // ovi on raollaan alusta asti, aukeaa 9,5–11,5 s
+    door?.hall(3.5);
+    door?.set(t < 9.5 ? 0.07 : THREE.MathUtils.clamp(0.07 + 0.93 * (1 - Math.pow(1 - (t - 9.5) / 2, 3)), 0, 1));
+    roomDirty = true;
+  },
+  // kohtaus ohi tai ohitettu: kamera työpöydälle, ovi kiinni
+  finish() {
+    views.override = null;
+    door?.hall(0);
+    door?.set(0);
+    roomDirty = true;
+  },
+};
 
 // Prologi pyörii latauksen aikana. Tarkastusmääräys (intro) avautuu, kun sekä
 // prologi on katsottu että huone ladattu; jos lataus on vielä kesken,
 // latausnäkymä jää näkyviin siihen asti.
 let prologueDone = false;
 // käynnistetään vasta, kun koko moduuli on alustettu (onDone voi tulla heti)
-queueMicrotask(() => runPrologue({ onDone: () => { prologueDone = true; maybeShowIntro(); } }));
+queueMicrotask(() => runPrologue({ cinematic, onDone: () => { prologueDone = true; maybeShowIntro(); } }));
 function maybeShowIntro() {
   if (!ready || !prologueDone || started || introOpen) return;
   showIntro();
-  const loading = document.getElementById('loading');
-  loading.classList.add('hidden');
-  setTimeout(() => loading.remove(), 1000);
 }
 
 // Aloitusruutu (tarkastusmääräys) näkyy latauksen jälkeen huoneen päällä.
@@ -284,16 +364,39 @@ function maybeShowIntro() {
 // Ohjeet-nappi avaa saman muistion uudelleen kesken pelin.
 let introOpen = false;
 let started = false;
+// Muistio on kolmessa vaiheessa (tehtävä, näin pelaat, vihjeet ja aika).
+const memoSteps = [...document.querySelectorAll('.memo-step')];
+const memoDots = document.getElementById('memo-dots');
+memoSteps.forEach(() => memoDots.appendChild(document.createElement('span')));
+let memoIndex = 0;
+function showMemoStep(i) {
+  memoIndex = Math.max(0, Math.min(memoSteps.length - 1, i));
+  memoSteps.forEach((el, j) => { el.hidden = j !== memoIndex; });
+  [...memoDots.children].forEach((d, j) => d.classList.toggle('active', j === memoIndex));
+  document.getElementById('memo-prev').disabled = memoIndex === 0;
+  document.getElementById('memo-next').hidden = memoIndex === memoSteps.length - 1;
+  document.getElementById('intro-start').hidden = memoIndex !== memoSteps.length - 1;
+  document.getElementById('intro').scrollTop = 0;
+}
+document.getElementById('memo-prev').addEventListener('click', () => showMemoStep(memoIndex - 1));
+document.getElementById('memo-next').addEventListener('click', () => showMemoStep(memoIndex + 1));
+addEventListener('keydown', (e) => {
+  if (!introOpen) return;
+  if (e.key === 'ArrowRight') { e.stopImmediatePropagation(); showMemoStep(memoIndex + 1); }
+  if (e.key === 'ArrowLeft') { e.stopImmediatePropagation(); showMemoStep(memoIndex - 1); }
+}, true);
+
 function showIntro() {
   const intro = document.getElementById('intro');
   intro.classList.remove('leaving');
   intro.hidden = false;
-  intro.scrollTop = 0;
   introOpen = true;
   document.body.classList.add('intro-open');
   const start = document.getElementById('intro-start');
   start.textContent = started ? 'Jatka tarkastusta' : 'Aloita tarkastus';
-  start.focus({ preventScroll: true });   // puhelimella muistio alkaa ylhäältä
+  // ensimmäisellä kerralla alusta; pelin aikana avattuna suoraan ohjeisiin
+  showMemoStep(started ? memoSteps.length - 1 : 0);
+  document.getElementById('memo-next').focus({ preventScroll: true });
   finale?.pause(true);
   start.addEventListener('click', () => {
     introOpen = false;

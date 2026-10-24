@@ -72,7 +72,12 @@ vaihtoehdosta (oikea termi, uskottava väärä, hölmö). Raportin voi lähettä
 oikeiden perusteiden ja käytettyjen vihjeiden mukaan. Vihje maksaa minuutin, väärä
 epäilymerkintä puoli minuuttia. Tuloksen alla listataan pelissä esiintyneet termit.
 
-**Prologi:** nimetön vihjekirje (Pirjolta) ja henkilöesittelyt (Kalevi, Pirjo, Sinä).
+**Prologi (noin 28 s, src/prologue.js):** kaksi itsestään etenevää kohtausta, joiden välillä
+pääsee nuolilla molempiin suuntiin. 1) Automatka sateessa 2D-canvaksella: kaupunki vilisee
+tuulilasin takana, pyyhkijä pyyhkii, nimetön kirje nousee kojelaudalta, auto pysähtyy
+Kivi & Kumppanit Oy:n eteen. 2) Käytävä 3D-huoneessa: kamera lähestyy raollaan olevaa ovea,
+henkilökortit (Kalevi, Pirjo, Sinä) vilahtavat, ovi aukeaa ja kamera ajaa työpöydän ääreen.
+Sen jälkeen tarkastusmääräys kolmessa vaiheessa (tehtävä, näin pelaat, ohjaus ja vihjeet).
 
 ## 5. Huumori ja yksityiskohdat
 

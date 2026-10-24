@@ -1,6 +1,5 @@
 // Pelin loppuosa: 15 minuutin aikaraja, tarkastusraportti ja loppukohtaus,
 // jossa ovi aukeaa ja Kalevi palaa lounaalta.
-import * as THREE from 'three';
 import { EVIDENCE, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
 
 const TIME_LIMIT = 15 * 60;            // sekuntia
@@ -24,7 +23,7 @@ const storyClock = (elapsed) => {
   return `${Math.floor(m / 60)}.${String(m % 60).padStart(2, '0')}`;
 };
 
-export function createFinale({ scene, views, interaction, animations, toast, onDirty, nextHint }) {
+export function createFinale({ scene, views, interaction, animations, toast, onDirty, nextHint, door }) {
   let elapsed = 0;
   let hintsUsed = 0;
   let running = false;
@@ -62,26 +61,13 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   };
   render();
 
-  // --- käytävän valo (valmiina, mutta pois päältä) -----------------------------------
-  // Valo luodaan heti latauksessa, jotta sen lisääminen ei käännä varjostimia
-  // uudelleen kesken loppukohtauksen.
-  const hallLight = new THREE.PointLight(0xffd9a0, 0, 7, 1.5);
-  hallLight.position.set(-1.2, 2.3, 3.4);
-  scene.add(hallLight);
-
+  // Ovi ja käytävän valo ovat yhteiset prologin kanssa (main.js: createDoor).
   function openDoor() {
-    const slab = scene.getObjectByName('door_slab');
-    const hinge = new THREE.Group();
-    hinge.position.set(-1.62, 0, 2.04);
-    scene.add(hinge);
-    hinge.updateMatrixWorld(true);
-    hinge.attach(slab);
     let t = 0;
     animations.push((dt) => {
       t = Math.min(1, t + dt / 2.2);
       const k = 1 - Math.pow(1 - t, 3);
-      hinge.rotation.y = 1.25 * k;
-      hallLight.intensity = 5 * k;
+      door.set(k);
       return t < 1;
     });
   }
