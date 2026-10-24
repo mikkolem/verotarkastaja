@@ -259,7 +259,7 @@ body.inspecting canvas:active { cursor: grabbing; }
   justify-content: flex-end;
   align-items: center;
   gap: 6px;
-  max-width: 60vw;
+  max-width: calc(100vw - 220px);
 }
 .hud-items { display: flex; flex-wrap: wrap; gap: 6px; }
 .hud-chip, .hud-evidence {
@@ -428,6 +428,160 @@ body.inspecting .hud { display: none; }
 }
 .login-input:focus { outline: 2px solid var(--ui-accent); outline-offset: 1px; }
 @media (prefers-reduced-motion: reduce) { .vm-wave.playing span { animation: none; } }
+
+/* Aikaraja ja raporttinappi yläkulman rivin alussa */
+.timer-box { display: flex; align-items: center; gap: 6px; }
+.timer, .timer-report {
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ui-text);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-variant-numeric: tabular-nums;
+}
+.timer.urgent { color: #ff8f80; border-color: #e0574a; animation: urgent 1s ease-in-out infinite; }
+@keyframes urgent { 50% { opacity: 0.6; } }
+.timer-report { color: #1b140c; background: var(--ui-accent); border-color: var(--ui-accent); cursor: pointer; }
+body.intro-open .timer-box,
+body.inspecting .timer-box { display: none; }
+body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
+@media (max-width: 560px) {
+  .timer, .timer-report { font-size: 14px; padding: 7px 12px; }
+}
+
+/* Tarkastusraportti ja lopputulos */
+.report { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow-y: auto; text-align: left; }
+.report h2, .result h2 { text-align: center; }
+.report-meta { margin: -6px 0 6px; text-align: center; color: var(--ui-muted); font-size: 15px; }
+.report-help { margin: 0 0 14px; font-size: 16px; line-height: 1.45; }
+.report-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.report-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  font-size: 16px;
+  line-height: 1.4;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.report-item:has(input:checked) { border-color: var(--ui-accent); background: rgba(216, 176, 106, 0.1); }
+.report-item input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--ui-accent); flex: none; }
+.report-missing { margin: 4px 0 0; font-size: 15px; color: var(--ui-muted); }
+.result .lock-card { width: min(520px, calc(100vw - 32px)); }
+.result-kicker { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ui-muted); }
+.result-story, .result-line { font-size: 17px; line-height: 1.55; text-align: left; }
+.result-line { color: var(--ui-accent); font-weight: 600; }
+.result-stats { font-size: 15px; color: var(--ui-muted); }
+/* tulos alareunassa, jotta oviaukon Kalevi näkyy taustalla */
+.result { animation: fade-in 0.8s; justify-content: flex-end; padding-bottom: 28px; background: rgba(8, 6, 4, 0.3); backdrop-filter: none; -webkit-backdrop-filter: none; }
+@keyframes fade-in { from { opacity: 0; } }
+
+/* Prologi: koko ruudun esitys ennen huonetta */
+.prologue {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  color: var(--ui-text);
+  background: radial-gradient(ellipse at 50% 35%, #2a2118 0%, #0d0b09 70%);
+  transition: opacity 0.7s;
+}
+.prologue.leaving { opacity: 0; pointer-events: none; }
+.pro-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  overflow-y: auto;
+  cursor: pointer;
+}
+.pro-slide { width: min(760px, 100%); animation: pro-in 0.8s ease-out; }
+@keyframes pro-in { from { opacity: 0; transform: translateY(12px); } }
+.pro-line { opacity: 0; animation: pro-line 0.9s ease-out forwards; }
+@keyframes pro-line { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.pro-title-slide, .pro-title { text-align: center; }
+.pro-slide.pro-title { text-align: center; }
+.pro-kicker { font-size: 15px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: var(--ui-muted); }
+h1.pro-title { margin: 14px 0 6px; font-size: clamp(56px, 12vw, 110px); font-weight: 800; letter-spacing: -0.02em; color: var(--ui-accent); }
+.pro-subtitle { font-size: 22px; color: var(--ui-muted); }
+
+.pro-text { text-align: center; }
+.pro-text .pro-line { margin: 0 0 18px; font-size: clamp(22px, 4vw, 32px); font-weight: 500; line-height: 1.35; }
+.pro-text .pro-line:first-child { color: var(--ui-accent); font-weight: 700; }
+
+.pro-paper {
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 40px 40px 34px;
+  color: #241c14;
+  background: #f1eadb;
+  border-radius: 3px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  transform: rotate(1deg);
+  font-family: 'Courier New', Courier, monospace;
+}
+.pro-paper .pro-line { margin: 0 0 18px; font-size: 19px; line-height: 1.5; }
+.pro-sign { text-align: right; font-style: italic; }
+
+.pro-character { display: flex; align-items: center; gap: 36px; }
+.portrait {
+  flex: none;
+  width: min(260px, 38vw);
+  aspect-ratio: 3 / 4;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(#3a2e22, #1a140e);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 236, 205, 0.15);
+}
+.portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.portrait-fallback { width: 100%; height: 100%; fill: #0d0b09; --tie: #8b1e16; }
+.portrait-pirjo { --tie: #d8b06a; }
+.portrait-sina { --tie: #1f4e79; }
+.pro-char-name { margin: 0; font-size: clamp(30px, 5vw, 44px); font-weight: 800; color: var(--ui-accent); }
+.pro-char-role { margin: 4px 0 18px; font-size: 17px; color: var(--ui-muted); }
+.pro-char-text .pro-line { margin: 0 0 10px; font-size: 19px; line-height: 1.45; }
+
+.pro-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px 24px;
+}
+.pro-dots { display: flex; gap: 8px; }
+.pro-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(243, 233, 216, 0.2); }
+.pro-dots span.active { background: var(--ui-accent); }
+.pro-skip, .pro-next {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.pro-skip { color: var(--ui-muted); background: transparent; border: 1px solid var(--ui-border); }
+.pro-next { color: #1b140c; background: var(--ui-accent); border: 0; min-width: 140px; }
+@media (max-width: 560px) {
+  .pro-character { flex-direction: column; gap: 20px; text-align: center; }
+  .portrait { width: min(200px, 60vw); }
+  .pro-paper { padding: 28px 22px; }
+  .pro-paper .pro-line { font-size: 17px; }
+  .pro-skip, .pro-next { padding: 10px 16px; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pro-slide, .pro-line { animation: none; opacity: 1; }
+}
 
 /* Aloitusruutu: tarkastusmääräys paperilla huoneen päällä */
 .intro {

@@ -19,6 +19,8 @@ import { VIEWS, ViewController } from './views.js';
 import { PROPS } from './props.js';
 import { addPaperItems, pagesFor } from './paper.js';
 import { Interaction } from './interact.js';
+import { createFinale } from './finale.js';
+import { runPrologue } from './prologue.js';
 import { ITEMS } from './items.js';
 import { EVIDENCE, EVIDENCE_TOTAL, game } from './game.js';
 import { codeLock, inventoryHud, passwordPrompt, readView, toast, voicemail } from './ui.js';
@@ -125,6 +127,7 @@ function showProgress(stage, value, label) {
 }
 
 let ready = false;
+let finale = null;   // aikaraja, raportti ja loppu (luodaan latauksen jälkeen)
 
 // Pöytälampun lämmin kohdevalo kuvun kohdalle, ja itse polttimo hehkumaan.
 function addLampLight(lamp) {
@@ -199,6 +202,7 @@ async function loadRoom() {
   addLampLight(scene.getObjectByName('lamp'));
   addPaperItems(scene);
   interaction.register(scene);
+  finale = createFinale({ scene, views, interaction, animations, toast, onDirty: () => { roomDirty = true; } });
   renderer.shadowMap.needsUpdate = true;
 
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
@@ -207,6 +211,17 @@ async function loadRoom() {
   showProgress('compile', 1);
 
   ready = true;
+  maybeShowIntro();
+}
+
+// Prologi pyörii latauksen aikana. Tarkastusmääräys (intro) avautuu, kun sekä
+// prologi on katsottu että huone ladattu; jos lataus on vielä kesken,
+// latausnäkymä jää näkyviin siihen asti.
+let prologueDone = false;
+// käynnistetään vasta, kun koko moduuli on alustettu (onDone voi tulla heti)
+queueMicrotask(() => runPrologue({ onDone: () => { prologueDone = true; maybeShowIntro(); } }));
+function maybeShowIntro() {
+  if (!ready || !prologueDone || started || introOpen) return;
   showIntro();
   const loading = document.getElementById('loading');
   loading.classList.add('hidden');
@@ -228,14 +243,17 @@ function showIntro() {
   const start = document.getElementById('intro-start');
   start.textContent = started ? 'Jatka tarkastusta' : 'Aloita tarkastus';
   start.focus({ preventScroll: true });   // puhelimella muistio alkaa ylhäältä
+  finale?.pause(true);
   start.addEventListener('click', () => {
     introOpen = false;
+    finale?.pause(false);
     document.body.classList.remove('intro-open');
     intro.classList.add('leaving');
     setTimeout(() => { intro.hidden = true; }, 600);
     if (!started) {
       started = true;
       hints.start();
+      finale.start();
     }
   }, { once: true });
 }
@@ -382,7 +400,7 @@ interaction.api = {
           button.disabled = true;
           button.textContent = 'Merkitty todisteeksi';
           if (game.evidence.length === EVIDENCE_TOTAL) {
-            setTimeout(() => toast('Kaikki todisteet löytyivät! Tarkastusraportti ja loppu ovat vielä työn alla.', 'success'), 4600);
+            setTimeout(() => toast('Kaikki todisteet löytyivät! Avaa tarkastusraportti oikeasta yläkulmasta.', 'success'), 4600);
           }
         } else if (page.evidence) {
           toast('Tämä on jo merkitty todisteeksi.');
@@ -410,14 +428,14 @@ const HINTS = [
   [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapista löytynyt musta kirja.'],
   [() => !game.is('laptop_open'), 'Tietokoneen salasanavihje on ”tasoitukseni”. Kuuntele puhelinvastaajan viestit.'],
   [() => !game.hasEvidence('cayman_transfer'), 'Katso Kalevin kalenteria tietokoneelta. Mitä perjantaina tapahtuu?'],
-  [() => true, 'Kaikki todisteet on löydetty. Tarkastusraportti on vielä työn alla.'],
+  [() => true, 'Kaikki todisteet on löydetty. Kokoa ne tarkastusraporttiin (oikea yläkulma) ennen kuin Kalevi palaa.'],
 ];
 const hints = {
   timer: null,
   start() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      if (!introOpen) toast(HINTS.find(([when]) => when())[1], 'hint');
+      if (!introOpen && !finale?.ending) toast(HINTS.find(([when]) => when())[1], 'hint');
       this.start();
     }, HINT_DELAY * 1000);
   },
@@ -437,6 +455,7 @@ addEventListener('resize', () => {
 if (import.meta.env.DEV) {
   window.__debug = {
     scene, camera, sun, bounce, skyLight, gtao, renderer, views, interaction,
+    get finale() { return finale; },
     // peek([x,y,z], [x,y,z]) vie kameran haluttuun paikkaan, peek() palauttaa
     peek(pos, target) {
       views.override = pos ? { pos, target } : null;
@@ -487,7 +506,8 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!ready) return;   // latausnäkymä peittää ruudun, ei piirretä turhaan
   sinceRender += dt;
-  views.locked = !!interaction.inspecting || introOpen;
+  views.locked = !!interaction.inspecting || introOpen || !!finale?.ending;
+  finale?.update(dt);
   const moving = views.moving;
   // käynnissä olevat animaatiot; valmiit poistetaan listalta
   const animating = animations.length > 0;

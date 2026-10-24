@@ -41,6 +41,7 @@ MATERIALS = {
     "leather": (0.20, 0.10, 0.06),
     "terracotta": (0.60, 0.30, 0.18),
     "drawer_inner": (0.55, 0.40, 0.25),
+    "wall_hall": (0.62, 0.60, 0.55),
     "plastic_black": (0.02, 0.02, 0.02),
 }
 # metalliset materiaalit ja niiden karheus
@@ -276,17 +277,30 @@ def build_door():
     door.box("wood_panel", DOOR_X0, DOOR_X0 + 0.03, 0, DOOR_Y1, Z1, Z1 + T)
     door.box("wood_panel", DOOR_X1 - 0.03, DOOR_X1, 0, DOOR_Y1, Z1, Z1 + T)
     door.box("wood_panel", DOOR_X0, DOOR_X1, DOOR_Y1 - 0.03, DOOR_Y1, Z1, Z1 + T)
-    # ovilevy ja peilit
-    dz0, dz1 = Z1 + 0.04, Z1 + 0.08
-    door.box("desk_wood", DOOR_X0 + 0.03, DOOR_X1 - 0.03, 0.005, DOOR_Y1 - 0.03, dz0, dz1)
-    for y0, y1 in [(0.15, 0.95), (1.1, 1.95)]:
-        door.box("desk_wood", DOOR_X0 + 0.14, DOOR_X1 - 0.14, y0, y1, dz0 - 0.012, dz0)
-    # kahva
-    hx = DOOR_X1 - 0.12
-    door.box("brass", hx - 0.025, hx + 0.025, 0.95, 1.12, dz0 - 0.008, dz0)
-    door.box("brass", hx - 0.13, hx + 0.01, 1.05, 1.07, dz0 - 0.06, dz0 - 0.04)
-    door.box("brass", hx - 0.01, hx + 0.01, 1.05, 1.07, dz0 - 0.06, dz0)
     door.build()
+
+    # Ovilevy omana objektinaan: three.js kääntää sen saranan (vasen reuna)
+    # ympäri loppukohtauksessa, kun Kalevi palaa.
+    slab = Part("door_slab")
+    dz0, dz1 = Z1 + 0.04, Z1 + 0.08
+    slab.box("desk_wood", DOOR_X0 + 0.03, DOOR_X1 - 0.03, 0.005, DOOR_Y1 - 0.03, dz0, dz1)
+    for y0, y1 in [(0.15, 0.95), (1.1, 1.95)]:
+        slab.box("desk_wood", DOOR_X0 + 0.14, DOOR_X1 - 0.14, y0, y1, dz0 - 0.012, dz0)
+    hx = DOOR_X1 - 0.12
+    slab.box("brass", hx - 0.025, hx + 0.025, 0.95, 1.12, dz0 - 0.008, dz0)
+    slab.box("brass", hx - 0.13, hx + 0.01, 1.05, 1.07, dz0 - 0.06, dz0 - 0.04)
+    slab.box("brass", hx - 0.01, hx + 0.01, 1.05, 1.07, dz0 - 0.06, dz0)
+    slab.build(bevel=0.003)
+
+    # Käytävä oven takana (näkyy vain, kun ovi aukeaa)
+    hall = Part("hallway")
+    hx0, hx1, hz0, hz1 = -2.6, 0.2, Z1 + T, Z1 + T + 2.2
+    hall.box("floor_parquet", hx0, hx1, -0.05, 0, hz0, hz1)
+    hall.box("ceiling", hx0, hx1, H, H + 0.05, hz0, hz1)
+    hall.box("wall_hall", hx0, hx1, 0, H, hz1, hz1 + 0.1)
+    hall.box("wall_hall", hx0 - 0.1, hx0, 0, H, hz0, hz1)
+    hall.box("wall_hall", hx1, hx1 + 0.1, 0, H, hz0, hz1)
+    hall.build()
 
 
 DRAWER_Y0 = 0.08 + 2 * 0.215     # ylimpien laatikoiden alareuna

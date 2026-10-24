@@ -46,6 +46,10 @@ export class ViewController {
     this.onChange?.(i);
   }
 
+  indexOf(id) {
+    return VIEWS.findIndex((v) => v.id === id);
+  }
+
   // Onko kamera liikkeessä (siirtymä kesken tai katse vielä seuraa hiirtä)?
   get moving() {
     return this.progress < 1 || this.look.distanceTo(this.mouse) > 0.002;
