@@ -24,7 +24,7 @@ export const ITEMS = {
       label: 'Nosta ruukkua',
       run: () => {
         game.give('key');
-        api.toast('Ruukun alta löytyi pieni messinkiavain!');
+        api.toast('Ruukun alta löytyi pieni messinkiavain! Se on nyt tavaroissasi.', 'item');
       },
     }]),
   },
@@ -53,7 +53,7 @@ export const ITEMS = {
         api.close();
         api.openDrawer('drawer_a');
         game.set('drawer_a_open');
-        api.toast('Laatikko A aukesi.');
+        api.toast('Laatikko A aukesi. Sisällä on papereita.', 'success');
       },
     }] : []),
   },
@@ -80,7 +80,7 @@ export const ITEMS = {
           api.close();
           api.openDrawer('drawer_b');
           game.set('drawer_b_open');
-          api.toast('Klik! Laatikko B aukesi.');
+          api.toast('Klik! Laatikko B aukesi.', 'success');
         },
       }),
     }]),

@@ -110,7 +110,21 @@ export class Interaction {
     }
     this.hovered = key;
     this.dom.style.cursor = key ? 'pointer' : '';
-    this.label.textContent = key ? ITEMS[key].title : '';
+    // nimen alle maininta, jos esineellä on juuri nyt jotain tehtävää
+    const canAct = !!key && (ITEMS[key].actions?.(this.api)?.length ?? 0) > 0;
+    this.label.replaceChildren();
+    if (key) {
+      const title = document.createElement('span');
+      title.textContent = ITEMS[key].title;
+      this.label.append(title);
+      if (canAct) {
+        const hint = document.createElement('span');
+        hint.className = 'hover-action';
+        hint.textContent = 'Klikkaa – voit tehdä jotain';
+        this.label.append(hint);
+      }
+    }
+    this.label.classList.toggle('has-action', canAct);
     this.label.classList.toggle('visible', !!key);
     this.onChange();
   }
@@ -130,7 +144,10 @@ export class Interaction {
     }
     if (this.inspecting || !this.world) return;
     this.setHover(this.keyAt(e.clientX, e.clientY));
-    this.label.style.transform = `translate(${e.clientX + 16}px, ${e.clientY + 16}px)`;
+    // nimi kursorin oikealle puolelle, tai vasemmalle jos ruudun reuna tulee vastaan
+    const w = this.label.offsetWidth;
+    const x = e.clientX + 16 + w > innerWidth - 8 ? e.clientX - 16 - w : e.clientX + 16;
+    this.label.style.transform = `translate(${x}px, ${e.clientY + 16}px)`;
   }
 
   onPointerDown(e) {
@@ -176,7 +193,11 @@ export class Interaction {
     const box = new THREE.Box3().setFromObject(holder);
     const size = box.getSize(new THREE.Vector3());
     holder.position.sub(box.getCenter(new THREE.Vector3()));
-    this.pivot.scale.setScalar(INSPECT_SIZE / Math.max(size.x, size.y, size.z));
+    // kapealla (pysty)näytöllä esine pienennetään, jotta se mahtuu leveyssuunnassa
+    const cam = this.inspectCamera;
+    const visibleWidth = 2 * cam.position.z * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * cam.aspect;
+    const fit = Math.min(INSPECT_SIZE, visibleWidth * 0.65);   // varaa tilaa alkukierrolle
+    this.pivot.scale.setScalar(fit / Math.max(size.x, size.y, size.z));
     this.pivot.position.set(0, 0.06, 0);   // hieman ylös, ettei tekstilaatikko peitä
     this.rotTarget.set(0.15, -0.35);
     this.pivot.rotation.set(0.15, -0.35, 0);
@@ -195,8 +216,9 @@ export class Interaction {
     document.getElementById('inspect-title').textContent = item.title;
     document.getElementById('inspect-text').textContent =
       typeof item.text === 'function' ? item.text() : item.text;
-    const box = document.getElementById('inspect-buttons');
-    box.replaceChildren(...(item.actions?.(this.api) ?? []).map(({ label, run }) => {
+    const actions = item.actions?.(this.api) ?? [];
+    document.getElementById('inspect-todo').hidden = actions.length === 0;
+    document.getElementById('inspect-buttons').replaceChildren(...actions.map(({ label, run }) => {
       const b = document.createElement('button');
       b.textContent = label;
       b.addEventListener('click', run);

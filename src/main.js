@@ -334,7 +334,7 @@ interaction.api = {
     readView(ITEMS[key].title, pagesFor(key), {
       onMark(page, button) {
         if (page.evidence && game.addEvidence(page.evidence)) {
-          toast(`Todiste löytyi: ${EVIDENCE[page.evidence]}`);
+          toast(`Todiste löytyi: ${EVIDENCE[page.evidence]}`, 'evidence');
           button.disabled = true;
           button.textContent = 'Merkitty todisteeksi';
         } else if (page.evidence) {
@@ -353,18 +353,18 @@ inventoryHud(game, { onHelp: () => { interaction.close(); showIntro(); } });
 // vaiheeseen, jossa pelaaja on. Jokainen edistysaskel nollaa ajastimen.
 const HINT_DELAY = 90;
 const HINTS = [
-  [() => !game.has('key'), 'Vihje: lue työpöydän muistilaput. Mitä tässä huoneessa on kirjattu taiteeksi?'],
-  [() => !game.is('drawer_a_open'), 'Vihje: messinkiavain sopii johonkin työpöydän laatikkoon.'],
-  [() => !game.hasEvidence('kiuas'), 'Vihje: lue laatikon A kuitit. Onko jokin niistä päivätty oudosti – vaikka juhannukseksi?'],
-  [() => !game.is('drawer_b_open'), 'Vihje: laske kuitit yhteen ja vertaa pääkirjan edustuskuluihin. Erotus on ”se mikä puuttuu”.'],
-  [() => true, 'Vihje: lue laatikon B paperit. Tarina jatkuu pian – loput pulmat ovat työn alla.'],
+  [() => !game.has('key'), 'Lue työpöydän muistilaput. Mitä tässä huoneessa on kirjattu taiteeksi?'],
+  [() => !game.is('drawer_a_open'), 'Messinkiavain sopii johonkin työpöydän laatikkoon.'],
+  [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit. Onko jokin niistä päivätty oudosti – vaikka juhannukseksi?'],
+  [() => !game.is('drawer_b_open'), 'Laske kuitit yhteen ja vertaa pääkirjan edustuskuluihin. Erotus on ”se mikä puuttuu”.'],
+  [() => true, 'Lue laatikon B paperit. Tarina jatkuu pian – loput pulmat ovat työn alla.'],
 ];
 const hints = {
   timer: null,
   start() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      if (!introOpen) toast(HINTS.find(([when]) => when())[1]);
+      if (!introOpen) toast(HINTS.find(([when]) => when())[1], 'hint');
       this.start();
     }, HINT_DELAY * 1000);
   },

@@ -25,11 +25,15 @@ const toastEl = el('div', 'toast');
 toastEl.setAttribute('role', 'status');
 document.body.appendChild(toastEl);
 let toastTimer;
-export function toast(message) {
-  toastEl.textContent = message;
+// type: 'info' | 'success' (avautui) | 'item' (löytyi tavara) | 'evidence' | 'hint'
+const TOAST_ICONS = { info: 'ℹ️', success: '✅', item: '🔑', evidence: '📌', hint: '💡' };
+export function toast(message, type = 'info') {
+  toastEl.className = `toast ${type}`;
+  toastEl.replaceChildren(el('span', 'toast-icon', TOAST_ICONS[type]), el('span', null, message));
+  void toastEl.offsetWidth;   // käynnistää näkyviin liukumisen uudelleen
   toastEl.classList.add('visible');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3500);
+  toastTimer = setTimeout(() => toastEl.classList.remove('visible'), type === 'hint' ? 8000 : 4500);
 }
 
 // --- tavarat ja todisteet oikeassa yläkulmassa ----------------------------------------

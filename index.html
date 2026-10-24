@@ -29,10 +29,13 @@
       <div class="inspect-card" role="dialog" aria-labelledby="inspect-title">
         <h2 id="inspect-title"></h2>
         <p id="inspect-text"></p>
-        <div class="inspect-actions">
-          <span class="inspect-hint">Vedä pyörittääksesi</span>
+        <div id="inspect-todo" class="inspect-todo" hidden>
+          <div class="inspect-todo-label">Mitä teet?</div>
           <div id="inspect-buttons" class="inspect-buttons"></div>
-          <button id="inspect-close" class="secondary">Takaisin</button>
+        </div>
+        <div class="inspect-footer">
+          <span class="inspect-hint">Vedä pyörittääksesi · Esc sulkee</span>
+          <button id="inspect-close">Takaisin</button>
         </div>
       </div>
     </div>
