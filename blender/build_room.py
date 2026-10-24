@@ -41,6 +41,8 @@ MATERIALS = {
     "leather": (0.20, 0.10, 0.06),
     "terracotta": (0.60, 0.30, 0.18),
 }
+# metalliset materiaalit ja niiden karheus
+METALS = {"brass": 0.3}
 
 
 def to_blender(v):
@@ -68,12 +70,12 @@ class Part:
             f.material_index = idx
         return faces
 
-    def box(self, mat, x0, x1, y0, y1, z0, z1, rot_x=0.0):
-        """Akselin suuntainen laatikko min/max-rajoilla (valinnainen kierto x-akselin ympäri)."""
+    def box(self, mat, x0, x1, y0, y1, z0, z1, rot_x=0.0, rot_y=0.0):
+        """Akselin suuntainen laatikko min/max-rajoilla (valinnainen kierto keskipisteen ympäri)."""
         cx, cy, cz = (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2
         sx, sy, sz = x1 - x0, y1 - y0, z1 - z0
         res = bmesh.ops.create_cube(self.bm, size=1.0)
-        rot = Matrix.Rotation(rot_x, 3, "X")
+        rot = Matrix.Rotation(rot_y, 3, "Y") @ Matrix.Rotation(rot_x, 3, "X")
         for v in res["verts"]:
             local = Vector((v.co.x * sx, v.co.y * sy, v.co.z * sz))
             local = rot @ local
@@ -93,7 +95,18 @@ class Part:
             v.co = to_blender((cx + v.co.x, cy + v.co.z, cz - v.co.y))
         self._add(res["verts"], mat)
 
-    def build(self):
+    def cylinder_x(self, mat, cy, cz, x0, x1, r, segments=32):
+        """Vaakasuora sylinteri x-akselin suuntaan (esim. kassakaapin nuppi)."""
+        res = bmesh.ops.create_cone(
+            self.bm, cap_ends=True, segments=segments, radius1=r, radius2=r, depth=x1 - x0,
+        )
+        cx = (x0 + x1) / 2
+        for v in res["verts"]:
+            v.co = to_blender((cx + v.co.z, cy + v.co.x, cz + v.co.y))
+        self._add(res["verts"], mat)
+
+    def build(self, bevel=0.0):
+        """Luo objektin. bevel > 0 pyöristää terävät reunat (näyttää heti aidommalta)."""
         uv = self.bm.loops.layers.uv.new("UVMap")
         # Laatikkoprojektio maailmankoordinaateista: 1 UV-yksikkö = 1 metri,
         # joten tekstuurit ovat samassa mittakaavassa kaikilla pinnoilla.
@@ -116,6 +129,11 @@ class Part:
             mesh.materials.append(material(m))
         obj = bpy.data.objects.new(self.name, mesh)
         bpy.context.scene.collection.objects.link(obj)
+        if bevel > 0:
+            mod = obj.modifiers.new("Bevel", "BEVEL")
+            mod.width = bevel
+            mod.segments = 2
+            mod.limit_method = "ANGLE"
         return obj
 
 
@@ -128,9 +146,9 @@ def material(name):
         m.use_nodes = True
         bsdf = m.node_tree.nodes["Principled BSDF"]
         bsdf.inputs["Base Color"].default_value = (*MATERIALS[name], 1.0)
-        if name == "brass":
+        if name in METALS:
             bsdf.inputs["Metallic"].default_value = 1.0
-            bsdf.inputs["Roughness"].default_value = 0.3
+            bsdf.inputs["Roughness"].default_value = METALS[name]
         _mat_cache[name] = m
     return _mat_cache[name]
 
@@ -287,7 +305,7 @@ def build_furniture():
             hx = (px0 + px1) / 2
             desk.box("brass", hx - 0.05, hx + 0.05, dy0 + 0.085, dy0 + 0.105, z1 - 0.012, z1 + 0.005)
     desk.box("desk_wood", x0 + 0.48, x1 - 0.48, 0.3, 0.72, z0 + 0.05, z0 + 0.08)
-    desk.build()
+    desk.build(bevel=0.006)
 
     shelf = Part("bookshelf")
     sx0, sx1, sz0, sz1, sh = X0 + 0.02, X0 + 0.38, -1.0, 1.0, 2.25
@@ -299,7 +317,7 @@ def build_furniture():
     for i in range(1, 5):
         y = 0.1 + i * (sh - 0.14) / 5
         shelf.box("desk_wood", sx0, sx1 - 0.01, y - 0.015, y + 0.015, sz0, sz1)
-    shelf.build()
+    shelf.build(bevel=0.006)
 
     side = Part("sideboard")
     bx0, bx1, bz0, bz1 = 0.3, 1.7, Z1 - 0.48, Z1 - 0.03
@@ -310,8 +328,20 @@ def build_furniture():
         dx1 = dx0 + (bx1 - bx0 - 0.06) / 3 - 0.01
         side.box("desk_wood", dx0, dx1, 0.12, 0.78, bz0 - 0.015, bz0)
         side.box("brass", (dx0 + dx1) / 2 - 0.01, (dx0 + dx1) / 2 + 0.01, 0.6, 0.7, bz0 - 0.03, bz0 - 0.015)
-    side.build()
+    side.build(bevel=0.006)
 
+
+
+def export(path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    bpy.ops.export_scene.gltf(
+        filepath=path,
+        export_format="GLB",
+        export_yup=True,
+        export_apply=True,
+        export_materials="EXPORT",
+    )
+    print(f"Valmis: {path}")
 
 
 def main():
@@ -320,15 +350,9 @@ def main():
     build_window()
     build_door()
     build_furniture()
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    bpy.ops.export_scene.gltf(
-        filepath=OUT,
-        export_format="GLB",
-        export_yup=True,
-        export_apply=True,
-        export_materials="EXPORT",
-    )
-    print(f"Valmis: {OUT}")
+    export(OUT)
 
 
-main()
+# build_props.py tuo tämän tiedoston apufunktiot, jolloin main() ei saa käynnistyä.
+if __name__ == "__main__":
+    main()

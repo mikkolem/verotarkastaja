@@ -7,6 +7,7 @@ import * as THREE from 'three';
 export const VIEWS = [
   { id: 'desk', name: 'Työpöytä', pos: [0.6, 1.6, 0.95], target: [0.6, 0.85, -0.75] },
   { id: 'window', name: 'Ikkuna', pos: [-0.9, 1.5, 0.9], target: [1.3, 1.1, -2.0] },
+  { id: 'sofa', name: 'Sohva', pos: [-0.7, 1.5, 0.15], target: [2.4, 1.0, 0.65] },
   { id: 'door', name: 'Ovi', pos: [1.0, 1.55, -0.9], target: [-0.9, 1.15, 2.0] },
   { id: 'shelf', name: 'Kirjahylly', pos: [0.7, 1.5, 0.25], target: [-2.4, 1.15, 0.0] },
 ];
@@ -35,6 +36,7 @@ export class ViewController {
   }
 
   go(i) {
+    if (this.locked) return;   // esim. esineen tarkastelun aikana
     const n = VIEWS.length;
     i = ((i % n) + n) % n;
     if (i === this.index && this.progress >= 1) return;

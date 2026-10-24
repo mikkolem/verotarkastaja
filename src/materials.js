@@ -60,5 +60,17 @@ export async function createMaterials(anisotropy, onProgress = () => {}) {
       sheen: 0.3, sheenColor: new THREE.Color(0x8a5a40),
     }),
     terracotta: new THREE.MeshStandardMaterial({ color: 0xa4593a, roughness: 0.85 }),
+
+    // erikoisesineet (blender/build_props.py)
+    plastic_black: new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.35 }),
+    plastic_grey: new THREE.MeshStandardMaterial({ color: 0x55575a, roughness: 0.5 }),
+    led_red: new THREE.MeshStandardMaterial({
+      color: 0x330000, emissive: 0xff2010, emissiveIntensity: 4, roughness: 0.3,
+    }),
+    steel_dark: new THREE.MeshStandardMaterial({ color: 0x2a2c30, roughness: 0.45, metalness: 0.9 }),
+    chrome: new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.15, metalness: 1 }),
+    binder_blue: new THREE.MeshStandardMaterial({ color: 0x1d3466, roughness: 0.55 }),
+    binder_red: new THREE.MeshStandardMaterial({ color: 0x7a1410, roughness: 0.55 }),
+    paper: new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.9 }),
   };
 }

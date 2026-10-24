@@ -16,12 +16,15 @@ import { createDust } from './dust.js';
 import { skyTexture } from './textures.js';
 import { VIEWS, ViewController } from './views.js';
 import { PROPS } from './props.js';
+import { addPaperItems } from './paper.js';
+import { Interaction } from './interact.js';
 import './style.css';
 
 // Ikkuna-aukko (vastaa blender/build_room.py:n mittoja)
 const WINDOW = { x0: -0.2, x1: 1.4, y0: 0.9, y1: 2.3, z: -2.0 };
 // Suunta kohti aurinkoa: ylhäältä, ikkunan takaa ja hieman sivusta
 const SUN_DIR = new THREE.Vector3(3, 4.5, -7).normalize();
+const DESK_HEIGHT = 0.78;
 
 // --- renderöijä ja kamera ---------------------------------------------------
 // Tarkkuus: piirretään näytön CSS-pikseleinä myös retina-näytöllä, koska
@@ -119,11 +122,34 @@ function showProgress(stage, value, label) {
 
 let ready = false;
 
+// Pöytälampun lämmin kohdevalo kuvun kohdalle, ja itse polttimo hehkumaan.
+function addLampLight(lamp) {
+  lamp.updateMatrixWorld(true);
+  let bulb;
+  lamp.traverse((o) => {
+    if (o.isMesh && o.material.name.endsWith('_light')) bulb = o;
+  });
+  if (!bulb) return;
+  bulb.material = bulb.material.clone();
+  bulb.material.emissive = new THREE.Color(0xffc27a);
+  bulb.material.emissiveIntensity = 6;
+  const center = new THREE.Box3().setFromObject(bulb).getCenter(new THREE.Vector3());
+
+  const light = new THREE.SpotLight(0xffc58a, 6, 4, 0.75, 0.6, 1.8);
+  light.position.copy(center);
+  light.target.position.set(center.x + 0.25, DESK_HEIGHT, center.z + 0.25);
+  light.castShadow = true;
+  light.shadow.mapSize.set(1024, 1024);
+  light.shadow.bias = -0.0005;
+  light.shadow.normalBias = 0.01;
+  scene.add(light, light.target);
+}
+
 async function loadRoom() {
   // Mallit latautuvat verkosta samaan aikaan, kun tekstuureja lasketaan.
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const propUrls = [...new Set(PROPS.map((p) => p.url))];
-  const urls = ['models/room.glb', ...propUrls];
+  const urls = ['models/room.glb', 'models/custom_props.glb', ...propUrls];
   const loaded = urls.map(() => 0);
   const modelPromises = urls.map((url, i) => loader.loadAsync(`${import.meta.env.BASE_URL}${url}`, (e) => {
     if (!e.total) return;
@@ -135,18 +161,21 @@ async function loadRoom() {
     showProgress('textures', p);
   });
   showProgress('textures', 1, 'Kannetaan huonekaluja…');
-  const [room, ...propModels] = await Promise.all(modelPromises);
+  const [room, custom, ...propModels] = await Promise.all(modelPromises);
   showProgress('model', 1);
 
-  room.scene.traverse((obj) => {
-    if (!obj.isMesh) return;
-    const replacement = materials[obj.material.name];
-    if (replacement) obj.material = replacement;
-    const isGlass = obj.material === materials.glass;
-    obj.castShadow = !isGlass;
-    obj.receiveShadow = !isGlass;
-  });
-  scene.add(room.scene);
+  // Blenderillä tehdyt mallit: materiaalit vaihdetaan nimen perusteella
+  for (const gltf of [room, custom]) {
+    gltf.scene.traverse((obj) => {
+      if (!obj.isMesh) return;
+      const replacement = materials[obj.material.name];
+      if (replacement) obj.material = replacement;
+      const isGlass = obj.material === materials.glass;
+      obj.castShadow = !isGlass;
+      obj.receiveShadow = !isGlass;
+    });
+    scene.add(gltf.scene);
+  }
 
   const used = new Set();
   for (const { name, url, position, rotationY = 0, scale = 1 } of PROPS) {
@@ -163,6 +192,9 @@ async function loadRoom() {
     });
     scene.add(obj);
   }
+  addLampLight(scene.getObjectByName('lamp'));
+  addPaperItems(scene);
+  interaction.register(scene);
   renderer.shadowMap.needsUpdate = true;
 
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
@@ -197,6 +229,22 @@ composer.renderToScreen = false;
 const copyQuad = new FullScreenQuad(new THREE.ShaderMaterial({
   ...CopyShader, uniforms: THREE.UniformsUtils.clone(CopyShader.uniforms), depthTest: false, depthWrite: false,
 }));
+// Tarkastelun aikana huone näkyy taustalla himmennettynä.
+const dimQuad = new FullScreenQuad(new THREE.ShaderMaterial({
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: CopyShader.vertexShader,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    varying vec2 vUv;
+    void main() {
+      vec2 d = vUv - 0.5;
+      float vignette = 1.0 - dot(d, d) * 1.2;
+      gl_FragColor = vec4(texture2D(tDiffuse, vUv).rgb * 0.28 * vignette, 1.0);
+    }
+  `,
+  depthTest: false,
+  depthWrite: false,
+}));
 let roomDirty = true;
 
 // --- kuvakulmat ja käyttöliittymä ----------------------------------------------
@@ -216,9 +264,17 @@ const setActive = (i) => {
   // reunanuolten alle sen suunnan nimi, johon nuoli kääntää
   edgePrev.querySelector('.edge-label').textContent = viewName(i - 1);
   edgeNext.querySelector('.edge-label').textContent = viewName(i + 1);
+  interaction?.clearHover();
 };
+let interaction = null;
 const views = new ViewController(camera, setActive);
 setActive(0);
+interaction = new Interaction({
+  camera,
+  dom: renderer.domElement,
+  environment: scene.environment,
+  onChange: () => { roomDirty = true; },
+});
 for (const [id, step] of [['prev', -1], ['next', 1], ['edge-prev', -1], ['edge-next', 1]]) {
   document.getElementById(id).addEventListener('click', () => views.go(views.index + step));
 }
@@ -232,7 +288,7 @@ addEventListener('resize', () => {
 
 if (import.meta.env.DEV) {
   window.__debug = {
-    scene, camera, sun, bounce, skyLight, gtao, renderer, views,
+    scene, camera, sun, bounce, skyLight, gtao, renderer, views, interaction,
     // peek([x,y,z], [x,y,z]) vie kameran haluttuun paikkaan, peek() palauttaa
     peek(pos, target) {
       views.override = pos ? { pos, target } : null;
@@ -263,12 +319,19 @@ function drawRoomAndDust() {
     composer.render();
     roomDirty = false;
   }
-  copyQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
   renderer.setRenderTarget(null);
   renderer.autoClear = false;
-  copyQuad.render(renderer);
-  renderer.clearDepth();
-  renderer.render(dustScene, camera);
+  if (interaction.inspecting) {
+    dimQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
+    dimQuad.render(renderer);
+    renderer.clearDepth();
+    renderer.render(interaction.scene, interaction.inspectCamera);
+  } else {
+    copyQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
+    copyQuad.render(renderer);
+    renderer.clearDepth();
+    renderer.render(dustScene, camera);
+  }
   renderer.autoClear = true;
 }
 
@@ -276,9 +339,12 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!ready) return;   // latausnäkymä peittää ruudun, ei piirretä turhaan
   sinceRender += dt;
+  views.locked = !!interaction.inspecting;
   const moving = views.moving;
+  const busy = interaction.busy;   // tarkasteltavaa esinettä pyöritetään
   views.update(dt);
-  if (!moving && sinceRender < IDLE_INTERVAL) return;
+  interaction.update(dt);
+  if (!moving && !busy && sinceRender < IDLE_INTERVAL) return;
 
   if (moving) {
     slowFrames = sinceRender > SLOW_FRAME ? slowFrames + 1 : Math.max(0, slowFrames - 1);

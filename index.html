@@ -24,6 +24,17 @@
       <div id="views"></div>
       <button id="next" class="arrow" aria-label="Seuraava kuvakulma">→</button>
     </nav>
+    <div id="hover-label" class="hover-label" aria-hidden="true"></div>
+    <div id="inspect" class="inspect" hidden>
+      <div class="inspect-card" role="dialog" aria-labelledby="inspect-title">
+        <h2 id="inspect-title"></h2>
+        <p id="inspect-text"></p>
+        <div class="inspect-actions">
+          <span class="inspect-hint">Vedä pyörittääksesi</span>
+          <button id="inspect-close">Takaisin</button>
+        </div>
+      </div>
+    </div>
     <div id="loading" role="status" aria-live="polite">
       <div class="loader">
         <div class="spinner" aria-hidden="true"></div>

@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "model": "/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python blender/build_room.py",
+    "model": "/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python blender/build_room.py && /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python blender/build_props.py && gltf-transform meshopt public/models/room.glb public/models/room.glb && gltf-transform meshopt public/models/custom_props.glb public/models/custom_props.glb",
     "models": "node scripts/optimize-models.mjs"
   },
   "dependencies": {

@@ -14,7 +14,8 @@ export const PROPS = [
   { name: 'plant', url: 'potted_plant_02', position: [2.0, 0, -1.5], rotationY: 0.6 },
 
   // --- seinät ---
-  { name: 'diploma', url: 'fancy_picture_frame_01', position: [1.0, 1.55, 2.0], rotationY: PI },
+  // "Vuoden veronmaksaja 1998" sohvan yläpuolella (diplomin teksti: paper.js)
+  { name: 'diploma', url: 'fancy_picture_frame_01', position: [2.5, 1.55, 0.65], rotationY: -PI / 2 },
   // kello ikkunan vasemmalla puolella, näkyy sekä työpöydän että ikkunan suunnasta
   { name: 'clock', url: 'wall_clock', position: [-1.3, 1.8, -2.0] },
 
@@ -28,11 +29,12 @@ export const PROPS = [
   { name: 'books5', url: 'book_encyclopedia_set_01', position: [SHELF_X, 0.1, 0.75], rotationY: PI / 2 },
 
   // --- työpöytä ---
-  { name: 'lamp', url: 'desk_lamp_arm_01', position: [-0.12, DESK_TOP + 0.088, -0.92], rotationY: 0.5 },
+  // lampun varsi kurottaa pöydän yli (valo syttyy main.js:ssä lampun kuvun kohdalle)
+  { name: 'lamp', url: 'desk_lamp_arm_01', position: [-0.12, DESK_TOP + 0.088, -0.92], rotationY: 0.5 + PI },
   { name: 'laptop', url: 'classic_laptop', position: [0.95, DESK_TOP, -0.72], rotationY: PI, scale: 0.55 },
   { name: 'photo', url: 'standing_picture_frame_01', position: [1.38, DESK_TOP, -0.95], rotationY: 2.4 },
   { name: 'notepads', url: 'office_notepads', position: [0.3, DESK_TOP, -0.45], rotationY: 0.15, scale: 0.4 },
-  { name: 'stapler', url: 'vintage_stapler', position: [1.25, DESK_TOP + 0.013, -0.35], rotationY: 0.4 },
+  { name: 'stapler', url: 'vintage_stapler', position: [1.3, DESK_TOP + 0.013, -0.24], rotationY: 0.4 },
   { name: 'glasses', url: 'round_spectacles', position: [0.6, DESK_TOP + 0.023, -0.35], rotationY: -0.6 },
 
   // --- sivupöytä oven vieressä ---
