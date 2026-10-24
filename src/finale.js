@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { EVIDENCE, EVIDENCE_TOTAL, game } from './game.js';
 
 const TIME_LIMIT = 15 * 60;            // sekuntia
+const HINT_COST = 60;                  // vihje vähentää aikaa näin monta sekuntia
 const START_CLOCK = 12 * 60 + 3;       // tarinan kellonaika alussa (12.03)
 const WARNINGS = [
   [5 * 60, 'Käytävältä kuuluu askelia… ei, se oli vain siivooja. Viisi minuuttia jäljellä.'],
@@ -58,8 +59,9 @@ function silhouetteTexture() {
   return t;
 }
 
-export function createFinale({ scene, views, interaction, animations, toast, onDirty }) {
+export function createFinale({ scene, views, interaction, animations, toast, onDirty, nextHint }) {
   let elapsed = 0;
+  let hintsUsed = 0;
   let running = false;
   let warned = 0;
   let ending = false;
@@ -70,7 +72,17 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   const reportButton = el('button', 'timer-report', 'Tarkastusraportti');
   reportButton.addEventListener('click', () => openReport());
   const box = el('div', 'timer-box');
-  box.append(timer, reportButton);
+  // Vihje maksaa aikaa: näytetään vihje nykyiseen vaiheeseen ja kello hyppää eteenpäin.
+  const hintButton = el('button', 'timer-hint', `💡 Vihje (−${HINT_COST / 60} min)`);
+  hintButton.title = 'Näytä vihje seuraavaan vaiheeseen. Maksaa minuutin aikaa.';
+  hintButton.addEventListener('click', () => {
+    if (ending || !running) return;
+    hintsUsed++;
+    elapsed += HINT_COST;
+    render();
+    toast(nextHint(), 'hint');
+  });
+  box.append(timer, hintButton, reportButton);
   // yläkulman tietojen (tavarat, todisteet, ohjeet) eteen samalle riville
   document.querySelector('.hud').prepend(box);
   const render = () => {
@@ -200,7 +212,12 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
       el('h2', null, `Arvosana: ${title}`),
       el('p', 'result-story', story),
       el('p', 'result-line', line),
-      el('p', 'result-stats', `Todisteita raportissa ${correct}/${EVIDENCE_TOTAL}${wrong ? ` · turhia havaintoja ${wrong}` : ''} · aikaa kului ${fmt(Math.min(elapsed, TIME_LIMIT))}`),
+      el('p', 'result-stats', [
+        `Todisteita raportissa ${correct}/${EVIDENCE_TOTAL}`,
+        wrong ? `turhia havaintoja ${wrong}` : null,
+        `aikaa kului ${fmt(Math.min(elapsed, TIME_LIMIT))}`,
+        `vihjeitä ${hintsUsed}`,
+      ].filter(Boolean).join(' · ')),
     );
     const again = el('button', 'lock-open', 'Pelaa uudelleen');
     again.addEventListener('click', () => location.reload());

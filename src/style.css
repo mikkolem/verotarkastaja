@@ -248,6 +248,8 @@ body.inspecting canvas:active { cursor: grabbing; }
 .toast.success { border-left-color: #7fbf6a; }
 .toast.evidence { border-left-color: #e0574a; }
 .toast.hint { border-left-color: #7aa7e0; }
+/* kapealla näytöllä yläkulman rivi jakautuu kahdeksi, joten ilmoitus alemmas */
+@media (max-width: 900px) { .toast { top: 112px; } }
 
 /* Tavarat ja todisteet oikeassa yläkulmassa */
 .hud {
@@ -431,7 +433,7 @@ body.inspecting .hud { display: none; }
 
 /* Aikaraja ja raporttinappi yläkulman rivin alussa */
 .timer-box { display: flex; align-items: center; gap: 6px; }
-.timer, .timer-report {
+.timer, .timer-hint, .timer-report {
   padding: 8px 14px;
   font: inherit;
   font-size: 16px;
@@ -446,12 +448,14 @@ body.inspecting .hud { display: none; }
 }
 .timer.urgent { color: #ff8f80; border-color: #e0574a; animation: urgent 1s ease-in-out infinite; }
 @keyframes urgent { 50% { opacity: 0.6; } }
+.timer-hint { cursor: pointer; color: #bcd3f2; border-color: rgba(122, 167, 224, 0.6); }
+.timer-hint:hover { background: rgba(122, 167, 224, 0.15); }
 .timer-report { color: #1b140c; background: var(--ui-accent); border-color: var(--ui-accent); cursor: pointer; }
 body.intro-open .timer-box,
 body.inspecting .timer-box { display: none; }
 body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
 @media (max-width: 560px) {
-  .timer, .timer-report { font-size: 14px; padding: 7px 12px; }
+  .timer, .timer-hint, .timer-report { font-size: 14px; padding: 7px 12px; }
 }
 
 /* Tarkastusraportti ja lopputulos */
@@ -762,5 +766,5 @@ body.intro-open .title { display: none; }
   .nav button { padding: 9px 11px; font-size: 15px; }
   .inspect-buttons button { flex-basis: 100%; }
   .inspect-hint { font-size: 13px; }
-  .toast { top: 64px; font-size: 16px; }
+  .toast { top: auto; bottom: 84px; font-size: 16px; }
 }

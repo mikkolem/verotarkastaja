@@ -202,7 +202,7 @@ async function loadRoom() {
   addLampLight(scene.getObjectByName('lamp'));
   addPaperItems(scene);
   interaction.register(scene);
-  finale = createFinale({ scene, views, interaction, animations, toast, onDirty: () => { roomDirty = true; } });
+  finale = createFinale({ scene, views, interaction, animations, toast, nextHint, onDirty: () => { roomDirty = true; } });
   renderer.shadowMap.needsUpdate = true;
 
   // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
@@ -414,9 +414,9 @@ interaction.api = {
 game.onChange(() => interaction.refresh());
 inventoryHud(game, { onHelp: () => { interaction.close(); showIntro(); } });
 
-// Vihjeet: jos peli ei etene HINT_DELAY sekuntiin, näytetään vihje siihen
-// vaiheeseen, jossa pelaaja on. Jokainen edistysaskel nollaa ajastimen.
-const HINT_DELAY = 90;
+// Vihjeet pyydetään yläkulman napista (maksaa aikaa, ks. finale.js). Jos peli ei
+// etene NUDGE_DELAY sekuntiin, muistutetaan napista – vihjettä ei anneta ilmaiseksi.
+const NUDGE_DELAY = 90;
 const HINTS = [
   [() => !game.has('key'), 'Lue työpöydän muistilaput. Mitä tässä huoneessa on kirjattu taiteeksi?'],
   [() => !game.is('drawer_a_open'), 'Messinkiavain sopii johonkin työpöydän laatikkoon.'],
@@ -430,14 +430,15 @@ const HINTS = [
   [() => !game.hasEvidence('cayman_transfer'), 'Katso Kalevin kalenteria tietokoneelta. Mitä perjantaina tapahtuu?'],
   [() => true, 'Kaikki todisteet on löydetty. Kokoa ne tarkastusraporttiin (oikea yläkulma) ennen kuin Kalevi palaa.'],
 ];
+const nextHint = () => HINTS.find(([when]) => when())[1];
 const hints = {
   timer: null,
   start() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      if (!introOpen && !finale?.ending) toast(HINTS.find(([when]) => when())[1], 'hint');
+      if (!introOpen && !finale?.ending) toast('Jumissa? Voit pyytää vihjeen yläkulmasta – se maksaa minuutin aikaa.', 'hint');
       this.start();
-    }, HINT_DELAY * 1000);
+    }, NUDGE_DELAY * 1000);
   },
 };
 game.onChange(() => { if (started) hints.start(); });
