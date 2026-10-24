@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laatikko B</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="title">
+      <h1>Laatikko B</h1>
+      <p>Kivi &amp; Kumppanit Oy · toimitusjohtajan työhuone</p>
+    </div>
+    <button id="edge-prev" class="edge left" aria-label="Käänny vasemmalle">
+      <svg viewBox="0 0 24 48" aria-hidden="true"><path d="M18 4 L6 24 L18 44" /></svg>
+      <span class="edge-label"></span>
+    </button>
+    <button id="edge-next" class="edge right" aria-label="Käänny oikealle">
+      <svg viewBox="0 0 24 48" aria-hidden="true"><path d="M6 4 L18 24 L6 44" /></svg>
+      <span class="edge-label"></span>
+    </button>
+    <nav class="nav">
+      <button id="prev" class="arrow" aria-label="Edellinen kuvakulma">←</button>
+      <div id="views"></div>
+      <button id="next" class="arrow" aria-label="Seuraava kuvakulma">→</button>
+    </nav>
+    <div id="loading" role="status" aria-live="polite">
+      <div class="loader">
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="loader-title">Laatikko B</div>
+        <div id="loading-label" class="loader-label">Ladataan työhuonetta…</div>
+        <div class="loader-bar"><div id="loading-fill" class="loader-fill"></div></div>
+        <div id="loading-pct" class="loader-pct">0 %</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

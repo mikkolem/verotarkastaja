@@ -1,0 +1,189 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+import { createMaterials } from './materials.js';
+import { createDust } from './dust.js';
+import { skyTexture } from './textures.js';
+import { VIEWS, ViewController } from './views.js';
+import './style.css';
+
+// Ikkuna-aukko (vastaa blender/build_room.py:n mittoja)
+const WINDOW = { x0: -0.2, x1: 1.4, y0: 0.9, y1: 2.3, z: -2.0 };
+// Suunta kohti aurinkoa: ylhäältä, ikkunan takaa ja hieman sivusta
+const SUN_DIR = new THREE.Vector3(3, 4.5, -7).normalize();
+
+// --- renderöijä ja kamera ---------------------------------------------------
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.toneMappingExposure = 1.1;
+document.getElementById('app').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.05, 60);
+
+// Kapealla (pysty)näytöllä levennetään näkökenttää, jotta vaakasuunnassa
+// näkyy aina suunnilleen sama alue.
+function fitCamera() {
+  const aspect = innerWidth / innerHeight;
+  const minHorizontal = THREE.MathUtils.degToRad(72);
+  const vertical = 2 * Math.atan(Math.tan(minHorizontal / 2) / aspect);
+  camera.fov = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(vertical), 55, 85);
+  camera.aspect = aspect;
+  camera.updateProjectionMatrix();
+}
+fitCamera();
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.06;
+
+// --- valot --------------------------------------------------------------------
+const sun = new THREE.DirectionalLight(0xfff0d8, 7);
+sun.target.position.set(0.6, 0.8, -0.6);
+sun.position.copy(sun.target.position).addScaledVector(SUN_DIR, 12);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -4.5, right: 4.5, top: 4.5, bottom: -4.5, near: 4, far: 22 });
+sun.shadow.bias = -0.0002;
+sun.shadow.normalBias = 0.012;
+scene.add(sun, sun.target);
+
+// Ikkunasta tuleva pehmeä taivaanvalo
+RectAreaLightUniformsLib.init();
+const skyLight = new THREE.RectAreaLight(0xcfe0ff, 3, WINDOW.x1 - WINDOW.x0, WINDOW.y1 - WINDOW.y0);
+skyLight.position.set((WINDOW.x0 + WINDOW.x1) / 2, (WINDOW.y0 + WINDOW.y1) / 2, WINDOW.z + 0.05);
+skyLight.lookAt(skyLight.position.x, skyLight.position.y, 0);
+scene.add(skyLight);
+
+// Auringon heijastus lattiasta ylöspäin (korvaa epäsuoraa valoa).
+// Pinta-alavalo ei tee terävää kiiltopistettä kuten pistevalo.
+const bounce = new THREE.RectAreaLight(0xffb27a, 0.3, 2.4, 2.0);
+bounce.position.set(0.8, 0.05, -0.9);
+bounce.lookAt(0.8, 2, -0.9);
+scene.add(bounce);
+scene.add(new THREE.HemisphereLight(0xc2d3ef, 0x4a3020, 0.35));
+
+// Taivas ikkunan takana
+const sky = new THREE.Mesh(
+  new THREE.PlaneGeometry(40, 20),
+  new THREE.MeshBasicMaterial({ map: skyTexture(), color: new THREE.Color(2.4, 2.4, 2.4) }),
+);
+sky.position.set(0.6, 4, -9);
+scene.add(sky);
+
+// --- huone ---------------------------------------------------------------------
+const dust = createDust({
+  box: new THREE.Box3(new THREE.Vector3(-0.6, 0.2, -1.95), new THREE.Vector3(1.9, 2.5, 0.8)),
+  sunDir: SUN_DIR,
+  window: WINDOW,
+});
+scene.add(dust);
+
+// Latauksen vaiheet ja niiden osuus edistymispalkista
+const progress = { textures: 0, model: 0, compile: 0 };
+const WEIGHTS = { textures: 0.7, model: 0.2, compile: 0.1 };
+function showProgress(stage, value, label) {
+  progress[stage] = value;
+  const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + WEIGHTS[k] * progress[k], 0);
+  const pct = Math.round(total * 100);
+  document.getElementById('loading-fill').style.width = `${pct}%`;
+  document.getElementById('loading-pct').textContent = `${pct} %`;
+  if (label) document.getElementById('loading-label').textContent = label;
+}
+
+async function loadRoom() {
+  // Malli latautuu verkosta samaan aikaan, kun tekstuureja lasketaan.
+  const modelPromise = new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/room.glb`, (e) => {
+    if (e.total) showProgress('model', e.loaded / e.total);
+  });
+  showProgress('textures', 0, 'Lakataan puupintoja…');
+  const materials = await createMaterials(renderer.capabilities.getMaxAnisotropy(), (p) => {
+    showProgress('textures', p);
+  });
+  showProgress('textures', 1, 'Kannetaan huonekaluja…');
+  const gltf = await modelPromise;
+  showProgress('model', 1);
+
+  gltf.scene.traverse((obj) => {
+    if (!obj.isMesh) return;
+    const replacement = materials[obj.material.name];
+    if (replacement) obj.material = replacement;
+    const isGlass = obj.material === materials.glass;
+    obj.castShadow = !isGlass;
+    obj.receiveShadow = !isGlass;
+  });
+  scene.add(gltf.scene);
+
+  // Varjostinohjelmat käännetään etukäteen, ettei ensimmäinen kuva nyi.
+  showProgress('model', 1, 'Avataan sälekaihtimia…');
+  await renderer.compileAsync(scene, camera);
+  showProgress('compile', 1);
+
+  const loading = document.getElementById('loading');
+  loading.classList.add('hidden');
+  setTimeout(() => loading.remove(), 1000);
+}
+loadRoom();
+
+// --- jälkikäsittely --------------------------------------------------------------
+const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THREE.HalfFloatType, samples: 4 });
+const composer = new EffectComposer(renderer, target);
+composer.addPass(new RenderPass(scene, camera));
+const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 16 });
+gtao.blendIntensity = 0.9;
+composer.addPass(gtao);
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
+composer.addPass(new OutputPass());
+
+// --- kuvakulmat ja käyttöliittymä ----------------------------------------------
+const nav = document.getElementById('views');
+const buttons = VIEWS.map((v, i) => {
+  const b = document.createElement('button');
+  b.textContent = v.name;
+  b.addEventListener('click', () => views.go(i));
+  nav.appendChild(b);
+  return b;
+});
+const edgePrev = document.getElementById('edge-prev');
+const edgeNext = document.getElementById('edge-next');
+const viewName = (i) => VIEWS[(i + VIEWS.length) % VIEWS.length].name;
+const setActive = (i) => {
+  buttons.forEach((b, j) => b.classList.toggle('active', i === j));
+  // reunanuolten alle sen suunnan nimi, johon nuoli kääntää
+  edgePrev.querySelector('.edge-label').textContent = viewName(i - 1);
+  edgeNext.querySelector('.edge-label').textContent = viewName(i + 1);
+};
+const views = new ViewController(camera, setActive);
+setActive(0);
+for (const [id, step] of [['prev', -1], ['next', 1], ['edge-prev', -1], ['edge-next', 1]]) {
+  document.getElementById(id).addEventListener('click', () => views.go(views.index + step));
+}
+
+addEventListener('resize', () => {
+  fitCamera();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+});
+
+if (import.meta.env.DEV) window.__debug = { scene, camera, sun, bounce, skyLight, gtao, renderer, views };
+
+// --- silmukka --------------------------------------------------------------------
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.1);
+  views.update(dt);
+  dust.userData.update(clock.elapsedTime);
+  composer.render();
+});
