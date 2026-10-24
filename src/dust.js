@@ -40,8 +40,11 @@ export function createDust({ count = 900, box, sunDir, window: win }) {
         float k = (uWindowZ - p.z) / uSunDir.z;
         vec2 hit = p.xy + uSunDir.xy * k;
         float inside = step(uWindow.x, hit.x) * step(hit.x, uWindow.y) * step(uWindow.z, hit.y) * step(hit.y, uWindow.w);
+        // Pöly piirretään valmiin kuvan päälle ilman syvyystietoa, joten
+        // työpöydän sisään jäävät hiukkaset piilotetaan tässä erikseen.
+        float inDesk = step(-0.32, p.x) * step(p.x, 1.52) * step(p.y, 0.8) * step(-1.07, p.z) * step(p.z, -0.13);
         float twinkle = 0.6 + 0.4 * sin(uTime * (1.0 + seed * 2.0) + seed * 30.0);
-        vLight = mix(0.04, 1.0, inside * step(0.0, k)) * twinkle;
+        vLight = mix(0.006, 0.8, inside * step(0.0, k)) * twinkle * (1.0 - inDesk);
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         gl_PointSize = (2.0 + seed * 3.0) * uPixelRatio * (1.0 / -mv.z);
         gl_Position = projectionMatrix * mv;
@@ -52,7 +55,10 @@ export function createDust({ count = 900, box, sunDir, window: win }) {
       void main() {
         float d = length(gl_PointCoord - 0.5);
         float a = smoothstep(0.5, 0.0, d);
-        gl_FragColor = vec4(vec3(1.0, 0.9, 0.75) * vLight * a * 1.6, 1.0);
+        vec3 linear = vec3(1.0, 0.9, 0.75) * vLight * a * 1.6;
+        // Piirretään suoraan valmiin (sRGB-muotoisen) kuvan päälle, joten
+        // muunnos tehdään tässä itse eikä jälkikäsittelyssä.
+        gl_FragColor = vec4(pow(min(linear, vec3(1.0)), vec3(1.0 / 2.2)), 1.0);
       }
     `,
   });

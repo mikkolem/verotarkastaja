@@ -7,6 +7,8 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
+import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 
 import { createMaterials } from './materials.js';
 import { createDust } from './dust.js';
@@ -91,12 +93,15 @@ sky.position.set(0.6, 4, -9);
 scene.add(sky);
 
 // --- huone ---------------------------------------------------------------------
+// Pöly on omassa näkymässään: se piirretään valmiin huonekuvan päälle, jolloin
+// raskasta huonetta ei tarvitse piirtää uudelleen pelkän pölyn takia.
+const dustScene = new THREE.Scene();
 const dust = createDust({
   box: new THREE.Box3(new THREE.Vector3(-0.6, 0.2, -1.95), new THREE.Vector3(1.9, 2.5, 0.8)),
   sunDir: SUN_DIR,
   window: WINDOW,
 });
-scene.add(dust);
+dustScene.add(dust);
 
 // Latauksen vaiheet ja niiden osuus edistymispalkista
 const progress = { textures: 0, model: 0, compile: 0 };
@@ -161,6 +166,14 @@ composer.addPass(new OutputPass());
 // Kaikki välivaiheet samaan kokoon renderöijän tarkkuuden kanssa
 composer.setPixelRatio(pixelRatio);
 composer.setSize(innerWidth, innerHeight);
+// Valmis huonekuva jää composerin puskuriin, josta se kopioidaan ruudulle
+// joka kuvassa. Huone piirretään uudelleen vain, kun kamera liikkuu.
+composer.renderToScreen = false;
+// Kopio ei saa kirjoittaa syvyyttä, muuten se peittäisi pölyn kokonaan.
+const copyQuad = new FullScreenQuad(new THREE.ShaderMaterial({
+  ...CopyShader, uniforms: THREE.UniformsUtils.clone(CopyShader.uniforms), depthTest: false, depthWrite: false,
+}));
+let roomDirty = true;
 
 // --- kuvakulmat ja käyttöliittymä ----------------------------------------------
 const nav = document.getElementById('views');
@@ -190,6 +203,7 @@ addEventListener('resize', () => {
   fitCamera();
   renderer.setSize(innerWidth, innerHeight);
   composer.setSize(innerWidth, innerHeight);
+  roomDirty = true;
 });
 
 if (import.meta.env.DEV) window.__debug = { scene, camera, sun, bounce, skyLight, gtao, renderer, views };
@@ -208,6 +222,21 @@ function lowerQuality() {
   pixelRatio = Math.max(MIN_PIXEL_RATIO, pixelRatio - 0.25);
   renderer.setPixelRatio(pixelRatio);
   composer.setPixelRatio(pixelRatio);
+  roomDirty = true;
+}
+
+function drawRoomAndDust() {
+  if (roomDirty) {
+    composer.render();
+    roomDirty = false;
+  }
+  copyQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
+  renderer.setRenderTarget(null);
+  renderer.autoClear = false;
+  copyQuad.render(renderer);
+  renderer.clearDepth();
+  renderer.render(dustScene, camera);
+  renderer.autoClear = true;
 }
 
 renderer.setAnimationLoop(() => {
@@ -226,6 +255,7 @@ renderer.setAnimationLoop(() => {
     }
   }
   sinceRender = 0;
+  if (moving) roomDirty = true;
   dust.userData.update(clock.elapsedTime);
-  composer.render();
+  drawRoomAndDust();
 });
