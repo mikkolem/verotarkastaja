@@ -83,12 +83,12 @@ const SCENES = {
     <rect width="1600" height="1000" fill="#c9b79a"/>
     <rect y="700" width="1600" height="300" fill="#8f7a5c"/>
     <rect x="100" y="80" width="1400" height="40" fill="#5a4a38" stroke="#1b140c" stroke-width="8"/>
-    <rect x="160" y="160" width="420" height="560" fill="#9fc4d8" stroke="#1b140c" stroke-width="12" opacity="0.9"/>
-    <line x1="370" y1="160" x2="370" y2="720" stroke="#1b140c" stroke-width="10"/>
+    <rect x="160" y="270" width="420" height="450" fill="#9fc4d8" stroke="#1b140c" stroke-width="12" opacity="0.9"/>
+    <line x1="370" y1="270" x2="370" y2="720" stroke="#1b140c" stroke-width="10"/>
     <rect x="330" y="400" width="18" height="90" fill="#d4af5a" stroke="#1b140c" stroke-width="5"/>
     <rect x="392" y="400" width="18" height="90" fill="#d4af5a" stroke="#1b140c" stroke-width="5"/>
-    <rect x="130" y="120" width="480" height="60" fill="#1d3466" stroke="#1b140c" stroke-width="8"/>
-    <text x="370" y="163" font-family="Georgia, serif" font-weight="700" font-size="34" fill="#f3ecdc" text-anchor="middle">KIVI &amp; KUMPPANIT OY</text>
+    <rect x="130" y="200" width="480" height="60" fill="#1d3466" stroke="#1b140c" stroke-width="8"/>
+    <text x="370" y="243" font-family="Georgia, serif" font-weight="700" font-size="34" fill="#f3ecdc" text-anchor="middle">KIVI &amp; KUMPPANIT OY</text>
     <rect x="700" y="420" width="420" height="300" fill="#7a1410" stroke="#1b140c" stroke-width="8" rx="20"/>
     <rect x="720" y="380" width="380" height="60" fill="#9a2a20" stroke="#1b140c" stroke-width="8" rx="20"/>
     <circle cx="1380" cy="330" r="110" fill="#f3ecdc" stroke="#1b140c" stroke-width="10"/>
