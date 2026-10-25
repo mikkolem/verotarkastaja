@@ -141,7 +141,7 @@ function showProgress(stage, value, label) {
 
 let ready = false;
 let finale = null;   // aikaraja, raportti ja loppu (luodaan latauksen jälkeen)
-let roomReady;       // täyttyy, kun huone on ladattu (prologin kohtaus 2 odottaa tätä)
+let roomReady;       // täyttyy, kun huone on ladattu (prologin ovisiirtymä odottaa tätä)
 const whenRoomReady = new Promise((resolve) => { roomReady = resolve; });
 
 // Ovi saranassaan ja käytävän valo. Prologi avaa oven, kun kamera ajaa sisään,
@@ -297,25 +297,20 @@ async function loadRoom() {
   showProgress('compile', 1);
 
   ready = true;
+  roomReady();
   // Latausnäkymä pois: prologi (tai tarkastusmääräys) peittää ruudun tästä eteenpäin.
   const loading = document.getElementById('loading');
   loading.classList.add('hidden');
   setTimeout(() => loading.remove(), 1000);
-  roomReady();
   maybeShowIntro();
 }
 
-// --- prologin kohtaus 2: kamera käytävästä huoneeseen ----------------------------
-// Prologi (prologue.js) kutsuu update(t) joka kuvassa, t = sekuntia kohtauksen alusta.
-// 0–9,5 s kamera lähestyy ovea, 9,5–11,5 s ovi aukeaa, 11–14 s kamera ajaa sisään
-// ja laskeutuu työpöytänäkymään, josta peli alkaa.
-// Avainasennot ja niiden ajat sekunteina; väli interpoloidaan pehmeästi.
+// --- prologin loppu: ovi aukeaa ja kamera ajaa työpöydälle (noin 4 s) -------------
+// Prologi (prologue.js) kutsuu update(t) joka kuvassa, t = sekuntia siirtymän alusta.
 const KEYS = [
-  [0, { pos: [-0.3, 1.5, 4.2], target: [-1.3, 1.2, 2.06] }],       // käytävän perällä, viistosti
-  [9.5, { pos: [-0.95, 1.5, 3.15], target: [-1.25, 1.15, 2.06] }], // oven edessä
-  [11.5, { pos: [-0.45, 1.5, 2.9], target: [-1.3, 1.1, 1.2] }],    // ovi auennut (levy kääntyy käytävään), katse sisään
-  [12.8, { pos: [-1.05, 1.55, 1.5], target: [0.2, 1.0, -0.5] }],   // oviaukossa
-  [14, { pos: [...VIEWS[0].pos], target: [...VIEWS[0].target] }],  // työpöytänäkymä
+  [0, { pos: [-0.45, 1.5, 2.9], target: [-1.3, 1.1, 1.2] }],      // käytävässä, ovi raollaan
+  [1.8, { pos: [-1.05, 1.55, 1.5], target: [0.2, 1.0, -0.5] }],   // oviaukossa
+  [4, { pos: [...VIEWS[0].pos], target: [...VIEWS[0].target] }],  // työpöytänäkymä
 ];
 const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 function poseAt(t) {
@@ -334,12 +329,11 @@ const cinematic = {
   duration: KEYS[KEYS.length - 1][0],
   update(t) {
     views.override = poseAt(t);
-    // ovi on raollaan alusta asti, aukeaa 9,5–11,5 s
     door?.hall(3.5);
-    door?.set(t < 9.5 ? 0.07 : THREE.MathUtils.clamp(0.07 + 0.93 * (1 - Math.pow(1 - (t - 9.5) / 2, 3)), 0, 1));
+    // ovi raollaan alussa, aukeaa 0,2–1,8 s
+    door?.set(THREE.MathUtils.clamp(0.07 + 0.93 * (1 - Math.pow(1 - (t - 0.2) / 1.6, 3)), 0.07, 1));
     roomDirty = true;
   },
-  // kohtaus ohi tai ohitettu: kamera työpöydälle, ovi kiinni
   finish() {
     views.override = null;
     door?.hall(0);
