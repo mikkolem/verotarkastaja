@@ -12,15 +12,18 @@ export const VIEWS = [
   { id: 'shelf', name: 'Kirjahylly', pos: [0.7, 1.5, 0.25], target: [-2.4, 1.15, 0.0] },
 ];
 
+// Peli alkaa Ikkuna-näkymästä: siitä näkyy sekä työpöytä että ikkuna.
+export const START_VIEW = 1;
+
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export class ViewController {
   constructor(camera, onChange) {
     this.camera = camera;
     this.onChange = onChange;
-    this.index = 0;
-    this.pos = new THREE.Vector3(...VIEWS[0].pos);
-    this.target = new THREE.Vector3(...VIEWS[0].target);
+    this.index = START_VIEW;
+    this.pos = new THREE.Vector3(...VIEWS[START_VIEW].pos);
+    this.target = new THREE.Vector3(...VIEWS[START_VIEW].target);
     this.from = { pos: this.pos.clone(), target: this.target.clone() };
     this.progress = 1;
     this.mouse = new THREE.Vector2();

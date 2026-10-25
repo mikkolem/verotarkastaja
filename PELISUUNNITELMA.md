@@ -39,7 +39,7 @@ Toimitusjohtajan työhuone iltapäivällä. Aurinko siivilöityy sälekaihtimien
 pölyhiukkaset leijuvat valossa ja aurinko laskee pelin kuluessa. Puupaneelit, nahkasohva ja
 viskikarahvi kertovat, että rahaa on. Ei ääniä.
 
-Pelaaja liikkuu viiden kiinteän kuvakulman välillä (järjestys myötäpäivään):
+Pelaaja liikkuu viiden kiinteän kuvakulman välillä (järjestys myötäpäivään). Peli alkaa Ikkuna-näkymästä, josta näkyy sekä työpöytä että ikkuna:
 
 | Kuvakulma | Mitä siellä on |
 |---|---|
@@ -71,6 +71,8 @@ pelikerralla (`SECRETS`, src/game.js).
 Tilinpäätös-mapissa on tase (taide-esineet 12 000 €, 1 kpl viherkasvi; nitojan poistoaika 25 v).
 
 **Vihjeet** (src/main.js, HINTS): jokainen nimeää kohteen (mikä lukko tai esine), kuvakulman ja mitä tehdään; Pirjoa ei mainita.
+
+**Ilmoitukset ja tauko:** tärkeät ilmoitukset (vihje, todiste, löydetty tavara) näkyvät yläreunan keskellä; vihje korostetaan sinisellä kehyksellä ja otsikolla. Sivutiedotteet (ajan varoitukset, muistutukset, vastaajan valo) ovat pieniä vasemmassa yläkulmassa. Vihjeen hinta näkyy kellon alla ”−5:00”. Tauko-nappi (tai P) pysäyttää kellon ja peittää ruudun, kunnes pelaaja jatkaa. Tietokoneen salasana näkyy kirjoitettaessa.
 
 **Pirjo reagoi:** jokaisesta todisteesta puhelinvastaajaan tulee Pirjolta uusi viesti ja
 merkkivalo syttyy uudelleen.

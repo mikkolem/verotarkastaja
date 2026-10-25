@@ -17,7 +17,7 @@ import { createDust } from './dust.js';
 import { createShafts } from './shafts.js';
 import { addDecor } from './decor.js';
 import { skyTexture } from './textures.js';
-import { VIEWS, ViewController } from './views.js';
+import { START_VIEW, VIEWS, ViewController } from './views.js';
 import { PROPS } from './props.js';
 import { addPaperItems, pagesFor, shredderCanvas } from './paper.js';
 import { Interaction } from './interact.js';
@@ -313,7 +313,7 @@ async function loadRoom() {
 const KEYS = [
   [0, { pos: [-0.45, 1.5, 2.9], target: [-1.3, 1.1, 1.2] }],      // käytävässä, ovi raollaan
   [1.8, { pos: [-1.05, 1.55, 1.5], target: [0.2, 1.0, -0.5] }],   // oviaukossa
-  [4, { pos: [...VIEWS[0].pos], target: [...VIEWS[0].target] }],  // työpöytänäkymä
+  [4, { pos: [...VIEWS[START_VIEW].pos], target: [...VIEWS[START_VIEW].target] }],  // aloitusnäkymä (Ikkuna)
 ];
 const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 function poseAt(t) {
@@ -503,7 +503,7 @@ const setActive = (i) => {
 };
 let interaction = null;
 const views = new ViewController(camera, setActive);
-setActive(0);
+setActive(START_VIEW);
 interaction = new Interaction({
   camera,
   dom: renderer.domElement,
@@ -578,7 +578,7 @@ interaction.api = {
   // silppurin suikaleet järjestykseen (ui.js); onDone kun lasku on koossa
   shred(onDone) {
     interaction.close();
-    shredPuzzle({ canvas: shredderCanvas(), strips: 5, onDone, onCancel: () => toast('Suikaleet jäivät säiliöön. Voit palata niihin myöhemmin.') });
+    shredPuzzle({ canvas: shredderCanvas(), strips: 5, onDone, onCancel: () => toast('Suikaleet jäivät säiliöön. Voit palata niihin myöhemmin.', 'notice') });
   },
   read(key) {
     readView(ITEMS[key]?.title ?? READ_TITLES[key], pagesFor(key), {
@@ -591,7 +591,7 @@ interaction.api = {
           if (game.evidence.length === EVIDENCE_TOTAL) {
             setTimeout(() => toast('Kaikki todisteet löytyivät! Avaa tarkastusraportti oikeasta yläkulmasta.', 'success'), 4600);
           } else {
-            setTimeout(() => { if (unheardMessages() > 0) toast('Puhelinvastaajan valo alkoi vilkkua: uusi viesti.', 'hint'); }, 5200);
+            setTimeout(() => { if (unheardMessages() > 0) toast('Puhelinvastaajan valo alkoi vilkkua: uusi viesti.', 'notice'); }, 5200);
           }
         } else if (page.evidence) {
           toast('Tämä on jo merkitty todisteeksi.');
@@ -628,7 +628,7 @@ const hints = {
   start() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      if (!introOpen && !finale?.ending) toast('Jumissa? Voit pyytää vihjeen yläkulmasta – se maksaa viisi minuuttia aikaa.', 'hint');
+      if (!introOpen && !finale?.ending) toast('Jumissa? Voit pyytää vihjeen yläkulmasta – se maksaa viisi minuuttia aikaa.', 'notice');
       this.start();
     }, NUDGE_DELAY * 1000);
   },
@@ -702,7 +702,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!ready) return;   // latausnäkymä peittää ruudun, ei piirretä turhaan
   sinceRender += dt;
-  views.locked = !!interaction.inspecting || introOpen || !!finale?.ending;
+  views.locked = !!interaction.inspecting || introOpen || !!finale?.ending || !!finale?.paused;
   finale?.update(dt);
   // aurinko liikkuu noin 20 sekunnin välein, ei joka kuvassa (varjot ovat kalliita)
   if (finale && !views.moving && !interaction.inspecting) {

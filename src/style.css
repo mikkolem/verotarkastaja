@@ -248,7 +248,80 @@ body.inspecting canvas:active { cursor: grabbing; }
 .toast-icon { font-size: 24px; line-height: 1; }
 .toast.success { border-left-color: #7fbf6a; }
 .toast.evidence { border-left-color: #e0574a; }
-.toast.hint { border-left-color: #7aa7e0; }
+/* vihje korostetaan: sininen kehys ja hehku, otsikko ”Vihje”, isompi teksti */
+.toast.hint {
+  top: 128px;
+  max-width: min(640px, calc(100vw - 32px));
+  padding: 18px 24px;
+  font-size: 18px;
+  background: rgba(16, 24, 38, 0.95);
+  border: 1px solid rgba(122, 167, 224, 0.7);
+  border-left: 6px solid #7aa7e0;
+  box-shadow: 0 0 0 4px rgba(122, 167, 224, 0.15), 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+.toast-body { display: flex; flex-direction: column; gap: 2px; }
+.toast-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #9cc0ef; }
+/* sivutiedote: pieni, hillitty, vasemmassa yläkulmassa otsikon alla */
+.notice {
+  position: fixed;
+  left: 24px;
+  top: 76px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  max-width: min(340px, calc(100vw - 48px));
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ui-muted);
+  background: rgba(18, 14, 10, 0.6);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  z-index: 29;
+}
+.notice.visible { opacity: 1; transform: none; }
+.notice-icon { font-size: 14px; }
+body.inspecting .notice, body.intro-open .notice { display: none; }
+/* kellon hyppy (vihjeen hinta) kellon alla */
+.timer { position: relative; }
+.timer-jump {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 0);
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ff8f80;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.timer-jump.show { animation: jump-fade 2.4s ease-out; }
+@keyframes jump-fade { 0% { opacity: 0; transform: translate(-50%, -6px); } 15% { opacity: 1; transform: translate(-50%, 0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, 8px); } }
+/* tauko */
+.timer-pause { cursor: pointer; }
+.pause-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 6, 4, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.pause-overlay[hidden] { display: none; }
+.pause-card { text-align: center; }
+.pause-title { font-size: clamp(64px, 12vw, 140px); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ui-accent); line-height: 1; }
+.pause-text { margin: 18px 0 28px; font-size: 18px; color: var(--ui-muted); }
+.pause-resume { padding: 16px 48px; font-size: 20px; }
 /* kapealla näytöllä yläkulman rivi jakautuu kahdeksi, joten ilmoitus alemmas */
 @media (max-width: 900px) { .toast { top: 112px; } }
 
@@ -485,7 +558,7 @@ body.inspecting .hud { display: none; }
 
 /* Aikaraja ja raporttinappi yläkulman rivin alussa */
 .timer-box { display: flex; align-items: center; gap: 6px; }
-.timer, .timer-hint, .timer-report {
+.timer, .timer-hint, .timer-report, .timer-pause {
   padding: 8px 14px;
   font: inherit;
   font-size: 16px;
@@ -509,7 +582,7 @@ body.intro-open .timer-box,
 body.inspecting .timer-box { display: none; }
 body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
 @media (max-width: 560px) {
-  .timer, .timer-hint, .timer-report { font-size: 14px; padding: 7px 12px; }
+  .timer, .timer-hint, .timer-report, .timer-pause { font-size: 14px; padding: 7px 12px; }
 }
 
 /* Tarkastusraportti ja lopputulos */

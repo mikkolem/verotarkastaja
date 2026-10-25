@@ -37,7 +37,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   let ending = false;
 
   // --- aikanäyttö -----------------------------------------------------------------
-  const timer = el('div', 'timer');
+  const timer = el('div', 'timer', '⏱');
   timer.title = 'Aikaa jäljellä ennen kuin Kalevi palaa';
   const reportButton = el('button', 'timer-report', 'Tarkastusraportti');
   reportButton.addEventListener('click', () => openReport());
@@ -68,16 +68,58 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
       paidHints.add(hint);
       hintsUsed++;
       elapsed += HINT_COST;
+      flashJump(HINT_COST);
     }
     render();
     toast(hint, 'hint');
   });
-  box.append(timer, hintButton, reportButton);
+  // Tauko: pysäyttää kellon ja peittää ruudun, kunnes pelaaja jatkaa.
+  let paused = false;
+  const pauseButton = el('button', 'timer-pause', '⏸ Tauko');
+  pauseButton.title = 'Pysäytä peli';
+  pauseButton.addEventListener('click', () => setPaused(true));
+  const pauseOverlay = el('div', 'pause-overlay');
+  pauseOverlay.hidden = true;
+  const pauseCard = el('div', 'pause-card');
+  const resume = el('button', 'lock-open pause-resume', '▶ Jatka');
+  pauseCard.append(el('div', 'pause-title', 'Tauko'), el('p', 'pause-text', 'Kello on pysähdyksissä. Kalevi syö lounastaan rauhassa.'), resume);
+  pauseOverlay.appendChild(pauseCard);
+  document.body.appendChild(pauseOverlay);
+  resume.addEventListener('click', () => setPaused(false));
+  // Tauon aikana mikään näppäin ei tee muuta kuin jatka (Esc, välilyönti, Enter, P).
+  addEventListener('keydown', (e) => {
+    if (!paused) {
+      if ((e.key === 'p' || e.key === 'P') && running && !ending && !document.querySelector('input:focus')) setPaused(true);
+      return;
+    }
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    if (['Escape', ' ', 'Enter', 'p', 'P'].includes(e.key)) setPaused(false);
+  }, true);
+  function setPaused(p) {
+    if (ending || (p && !running)) return;
+    paused = p;
+    pauseOverlay.hidden = !p;
+    document.body.classList.toggle('paused', p);
+    if (p) resume.focus();
+  }
+
+  // Kellon hyppy näkyy kellon alla (−5:00), ei ilmoituksena, jotta se ei peitä mitään.
+  const jump = el('div', 'timer-jump');
+  timer.appendChild(jump);
+  function flashJump(seconds) {
+    jump.textContent = `−${fmt(seconds)}`;
+    jump.classList.remove('show');
+    void jump.offsetWidth;
+    jump.classList.add('show');
+  }
+
+  box.append(timer, hintButton, pauseButton, reportButton);
   // yläkulman tietojen (tavarat, todisteet, ohjeet) eteen samalle riville
   document.querySelector('.hud').prepend(box);
   const render = () => {
     const left = Math.max(0, TIME_LIMIT - elapsed);
-    timer.textContent = `⏱ ${fmt(left)}`;
+    timer.firstChild ? (timer.firstChild.nodeValue = `⏱ ${fmt(left)}`) : timer.prepend(`⏱ ${fmt(left)}`);
     renderHint();
     timer.classList.toggle('urgent', left <= 120);
   };
@@ -312,12 +354,13 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     skip(seconds) { elapsed += seconds; },   // kehitystyön apu
     start() { running = true; },
     pause(p) { if (!ending) running = !p; },
+    get paused() { return paused; },
     update(dt) {
-      if (!running) return;
+      if (!running || paused) return;
       elapsed += dt;
       const left = TIME_LIMIT - elapsed;
       while (warned < WARNINGS.length && left <= WARNINGS[warned][0]) {
-        toast(WARNINGS[warned][1], 'hint');
+        toast(WARNINGS[warned][1], 'notice');
         warned++;
       }
       render();

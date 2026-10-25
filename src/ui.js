@@ -20,20 +20,40 @@ function onEscape(close) {
   return () => removeEventListener('keydown', handler, true);
 }
 
-// --- ilmoitus ----------------------------------------------------------------------
+// --- ilmoitukset --------------------------------------------------------------------
+// Kaksi kanavaa:
+//   - tärkeät (vihje, todiste, löydetty tavara, avautui) yläreunan keskellä, isona
+//   - sivutiedotteet ('notice': ajan varoitukset, muistutukset, vastaajan valo)
+//     pieninä vasemmassa yläkulmassa otsikon alla, jotta ne eivät peitä kelloa
+//     eivätkä vihjettä
 const toastEl = el('div', 'toast');
 toastEl.setAttribute('role', 'status');
 document.body.appendChild(toastEl);
+const noticeEl = el('div', 'notice');
+noticeEl.setAttribute('role', 'status');
+document.body.appendChild(noticeEl);
 let toastTimer;
-// type: 'info' | 'success' (avautui) | 'item' (löytyi tavara) | 'evidence' | 'hint'
-const TOAST_ICONS = { info: 'ℹ️', success: '✅', item: '🔑', evidence: '📌', hint: '💡' };
+let noticeTimer;
+// type: 'info' | 'success' (avautui) | 'item' (löytyi tavara) | 'evidence' | 'hint' | 'notice'
+const TOAST_ICONS = { info: 'ℹ️', success: '✅', item: '🔑', evidence: '📌', hint: '💡', notice: '🕑' };
 export function toast(message, type = 'info') {
+  if (type === 'notice') {
+    noticeEl.replaceChildren(el('span', 'notice-icon', TOAST_ICONS.notice), el('span', null, message));
+    void noticeEl.offsetWidth;
+    noticeEl.classList.add('visible');
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => noticeEl.classList.remove('visible'), 6000);
+    return;
+  }
   toastEl.className = `toast ${type}`;
-  toastEl.replaceChildren(el('span', 'toast-icon', TOAST_ICONS[type]), el('span', null, message));
+  const body = el('span', 'toast-body');
+  if (type === 'hint') body.appendChild(el('span', 'toast-kicker', 'Vihje'));
+  body.appendChild(el('span', null, message));
+  toastEl.replaceChildren(el('span', 'toast-icon', TOAST_ICONS[type]), body);
   void toastEl.offsetWidth;   // käynnistää näkyviin liukumisen uudelleen
   toastEl.classList.add('visible');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('visible'), type === 'hint' ? 8000 : 4500);
+  toastTimer = setTimeout(() => toastEl.classList.remove('visible'), type === 'hint' ? 12000 : 4500);
 }
 
 // --- tavarat ja todisteet oikeassa yläkulmassa ----------------------------------------
@@ -279,7 +299,7 @@ export function passwordPrompt({ title, hint, check, failHint, onOpen }) {
   const overlay = el('div', 'overlay lock');
   const card = el('form', 'lock-card login');
   const input = el('input', 'login-input');
-  input.type = 'password';
+  input.type = 'text';   // näkyvissä: pelaaja näkee, mitä kirjoittaa
   input.autocomplete = 'off';
   input.placeholder = 'Salasana';
   const message = el('p', 'lock-message', hint);
