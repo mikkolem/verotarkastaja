@@ -115,7 +115,12 @@ export const ITEMS = {
       if (game.has('key')) return 'Etulevyssä on pieni messinkikyltti: ”A”. Avaimessasi lukee sama kirjain.';
       return 'Etulevyssä on pieni messinkikyltti: ”A”. Lukossa. Tietokoneen kannessa oleva lappu kertoo, missä varavain on.';
     },
-    actions: (api) => (!game.is('drawer_a_open') && game.has('key') ? [{
+    // Avattuna laatikko tarjoaa sisältönsä suoraan, jotta sen voi lukea mistä
+    // tahansa kuvakulmasta (paperit eivät näy laatikon sisältä kaikista suunnista).
+    actions: (api) => (game.is('drawer_a_open') ? [
+      { label: 'Lue kuitit', run: () => api.read('receipts') },
+      { label: 'Lue lappu', run: () => api.read('note_pirjo') },
+    ] : game.has('key') ? [{
       label: 'Käytä messinkiavainta',
       run: () => {
         api.close();
@@ -143,7 +148,9 @@ export const ITEMS = {
     text: () => (game.is('drawer_b_open')
       ? 'Laatikko on auki. Sisällä on puolikas lasku ja käsin kirjoitettu lappu.'
       : 'Messinkikyltti: ”B”. Nelinumeroinen numerolukko.'),
-    actions: (api) => (game.is('drawer_b_open') ? [] : [{
+    actions: (api) => (game.is('drawer_b_open') ? [
+      { label: 'Lue paperit', run: () => api.read('drawer_b_papers') },
+    ] : [{
       label: 'Kokeile koodia',
       run: () => api.codeLock({
         title: 'Laatikko B',

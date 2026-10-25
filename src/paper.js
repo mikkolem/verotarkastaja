@@ -819,6 +819,7 @@ export function pagesFor(key) {
     ];
   }
   if (key === 'binder_3') return [{ canvas: once('balance', balanceSheetCanvas), label: 'Tase' }];
+  if (key === 'note_pirjo') return [{ canvas: PAGES.get('note_pirjo'), label: 'Lappu laatikossa A' }];
   if (key === 'offshore_statement') {
     return [{ canvas: once('offshore', offshoreStatementCanvas), label: 'Cayman National Bank, tiliote', markable: true, evidence: 'offshore_account' }];
   }
