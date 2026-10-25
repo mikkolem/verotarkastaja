@@ -1,172 +1,207 @@
-# Pelisuunnitelma: "Tarkastuskäynti – kirjanpito, joka ei täsmää"
+# Pelisuunnitelma: Tarkastuskäynti – kirjanpito, joka ei täsmää
 
 > Realistinen yhden huoneen point-and-click-pakohuonepeli selaimessa.
-> Pelaaja on viranomainen, joka tekee epävirallisen käynnin toimitusjohtajan työhuoneeseen ennen virallista tarkastusta.
+> Pelaaja on viranomainen, joka tekee epävirallisen käynnin rakennusliikkeen toimitusjohtajan
+> työhuoneeseen ja etsii todisteet kirjanpidosta, joka ei täsmää.
 
-Aiempi työnimi *Laatikko B* hylättiin: laatikko-sanaleikki ei kantanut. Henkilöt esiintyvät vain etunimellä ja alkukirjaimella (Kalevi K., Pirjo P.).
+Pelaa: https://mikkolem.github.io/verotarkastaja/
 
 ---
 
 ## 1. Tavoite ja linjaukset
 
 - **Miksi:** tekniikkademo siitä, että näyttävän 3D-selainpelin voi tehdä Claude-avusteisesti.
-- **Painopiste:** mahdollisimman realistinen ja näyttävä ulkoasu. Pelin ei tarvitse olla pitkä.
+- **Painopiste:** realistinen ja näyttävä ulkoasu ilman raskasta kuormaa. Peli on lyhyt.
 - **Kesto:** noin 15–25 minuuttia, aikaraja 30 minuuttia.
 - **Tyyli:** huumoria, ei vakava trilleri.
-- **Vaikeus:** alussa helppoa. Kuka tahansa pystyy ratkaisemaan pulmat, mutta kirjanpidon osaamisesta on apua.
-- **Kieli:** suomi.
+- **Vaikeus:** kaksi ensimmäistä todistetta ohjattuja, viimeinen vaikein. Kuka tahansa pystyy
+  ratkaisemaan pulmat; kirjanpidon osaamisesta on apua raportin perusteluissa.
+- **Kieli:** suomi. **Ei ääniä.**
+- **Nimet:** henkilöt esiintyvät vain etunimellä ja alkukirjaimella (Kalevi K., Pirjo P.).
+  Virastoa ei nimetä. Kivi & Kumppanit Oy ja Pohjolan Säästöpankki ovat keksittyjä.
+  Oikeiden virastojen tai yritysten nimiä ja logoja ei käytetä.
 
 ## 2. Tarina
 
-Pelaaja on viranomainen; virastoa ei nimetä, jotta peli ei näytä minkään oikean viranomaisen viestinnältä. Rakennusliike **Kivi & Kumppanit Oy:n** kirjanpidossa on ollut outoja lukuja, ja nyt tehdään yllätystarkastus.
+Rakennusliike **Kivi & Kumppanit Oy** ilmoittaa liikevaihdokseen puolet siitä, mitä sen
+pankkitilille tulee. Kirjanpidosta puuttuu tosite 117, eikä se ole ainoa.
 
-Toimitusjohtaja **Kalevi K.** on "lähtenyt lounaalle" ja palaa noin 30 minuutin kuluttua. Siihen mennessä pelaajan pitää todistaa, että toinen, oikea kirjanpito on olemassa, ja koota tarkastusraportti.
+**Sinä** olet viranomainen. Virallinen tarkastus alkaa ensi kuussa, ja siihen mennessä paperit
+ovat silppurissa. Pöydällesi tulee kirje ilman lähettäjää: toimitusjohtaja pitää toista, oikeaa
+kirjanpitoa työhuoneessaan, lähtee lounaalle tasan kello 12 ja palaa puolen tunnin päästä.
+Tämä on salapoliisityötä, ei virallinen tarkastus. Oikea tarkastus ei tonki laatikoita johtajan
+ollessa lounaalla; peli tunnustaa sen huumorilla. Sisältö (termit, kirjaukset, ALV) on silti
+asiallisesti oikein.
 
-Työpöydän laatikot A ja B ovat Kalevin vitsi, ja kassakaapin musta kirja on hänen "Kirjanpito B":nsä. Kirje ja muistio eivät käytä laatikko-sanaa: tehtävä on "selvitä kirjanpidon epäselvyydet", ja punainen lanka on puuttuva tosite 117.
+**Kalevi K.**, toimitusjohtaja, ”Vuoden veronmaksaja” oman ilmoituksensa mukaan. Häntä ei nähdä
+pelin aikana, mutta huoneen tavarat kertovat hänestä kaiken. Hän astuu ovesta loppukohtauksessa.
+Työpöydän laatikot A ja B ovat hänen vitsinsä, ja kassakaapin musta kirja on hänen
+”Kirjanpito B”:nsä.
 
-**Tämä ei ole virallinen verotarkastus** vaan epävirallinen käynti ennen sitä (virallinen alkaa ensi kuussa, "siihen mennessä paperit ovat silppurissa"). Oikea tarkastus ei tonki laatikoita johtajan ollessa lounaalla; peli on salapoliisityötä tarkastajan vaatteissa, ja prologi tunnustaa sen huumorilla. Sisältö (termit, kirjaukset, ALV) on silti asiallisesti oikein.
+**Pirjo P.**, kirjanpitäjä, 3 vuotta talossa. Whistleblower: hän yritti ensin sanoa Kaleville,
+nyt hän jättää jälkiä vieraalle (nimetön lappu laatikossa A). Peli ei kerro suoraan, että kirje
+on hänen. Hän jättää Kaleville viestejä puhelinvastaajaan ja uuden viestin jokaisesta löydetystä
+todisteesta.
 
-Kalevia ei nähdä pelin aikana, mutta huoneen tavarat kertovat hänestä kaiken. Hän astuu ovesta
-vasta loppukohtauksessa (henkilökuva ja repliikki, joka riippuu tuloksesta).
+Sivuhenkilöt puhelinvastaajassa: vaimo Marjatta ja golfkaveri Raimo.
 
-**Pirjo P.** on firman kirjanpitäjä (3 vuotta talossa) ja whistleblower: hän yritti ensin sanoa Kaleville, nyt hän jättää jälkiä vieraalle (nimetön lappu laatikossa A). Pelille ei kerrota suoraan, että kirje on hänen. Hän jättää puhelinvastaajaan
-viestejä Kaleville, jotka toimivat samalla vihjeinä pelaajalle, ja uuden viestin jokaisesta
-löydetystä todisteesta.
+## 3. Pelin kulku
 
-## 3. Huone ja kuvakulmat
+1. **Prologi** (src/prologue.js), alle puoli minuuttia. Kollaasikuva henkilöistä
+   (public/comic/collage.jpg) koko ruudun taustana ja sen päällä kolme diaa: tarina kolmessa
+   virkkeessä, nimetön vihjekirje ja henkilöt pieninä kortteina. Klikkaus tai nuolet eteen ja
+   taakse, Esc ohittaa. Lopuksi ovi aukeaa ja kamera ajaa käytävästä huoneeseen.
+2. **Tarkastusmääräys** kahdessa vaiheessa: tehtävä lyhyesti (viisi todistetta, 30 minuuttia) ja
+   näin pelaat. Ohjeet-nappi avaa sen uudelleen.
+3. **Huone.** Peli alkaa Ikkuna-näkymästä. Pelaaja etsii viisi todistetta, merkitsee ne papereista
+   ja kokoaa tarkastusraportin. Kello käy.
+4. **Raportti.** Jokaiselle löydetylle todisteelle valitaan peruste. Keskeneräinen lähetys vaatii
+   varmistuksen.
+5. **Loppukohtaus.** Ovi aukeaa ja Kalevi palaa. Tulosnäkymässä arvosana, tilastot, todisteet ja
+   termit selityksineen.
+
+## 4. Huone ja kuvakulmat
 
 Toimitusjohtajan työhuone iltapäivällä. Aurinko siivilöityy sälekaihtimien läpi valonsäteinä,
 pölyhiukkaset leijuvat valossa ja aurinko laskee pelin kuluessa. Puupaneelit, nahkasohva ja
-viskikarahvi kertovat, että rahaa on. Ei ääniä.
+viskikarahvi kertovat, että rahaa on.
 
-Pelaaja liikkuu viiden kiinteän kuvakulman välillä (järjestys myötäpäivään). Peli alkaa Ikkuna-näkymästä, josta näkyy sekä työpöytä että ikkuna:
+Viisi kiinteää kuvakulmaa, järjestys myötäpäivään (src/views.js). Peli alkaa Ikkunasta.
 
 | Kuvakulma | Mitä siellä on |
 |---|---|
 | **Työpöytä** | kannettava tietokone (kalenteri), muistilappu kannessa, pöytälaatikot A ja B, kahvikuppi, paperipino (tiliote), lukulasit, nitoja, mökkikuva kehyksessä, pöytälamppu |
-| **Ikkuna** | viherkasvi (”taideteos”, avain ruukun alla), paperisilppuri, seinäkello |
-| **Sohva** | Chesterfield-sohva, kukkatyyny, kunniakirja ”Vuoden veronmaksaja” seinällä |
-| **Ovi** | sivupöytä: puhelinvastaaja, muistikirja, viskikarahvi ja lasi; ALV-juliste; ovi käytävään |
+| **Ikkuna** | viherkasvi (”taideteos”, avain ruukun alla), paperisilppuri, seinäkello; näkyy myös työpöytä |
+| **Sohva** | Chesterfield-sohva, tyyny, kunniakirja ”Vuoden veronmaksaja” seinällä |
+| **Ovi** | sivupöytä: puhelinvastaaja, muistikirja, viskikarahvi ja lasi; tiedotejuliste (ALV 25,5 %); ovi käytävään |
 | **Kirjahylly** | kirjasarjat, mapit (Kirjanpito 2025, Kirjanpito 2024, Tilinpäätös), golfpokaali, kassakaappi alahyllyllä |
 
-Esineitä voi klikata, nostaa lähemmäs ja pyöritellä. Läheltä katsottaessa realistiset yksityiskohdat pääsevät oikeuksiinsa.
+Esineitä voi klikata, jolloin ne lentävät lähikuvaan ja niitä voi pyöritellä. Lähikuvan napeilla
+nostetaan, luetaan ja avataan. Avatut laatikot tarjoavat sisältönsä mistä tahansa kuvakulmasta.
 
-## 4. Pulmaketju (toteutettu)
+## 5. Pulmat ja ratkaisut
 
-Ei laskutehtäviä. Viisi todistetta vaikeusjärjestyksessä: kaksi ensimmäistä ovat ohjattuja
-(laput kertovat paikan), kolmas vaatii kahden lähteen yhdistämistä, kaksi viimeistä päättelyä
-ilman suoraa ohjausta. Koodit (diplomin vuosi, hääpäivä, golftasoitus) arvotaan joka
-pelikerralla (`SECRETS`, src/game.js).
+Ei laskutehtäviä. Koodit (kunniakirjan vuosi VVVV, hääpäivä PPKK, golftasoitus NN) arvotaan joka
+pelikerralla (`SECRETS`, src/game.js), ja jokaiseen koodiin on vähintään kaksi lähdettä.
 
-| # | Todiste | Johtava vihje | Paikka | Vaikeus |
+| # | Todiste (termi) | Johtolanka | Ratkaisu | Vaikeus |
 |---|---|---|---|---|
-| 1 | **Kiuas edustuskuluissa** (peitelty osinko) | Tietokoneen lappu: ”Varavain A kukkaruukun alla” → avaimessa ”A” → laatikko A. Kolmessa kuitissa asiakkaan nimi, yhdessä toimitusosoite mökille | Kasvi → laatikko A → kuitit | Helppo, ohjattu |
-| 2 | **Lasku 117 Cayman-yhtiölle** (ohimyynti) | Nimetön lappu laatikossa A: ”laatikon B koodi on vuosi kunniakirjassa sohvan yläpuolella” → laatikko B → lappu ”silppuri ikkunan alla” → suikaleet kootaan vetämällä | Sohva → laatikko B → silppuri | Helppo–keski |
-| 3 | **Musta B-kirjanpito** (kaksoiskirjanpito) | Lappu: ”Kassakaappi: HÄÄPÄIVÄ”. Päivä pitää itse löytää: vaimon viesti vastaajassa tai mökkikuvan päiväys. Rullat DEBET / KREDIT | Vastaaja / mökkikuva → kassakaappi | Keskitaso |
-| 4 | **Kalenterin siirto 870 000 €** (lähipiirisiirto) | Salasanavihje ”tasoitukseni”, Raimon vitsi tasoituksesta, pokaali hyllyssä (”Tasoitus NN”). B-kirja: ”ajankohdat sovittu Raimon kanssa” | Pokaali → tietokone → kalenteri | Vaikea |
-| 5 | **Cayman-tiliote Kalevin omissa nimissä, 2,1 milj. €** (ilmoittamaton ulkomainen tili) | B-kirjan viimeinen rivi: ”Tiliotteet: ylpeyteni takana.” Kunniakirja roikkuu vinossa → ”Nosta kehystä” → teipattu kirjekuori | Sohva → kunniakirja | Vaikein |
+| 1 | **Kiuas edustuskuluissa** (peitelty osinko) | Tietokoneen lappu: ”Varavain A kukkaruukun alla!” | Ikkuna: kasvi → *Nosta ruukkua* → avain ”A”. Työpöytä: laatikko A → *Käytä messinkiavainta*. Kuiteista kolmessa asiakkaan nimi, Rauta-Antin kiukaassa ”Toimitus: Kivi, Mökkitie 3” → merkitse | Helppo, ohjattu |
+| 2 | **Lasku 117 Cayman-yhtiölle** (ohimyynti) | Nimetön lappu laatikossa A: ”laatikon B koodi on vuosi kunniakirjassa sohvan yläpuolella” | Sohva: kunniakirja ”VVVV”. Laatikko B → koodi VVVV. Lappu: ”Silppuri ikkunan alla”. Ikkuna: silppuri → *Kaiva silppurin säiliötä* (vasta kun B on auki) → viisi suikaletta järjestykseen → koottu lasku → merkitse | Helppo–keski |
+| 3 | **Musta kirjanpitokirja** (kaksoiskirjanpito) | Laatikon B lappu: ”Kassakaappi: HÄÄPÄIVÄ” | Ovi: puhelinvastaajassa Marjatta kertoo hääpäivän; sama päivä mökkikuvan reunassa. Kirjahylly: kassakaappi → PPKK (rullat DEBET / KREDIT) → musta kirja → merkitse | Keskitaso |
+| 4 | **Siirto 870 000 €** (lähipiiriliiketoimi) | Salasanavihje ”tasoitukseni”, Raimon vitsi tasoituksesta, mustassa kirjassa ”ajankohdat sovittu Raimon kanssa” | Kirjahylly: golfpokaalin laatta ”Tasoitus NN”. Työpöytä: tietokone → salasana NN → kalenteri ”SIIRTO CAYMANILLE 870 000 €” → merkitse | Vaikea |
+| 5 | **Cayman-tiliote, 2,1 milj. € Kalevin nimissä** (ilmoittamaton ulkomainen tili) | Mustan kirjan viimeinen rivi: ”Tiliotteet: ylpeyteni takana.” Kunniakirja roikkuu vinossa | Sohva: kunniakirja → *Nosta kehystä* → teipattu kirjekuori → tiliote → merkitse | Vaikein |
 
-**Tukimateriaali mapeissa:** Kirjanpito 2025 -mapissa on tuloslaskelman lisäksi tositeluettelo
-(ML 117 puuttuu välistä) ja pankin tiliote (pano Kivi Consulting Ltd:ltä, jolle ei ole tositetta).
-Tilinpäätös-mapissa on tase (taide-esineet 12 000 €, 1 kpl viherkasvi; nitojan poistoaika 25 v).
+**Tukimateriaali, ei pakollinen:** Kirjanpito 2025 -mapissa tuloslaskelma, tositeluettelo
+(ML 117 puuttuu välistä) ja pankin tiliote (pano Kivi Consulting Ltd:ltä ilman tositetta).
+Tilinpäätös-mapissa tase (taide-esineet 12 000 €, 1 kpl viherkasvi; nitojan poistoaika 25 v).
 
-**Vihjeet** (src/main.js, HINTS): jokainen nimeää kohteen (mikä lukko tai esine), kuvakulman ja mitä tehdään; Pirjoa ei mainita.
+**Järjestys:** vain silppuri on lukittu edellisen vaiheen taakse. Muut voi löytää missä
+järjestyksessä tahansa, jos tietää vastauksen. *Nosta kehystä* on tarjolla heti alussa, joten
+viides todiste voi löytyä vahingossa ensimmäisenä (avoin kysymys, luku 11).
 
-**Ilmoitukset ja tauko:** tärkeät ilmoitukset (vihje, todiste, löydetty tavara) näkyvät yläreunan keskellä; vihje korostetaan sinisellä kehyksellä ja otsikolla. Sivutiedotteet (ajan varoitukset, muistutukset, vastaajan valo) ovat pieniä vasemmassa yläkulmassa. Vihjeen hinta näkyy kellon alla ”−5:00”. Tauko-nappi (tai P) pysäyttää kellon ja peittää ruudun, kunnes pelaaja jatkaa. Tietokoneen salasana näkyy kirjoitettaessa.
+**Väärät merkinnät:** paperin merkitseminen väärin antaa vain palautteen, ei sakkoa.
 
-**Pirjo reagoi:** jokaisesta todisteesta puhelinvastaajaan tulee Pirjolta uusi viesti ja
-merkkivalo syttyy uudelleen.
+## 6. Vihjeet, aika ja ilmoitukset
 
-**Loppu:** tarkastusraportissa jokaiselle löydetylle todisteelle valitaan peruste kolmesta
-vaihtoehdosta (oikea termi, uskottava väärä, hölmö). Jokaisen vaihtoehdon alla on tarkastajan
-yhden rivin muistiinpano, joka selittää termin: termit selitetään vain raportissa ja tuloksessa,
-ei huoneessa. Puuttuvan todisteen kohdalla näkyy vain kategoria ("myynti, jota ei ole kirjattu").
-Raportin voi lähettää milloin tahansa. 30 minuutin aikarajan lopussa ovi aukeaa ja Kalevi palaa.
-Arvosana määräytyy todisteiden, oikeiden perusteiden ja käytettyjen vihjeiden mukaan.
-Vihje maksaa viisi minuuttia (saman vaiheen vihje uudelleen ilmaiseksi); väärästä epäilymerkinnästä ei ole sakkoa. Tuloksen alla on
-termilista yhden rivin selityksineen.
+- **Aikaraja** 30 minuuttia. Tarinan kello alkaa 12.03. Varoitukset 10, 5 ja 2 minuuttia ja
+  30 sekuntia ennen loppua. Lopussa ovi aukeaa ja Kalevi palaa.
+- **Vihje** (src/main.js, `HINTS`) maksaa viisi minuuttia. Napissa lukee aina ”Pyydä vihje” ja
+  hinta (”−5 min” tai ”ilmainen”). Saman vaiheen vihjeen saa uudelleen ilmaiseksi, ja kun kaikki
+  todisteet on löydetty, vihje on ilmainen. Jokainen vihje nimeää kohteen (lukko tai esine),
+  kuvakulman ja mitä tehdään; Pirjoa ei mainita. Hinta näkyy kellon alla hetken ”−5:00”.
+- **Lukkojen omat vihjeet** tulevat kolmen väärän yrityksen jälkeen (laatikko B, kassakaappi,
+  tietokone).
+- **Ilmoitukset kahdessa kanavassa:** tärkeät (vihje, todiste, löydetty tavara, avautui)
+  yläreunan keskellä; vihje korostetaan sinisellä kehyksellä ja otsikolla ”Vihje”. Sivutiedotteet
+  (ajan varoitukset, jumissa-muistutus 90 s välein, vastaajan valo) pieninä vasemmassa
+  yläkulmassa, jotta ne eivät peitä kelloa eivätkä vihjettä.
+- **Tauko** (nappi tai P) pysäyttää kellon ja peittää ruudun; mitään muuta ei voi tehdä ennen
+  kuin pelaaja jatkaa.
 
-**Prologi (src/prologue.js):** kollaasikuva henkilöistä (public/comic/collage.jpg) koko
-ruudun taustana, sen päällä kolme diaa: 1) tarina ja pelin idea kolmessa virkkeessä,
-2) nimetön vihjekirje (laatikko B, lounas kello 12, vartti aikaa), 3) henkilöt pieninä
-kortteina. Sitten ovi aukeaa ja kamera ajaa käytävästä työpöydälle. Klikkaus eteen- ja
-taaksepäin, Esc ohittaa. Huoneessa tarkastusmääräys kahdessa vaiheessa: tehtävä lyhyesti
-ja näin pelaat.
+## 7. Raportti ja arvosana
 
-## 5. Huumori ja yksityiskohdat
+- Raportti on tarkistuslista viidestä todisteesta. Puuttuvan kohdalla näkyy vain kategoria
+  (”myynti, jota ei ole kirjattu”), ei paikka.
+- Jokaiselle löydetylle todisteelle valitaan peruste kolmesta vaihtoehdosta: oikea termi,
+  uskottava väärä ja hölmö. Jokaisen alla on tarkastajan yhden rivin muistiinpano, joka selittää
+  termin. **Termit selitetään vain raportissa ja tuloksessa, ei huoneessa.**
+- Keskeneräisenä ”Jatka tutkimista” on päätoiminto. Lähetys vaatii varmistuksen, joka kertoo
+  puuttuvat todisteet, puuttuvat perusteet ja jäljellä olevan ajan.
+- **Arvosana** (src/finale.js, `grade`): Erinomainen = kaikki viisi, kaikki perusteet oikein ja
+  enintään yksi vihje. Kiitettävä = kaikki viisi ja korkeintaan yksi peruste väärin. Sitten Hyvä,
+  Tyydyttävä, Välttävä, Heikko ja Hylätty löydettyjen todisteiden mukaan.
+- **Tulosnäkymä:** Kalevi ja repliikki (riippuu tuloksesta), arvosana, tilastot (todisteet,
+  oikeat perusteet, aika, vihjeet), todisteet merkinnöin (✓ / ½ / –) ja termilista selityksineen.
 
-Toteutettu (esineiden kuvaukset src/items.js, paperit src/paper.js):
+Pelissä esiintyvät termit: debet ja kredit, tosite ja kirjausketju, täsmäytys, peitelty osinko,
+ohimyynti, lähipiiriliiketoimi, ALV 0 % EU:n ulkopuolelle, ulkomainen tili.
 
-- Kunniakirja ”Vuoden veronmaksaja [arvottu vuosi]”. Myöntäjä: Kalevi K., saaja: Kalevi K.
-- Muistilaput: ”Varavain A kukkaruukun alla!”, ”Silppuri ikkunan alla – tyhjennä!!! Kassakaappi: HÄÄPÄIVÄ (älä kirjoita ylös)”, nimetön lappu laatikossa A.
-- Kahvikuppi ”Maailman paras johtaja”, kirjattu edustuskuluksi. Viherkasvi taideteoksena 12 000 € (oikea hinta 89 €). Nitojan poistoaika 25 vuotta. Sohva ”neuvottelutilan kalustus 8 900 €”.
-- Tietosanakirjasarja metreittäin, ”ammattikirjallisuutta”, sivut leikkaamatta. Muistikirja ”EI PAPEREITA VEROTTAJALLE – paitsi ne viralliset”.
-- Puhelinvastaajassa viestejä Pirjolta, vaimolta (Marjatta) ja golfkaveri Raimolta. Kalenterissa ”Hallituksen kokous (= minä)” ja ”Verotarkastus?? EI KOSKAAN”.
-- ALV-juliste 25,5 %, johon joku on piirtänyt surullisen naaman.
-- Kivi & Kumppanit Oy ja Pohjolan Säästöpankki ovat keksittyjä; virastoa ei nimetä. Oikeiden virastojen tai yritysten nimiä ja logoja ei käytetä (tyyny on yleinen kukkakuvio, ei tuotemerkki).
+## 8. Huumori ja yksityiskohdat
 
-Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyssä.
+Esineiden kuvaukset src/items.js, paperit src/paper.js.
 
-## 6. Tarvittavat esineet (mallilista)
+- Kunniakirja ”Vuoden veronmaksaja [vuosi]”. Myöntäjä: Kalevi K., saaja: Kalevi K.
+- Kahvikuppi ”Maailman paras johtaja”, kirjattu edustuskuluksi. Viherkasvi taideteoksena
+  12 000 € (oikea hinta 89 €). Nitojan poistoaika 25 vuotta. Sohva ”neuvottelutilan kalustus
+  8 900 €”. Viski ”neuvottelutarjoilut”.
+- Tietosanakirjasarja metreittäin, sivut leikkaamatta. Muistikirja ”EI PAPEREITA VEROTTAJALLE –
+  paitsi ne viralliset”.
+- Kalenterissa ”Hallituksen kokous (= minä)” ja ”Verotarkastus?? EI KOSKAAN”.
+- Golfpokaalin laatassa tasoitus, josta Kalevi on ylpeä ja jota kukaan muu ei pidä saavutuksena.
+- Tiedotejuliste ALV 25,5 %, johon joku on piirtänyt surullisen naaman.
+- Pirjon jatkoviestit kiristyvät todiste todisteelta (”Minulla on kopio.”, ”Minä irtisanoudun.”).
 
-**Huone:** seinät ja puupaneelit, lattia, ikkuna ja sälekaihtimet, ovi, katto ja valaisin
+## 9. Grafiikka ja mallit
 
-**Huonekalut:** työpöytä (2 laatikkoa), nahkatuoli, kirjahylly, sohva, kassakaappi, naulakko
+- **Huone, ovi, käytävä, työpöytä, kirjahylly, sivupöytä:** blender/build_room.py.
+- **Puhelinvastaaja, kassakaappi, mapit, silppuri:** blender/build_props.py (roskakori on mallissa,
+  mutta poistetaan latauksessa). Kassakaapin näppäimistö, kyltti ja pultit sekä silppurin ikkuna,
+  merkki ja paneeli lisätään koodilla (src/decor.js). Teräs ja muovi saavat proseduraaliset
+  harjaus- ja rakeisuustekstuurit (src/textures.js).
+- **15 valmista Poly Havenin CC0-mallia** (src/props.js), pakattu `npm run models`-komennolla.
+  Niistä brass_goblets toimii golfpokaalina (yksi malja; laatta ja golfpallo koodilla) ja
+  throw_pillows_01 sohvatyynynä.
+- **Kahvikuppi, paperipino, karahvi:** three.js:n perusmuodot (src/decor.js).
+- **Paperit ja tekstit** piirretään canvakselle (src/paper.js), käsiala Kalam-fontilla.
+- **Henkilökuvat ja kollaasi:** tekoälyllä tehdyt piirroskuvat (public/characters, public/comic).
 
-**Esineet:** kannettava tietokone, pöytälamppu, puhelinvastaaja, seinäkello, viherkasvi ruukussa, paperisilppuri, viskikarahvi ja lasi, kahvikuppi, paperipino, mapit (3), kirjasarjat, golfpokaali, sohvatyyny, kehykset (kunniakirja, mökkikuva), lukulasit, nitoja, muistikirja, muistilaput, kuitit, lasku (silputtu), avain, juliste. Kalenteri on tietokoneen näytöllä, ei pöydällä. Naulakkoa ei ole.
+**Visuaaliset tehosteet** (kaikki valittu niin, ettei huonetta tarvitse piirtää joka kuvassa):
 
-**Mistä mallit tulevat (toteutunut):**
-- Huone, ovi, käytävä, työpöytä, kirjahylly ja sivupöytä: Blender-skripti blender/build_room.py
-- Puhelinvastaaja, kassakaappi, mapit, silppuri: blender/build_props.py (roskakori on mallissa, mutta poistetaan latauksessa). Kassakaapin näppäimistö, kyltti ja pultit sekä silppurin ikkuna, merkki ja paneeli lisätään koodilla (src/decor.js). Teräs ja muovi saavat proseduraaliset harjaus- ja rakeisuustekstuurit (src/textures.js).
-- 15 valmista Poly Havenin CC0-mallia (src/props.js), pakattu `npm run models`-komennolla; niistä brass_goblets toimii golfpokaalina (yksi malja, kaiverrettu laatta koodilla) ja throw_pillows_01 sohvatyynynä
-- Kahvikuppi, paperipino ja karahvi: three.js:n perusmuodot (src/decor.js)
-- Paperit ja tekstit piirretään canvakselle (src/paper.js), käsiala Kalam-fontilla
-- Henkilökuvat ja kollaasi: tekoälyllä tehdyt piirroskuvat (public/characters, public/comic)
+- Valonsäteet kaihtimien raoista (src/shafts.js), noin 30 läpikuultavaa levyä.
+- Pöly näkyy vain auringonsäteessä ja lamellien raidoissa (src/dust.js).
+- Aurinko laskee 30 minuutissa: suunta madaltuu, väri lämpenee, varjot pitenevät (päivitys 20 s välein).
+- Heijastukset: huone kuvataan kerran latauksessa kuutiokameralla ympäristökartaksi.
+- Lähikuva: esine lentää ruudun keskelle ja tausta sumenee.
+- Kuvakulmasiirtymä kiertää katseen suuntaa (slerp).
+- Jälkikäsittely: GTAO, bloom, ääriviiva hiiren alla, AgX-sävykartta.
 
-## 7. Tekniikka (lyhyesti)
+## 10. Tekniikka
 
-- **three.js** (0.186) ja **Vite**, mallit **Blenderistä** (4.5 LTS) meshopt-pakattuina
-- Jälkikäsittely: GTAO, bloom, ääriviivat, AgX-sävykartta. Huone piirretään vain kameran liikkuessa, levossa päivittyy vain pöly.
-- Julkaisu **GitHub Pagesissa** (.github/workflows/deploy.yml), osoite https://mikkolem.github.io/verotarkastaja/. Cloudflare Pages harkinnassa myöhemmin.
-- **Ei ääniä.** Päätetty jättää pois; rytmi tehdään tekstien ilmestymisellä ja kameran liikkeellä.
+- **three.js** 0.186 ja **Vite**, mallit **Blenderistä** (4.5 LTS) meshopt-pakattuina, tekstuurit WebP.
+- Huone piirretään vain kameran liikkuessa; levossa päivittyy vain pöly (30 fps). Tarkkuus
+  laskee automaattisesti, jos kone ei jaksa.
+- Julkaisu **GitHub Pagesissa** (.github/workflows/deploy.yml) jokaisesta pushista mainiin.
+- Toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio, prologi ja
+  tulosnäkymä mukautuvat); ensisijainen kohde on tietokoneen selain.
 
-## 8. Toteutusvaiheet
+## 11. Avoimet kysymykset ja seuraavat askeleet
 
-1. ✅ **Huone näkyviin:** tyhjä huone, valaistus ja kuvakulmien vaihto selaimessa.
-2. ✅ **Kalusteet ja esineet:** huone täytetty, esineitä voi klikata ja tarkastella läheltä.
-3. ✅ **Pulmat:** pulmaketju 1–4, aikaraja ja tarkastusraportti.
-4. ✅ **Viimeistely:** huumoriyksityiskohdat, vihjeet, loppukohtaus ja prologi (ei ääniä).
-5. ✅ **Julkaisu:** GitHub Pages.
-6. ✅ **Wow-tehosteet ja termit:** valonsäteet, laskeva aurinko, satunnaiset koodit, silppuripeli, raportin perusteet (ks. luvut 4 ja 10).
-7. ✅ **Tarina ja vaikeuskaari:** Laatikko B kiertoilmauksena, epävirallinen käynti, viides todiste, 30 min, vihje 5 min, raportin selitykset.
-8. **Seuraavaksi:** UI-hionta, Sohva-näkymän sisältö, aikarajan näkyvyys, Kalevin repliikit löydösten mukaan.
+- Lukitaanko *Nosta kehystä* mustan kirjan lukemisen taakse, jotta viides todiste ei löydy
+  vahingossa ensimmäisenä?
+- Laskevan auringon häikäisy Ikkuna-näkymässä pelin loppupuolella: hillitäänkö?
+- Kalevin repliikki löydösten mukaan (nyt määrän mukaan).
+- Sohva-näkymän sisältö (tyynyn alla mainittu tuloskortti luettavaksi?).
+- Cloudflare Pagesiin siirtyminen: myöhemmin, jos tarvetta.
 
-## 9. Avoimet kysymykset
+## 12. Historia lyhyesti
 
-- Nimi päätetty: *Tarkastuskäynti – kirjanpito, joka ei täsmää*.
-- Cloudflare Pagesiin siirtyminen: milloin, vai jäädäänkö GitHub Pagesiin?
-
-Ratkaistut:
-- Aikaraja on oikea: 30 minuuttia, kello käy, vihje maksaa viisi minuuttia, lopussa Kalevi palaa.
-- Pelaaja on ”Sinä”, viranomainen, ilman nimeä ja ilman viraston nimeä. Käynti on epävirallinen, salapoliisityötä.
-- Peli toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio ja prologi mukautuvat), mutta ensisijainen kohde on tietokoneen selain.
-- Raportissa jokaiselle todisteelle kolme perustevaihtoehtoa: oikea, uskottava väärä ja hölmö, kukin selitysrivillä.
-- Termit selitetään vain raportissa ja tuloksessa, henkilön äänellä, ei huoneessa.
-
-## 10. Visuaaliset tehosteet (toteutettu)
-
-Ei ääniä. Kaikki tehosteet on valittu niin, ettei huonetta tarvitse piirtää uudelleen joka kuvassa.
-
-- **Valonsäteet** (src/shafts.js): jokaisesta kaihtimen raosta lähtee ohut läpikuultava valolevy
-  auringon suuntaan. Noin 30 nelikulmiota, lisäävä sekoitus. Piilotetaan AO- ja ääriviivapassien
-  ajaksi, jotteivät ne kirjoita syvyyttä.
-- **Pöly** näkyy vain säteen sisällä ja lamellien raidoissa; kameran lähellä häivytetään.
-- **Aurinko laskee** pelin 30 minuutin aikana: suunta madaltuu, väri lämpenee, varjot pitenevät.
-  Päivitetään 20 sekunnin välein (varjokartta lasketaan silloin uudelleen).
-- **Heijastukset**: huone kuvataan kerran latauksessa kuutiokameralla ja kuvasta tehdään
-  ympäristökartta. Lakattu pöytä ja messinki heijastavat ikkunaa.
-- **Lähikuva**: esine lentää huoneesta ruudun keskelle ja tausta sumenee (12 näytteen sumennus).
-- **Kuvakulmasiirtymä** kiertää katseen suuntaa (slerp), ei kohdepistettä.
-- **Sisustus** (src/decor.js): kahvikuppi, paperipino, viskikarahvi ja lasi three.js:n
-  perusmuodoista; pokaali ja tyyny Poly Havenista; kirjasarjat eri sävyissä.
-- **Käsialafontti** Kalam Google Fontsista (index.html); paperit piirretään vasta fontin latauduttua.
+1. Huone, valaistus ja kuvakulmat.
+2. Kalusteet, esineet ja lähikuva.
+3. Pulmaketju, aikaraja, raportti, loppukohtaus.
+4. Wow-tehosteet: valonsäteet, laskeva aurinko, heijastukset, silppuripeli, satunnaiset koodit.
+5. Tarina uusiksi: työnimi *Laatikko B* hylättiin, nimeksi *Tarkastuskäynti*. Pelaaja
+   viranomaiseksi, käynti epäviralliseksi, Pirjo whistlebloweriksi, viides todiste.
+6. Prologi kokeiltiin automatkana, sarjakuvana ja päätyi kollaasiin ja kolmeen diaan.
+7. UI-hionta: vihjeiden selkeys, raportin varmistus, tauko, ilmoitusten kaksi kanavaa,
+   loppunäkymä, parannellut esineet.
