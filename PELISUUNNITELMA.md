@@ -61,7 +61,7 @@ pelikerralla (`SECRETS`, src/game.js).
 | # | Todiste | Johtava vihje | Paikka | Vaikeus |
 |---|---|---|---|---|
 | 1 | **Kiuas edustuskuluissa** (peitelty osinko) | Tietokoneen lappu: ”Varavain A kukkaruukun alla” → avaimessa ”A” → laatikko A. Kolmessa kuitissa asiakkaan nimi, yhdessä toimitusosoite mökille | Kasvi → laatikko A → kuitit | Helppo, ohjattu |
-| 2 | **Lasku 117 Cayman-yhtiölle** (ohimyynti) | Pirjon lappu laatikossa A: ”koodi on vuosi kunniakirjassa sohvan yläpuolella” → laatikko B → lappu ”silppuri ikkunan alla” → suikaleet kootaan vetämällä | Sohva → laatikko B → silppuri | Helppo–keski |
+| 2 | **Lasku 117 Cayman-yhtiölle** (ohimyynti) | Nimetön lappu laatikossa A: ”laatikon B koodi on vuosi kunniakirjassa sohvan yläpuolella” → laatikko B → lappu ”silppuri ikkunan alla” → suikaleet kootaan vetämällä | Sohva → laatikko B → silppuri | Helppo–keski |
 | 3 | **Musta B-kirjanpito** (kaksoiskirjanpito) | Lappu: ”Kassakaappi: HÄÄPÄIVÄ”. Päivä pitää itse löytää: vaimon viesti vastaajassa tai mökkikuvan päiväys. Rullat DEBET / KREDIT | Vastaaja / mökkikuva → kassakaappi | Keskitaso |
 | 4 | **Kalenterin siirto 870 000 €** (lähipiirisiirto) | Salasanavihje ”tasoitukseni”, Raimon vitsi tasoituksesta, pokaali hyllyssä (”Tasoitus NN”). B-kirja: ”ajankohdat sovittu Raimon kanssa” | Pokaali → tietokone → kalenteri | Vaikea |
 | 5 | **Cayman-tiliote Kalevin omissa nimissä, 2,1 milj. €** (ilmoittamaton ulkomainen tili) | B-kirjan viimeinen rivi: ”Tiliotteet: ylpeyteni takana.” Kunniakirja roikkuu vinossa → ”Nosta kehystä” → teipattu kirjekuori | Sohva → kunniakirja | Vaikein |
@@ -69,6 +69,8 @@ pelikerralla (`SECRETS`, src/game.js).
 **Tukimateriaali mapeissa:** Kirjanpito 2025 -mapissa on tuloslaskelman lisäksi tositeluettelo
 (ML 117 puuttuu välistä) ja pankin tiliote (pano Kivi Consulting Ltd:ltä, jolle ei ole tositetta).
 Tilinpäätös-mapissa on tase (taide-esineet 12 000 €, 1 kpl viherkasvi; nitojan poistoaika 25 v).
+
+**Vihjeet** (src/main.js, HINTS): jokainen nimeää kohteen (mikä lukko tai esine), kuvakulman ja mitä tehdään; Pirjoa ei mainita.
 
 **Pirjo reagoi:** jokaisesta todisteesta puhelinvastaajaan tulee Pirjolta uusi viesti ja
 merkkivalo syttyy uudelleen.
@@ -79,7 +81,7 @@ yhden rivin muistiinpano, joka selittää termin: termit selitetään vain rapor
 ei huoneessa. Puuttuvan todisteen kohdalla näkyy vain kategoria ("myynti, jota ei ole kirjattu").
 Raportin voi lähettää milloin tahansa. 30 minuutin aikarajan lopussa ovi aukeaa ja Kalevi palaa.
 Arvosana määräytyy todisteiden, oikeiden perusteiden ja käytettyjen vihjeiden mukaan.
-Vihje maksaa kolme minuuttia; väärästä epäilymerkinnästä ei ole sakkoa. Tuloksen alla on
+Vihje maksaa viisi minuuttia (saman vaiheen vihje uudelleen ilmaiseksi); väärästä epäilymerkinnästä ei ole sakkoa. Tuloksen alla on
 termilista yhden rivin selityksineen.
 
 **Prologi (src/prologue.js):** kollaasikuva henkilöistä (public/comic/collage.jpg) koko
@@ -94,7 +96,7 @@ ja näin pelaat.
 Toteutettu (esineiden kuvaukset src/items.js, paperit src/paper.js):
 
 - Kunniakirja ”Vuoden veronmaksaja [arvottu vuosi]”. Myöntäjä: Kalevi K., saaja: Kalevi K.
-- Muistilaput: ”Varavain siellä missä taide kasvaa”, ”Silppuri – älä unohda!!! Kassakaappi: HÄÄPÄIVÄ (älä kirjoita ylös)”, Pirjon lappu laatikossa A.
+- Muistilaput: ”Varavain A kukkaruukun alla!”, ”Silppuri ikkunan alla – tyhjennä!!! Kassakaappi: HÄÄPÄIVÄ (älä kirjoita ylös)”, nimetön lappu laatikossa A.
 - Kahvikuppi ”Maailman paras johtaja”, kirjattu edustuskuluksi. Viherkasvi taideteoksena 12 000 € (oikea hinta 89 €). Nitojan poistoaika 25 vuotta. Sohva ”neuvottelutilan kalustus 8 900 €”.
 - Tietosanakirjasarja metreittäin, ”ammattikirjallisuutta”, sivut leikkaamatta. Muistikirja ”EI PAPEREITA VEROTTAJALLE – paitsi ne viralliset”.
 - Puhelinvastaajassa viestejä Pirjolta, vaimolta (Marjatta) ja golfkaveri Raimolta. Kalenterissa ”Hallituksen kokous (= minä)” ja ”Verotarkastus?? EI KOSKAAN”.
@@ -134,7 +136,7 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 4. ✅ **Viimeistely:** huumoriyksityiskohdat, vihjeet, loppukohtaus ja prologi (ei ääniä).
 5. ✅ **Julkaisu:** GitHub Pages.
 6. ✅ **Wow-tehosteet ja termit:** valonsäteet, laskeva aurinko, satunnaiset koodit, silppuripeli, raportin perusteet (ks. luvut 4 ja 10).
-7. ✅ **Tarina ja vaikeuskaari:** Laatikko B kiertoilmauksena, epävirallinen käynti, viides todiste, 30 min, vihje 3 min, raportin selitykset.
+7. ✅ **Tarina ja vaikeuskaari:** Laatikko B kiertoilmauksena, epävirallinen käynti, viides todiste, 30 min, vihje 5 min, raportin selitykset.
 8. **Seuraavaksi:** UI-hionta, Sohva-näkymän sisältö, aikarajan näkyvyys, Kalevin repliikit löydösten mukaan.
 
 ## 9. Avoimet kysymykset
@@ -143,7 +145,7 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 - Cloudflare Pagesiin siirtyminen: milloin, vai jäädäänkö GitHub Pagesiin?
 
 Ratkaistut:
-- Aikaraja on oikea: 30 minuuttia, kello käy, vihje maksaa kolme minuuttia, lopussa Kalevi palaa.
+- Aikaraja on oikea: 30 minuuttia, kello käy, vihje maksaa viisi minuuttia, lopussa Kalevi palaa.
 - Pelaaja on ”Sinä”, viranomainen, ilman nimeä ja ilman viraston nimeä. Käynti on epävirallinen, salapoliisityötä.
 - Peli toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio ja prologi mukautuvat), mutta ensisijainen kohde on tietokoneen selain.
 - Raportissa jokaiselle todisteelle kolme perustevaihtoehtoa: oikea, uskottava väärä ja hölmö, kukin selitysrivillä.

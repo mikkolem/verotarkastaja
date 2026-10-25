@@ -3,7 +3,7 @@
 import { EVIDENCE, EVIDENCE_CATEGORY, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
 
 const TIME_LIMIT = 30 * 60;            // sekuntia
-const HINT_COST = 3 * 60;              // vihje vähentää aikaa näin monta sekuntia
+const HINT_COST = 5 * 60;              // vihje vähentää aikaa näin monta sekuntia
 const START_CLOCK = 12 * 60 + 3;       // tarinan kellonaika alussa (12.03)
 const WARNINGS = [
   [10 * 60, 'Sihteeri soittaa: Kalevi on tilannut jälkiruoan. Kymmenen minuuttia jäljellä.'],

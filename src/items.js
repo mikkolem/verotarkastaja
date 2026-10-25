@@ -91,7 +91,7 @@ export const ITEMS = {
       run: () => api.passwordPrompt({
         title: 'Kirjaudu',
         hint: 'Salasanan vihje: ”tasoitukseni”',
-        failHint: 'Vihje: Kalevin golftasoitus on kaiverrettu johonkin tässä huoneessa.',
+        failHint: 'Vihje: salasana on golftasoitus, pelkkä luku. Katso kirjahyllyn golfpokaalia.',
         check: (v) => v.replace(/\s/g, '') === SECRETS.handicap,
         onOpen: () => {
           game.set('laptop_open');
@@ -156,7 +156,7 @@ export const ITEMS = {
         title: 'Laatikko B',
         digits: 4,
         code: SECRETS.year,
-        hint: 'Vihje: Pirjon lappu laatikossa A kertoo, mistä vuosi löytyy. Käänny sohvalle.',
+        hint: 'Vihje: laatikon A lappu kertoo, mistä vuosi löytyy. Käänny sohvalle.',
         onOpen: () => {
           api.close();
           api.openDrawer('drawer_b');
@@ -213,7 +213,7 @@ export const ITEMS = {
         digits: 4,
         code: SECRETS.weddingCode,
         labels: ['DEBET', 'KREDIT'],
-        hint: 'Vihje: laatikon B lapussa lukee ”hääpäivä” (päivä ja kuukausi). Vaimo puhuu siitä puhelinvastaajassa, ja mökkikuvassakin lukee jotain.',
+        hint: 'Vihje: hääpäivä muodossa PPKK. Vaimo mainitsee päivän puhelinvastaajassa, ja mökkikuvan reunassa lukee sama.',
         onOpen: () => {
           api.close();
           api.openSafe();

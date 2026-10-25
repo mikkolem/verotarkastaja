@@ -609,17 +609,17 @@ inventoryHud(game, { onHelp: () => { interaction.close(); showIntro(); } });
 // etene NUDGE_DELAY sekuntiin, muistutetaan napista – vihjettä ei anneta ilmaiseksi.
 const NUDGE_DELAY = 90;
 const HINTS = [
-  [() => !game.has('key'), 'Tietokoneen kannessa on muistilappu: varavain on kukkaruukun alla. Kasvi on ikkunan vieressä.'],
-  [() => !game.is('drawer_a_open'), 'Avaimessa lukee ”A”. Työpöydän vasemmassa laatikossa on sama kirjain.'],
-  [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit. Kolmessa on asiakkaan nimi, yhdessä toimitusosoite mökille.'],
-  [() => !game.is('drawer_b_open'), 'Pirjon lappu laatikossa A: koodi on vuosi kunniakirjassa sohvan yläpuolella.'],
-  [() => !game.has('invoice_bottom'), 'Laatikon B lappu: silppuri on ikkunan alla. Kokoa suikaleet.'],
-  [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku ja merkitse se. Tämä tulo ei ole virallisessa kirjanpidossa.'],
-  [() => !game.is('safe_open'), 'Kassakaapin koodi on hääpäivä: päivä ja kuukausi. Kuka tietäisi sen paremmin kuin vaimo? Puhelinvastaaja on oven vieressä.'],
-  [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapista löytynyt musta kirja ja merkitse se.'],
-  [() => !game.is('laptop_open'), 'Salasanavihje ”tasoitukseni” tarkoittaa golftasoitusta. Luku on kaiverrettu johonkin tässä huoneessa.'],
-  [() => !game.hasEvidence('cayman_transfer'), 'B-kirjan mukaan siirtojen ajankohdat on sovittu Raimon kanssa. Kalevin kalenteri on tietokoneella.'],
-  [() => !game.hasEvidence('offshore_account'), 'B-kirjan viimeinen rivi: ”Tiliotteet: ylpeyteni takana.” Mistä Kalevi on ylpein? Nosta sitä.'],
+  [() => !game.has('key'), 'Työpöydän tietokoneen kannessa on muistilappu: laatikon A varavain on kukkaruukun alla. Kasvi on Ikkuna-näkymässä.'],
+  [() => !game.is('drawer_a_open'), 'Avaimessa lukee ”A”. Se avaa työpöydän vasemman laatikon A. Klikkaa laatikkoa, avain käytetään automaattisesti.'],
+  [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit ja merkitse todisteeksi se, joka ei ole yrityksen kulu. Katso, minne tavara toimitettiin.'],
+  [() => !game.is('drawer_b_open'), 'Laatikon B numerolukon koodi on vuosiluku. Laatikon A lappu kertoo, mistä se löytyy: kunniakirjasta Sohva-näkymässä.'],
+  [() => !game.has('invoice_bottom'), 'Laatikon B lapun mukaan laskun loppuosa on silppurissa. Silppuri on Ikkuna-näkymässä työpöydän vasemmalla puolella. Kokoa suikaleet.'],
+  [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku ja merkitse se todisteeksi. Lasku 117 puuttuu virallisesta kirjanpidosta.'],
+  [() => !game.is('safe_open'), 'Kassakaapin (Kirjahylly, alahylly) koodi on Kalevin hääpäivä muodossa PPKK. Vaimo mainitsee päivän puhelinvastaajassa (Ovi-näkymä).'],
+  [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapin musta kirja ja merkitse se todisteeksi.'],
+  [() => !game.is('laptop_open'), 'Tietokoneen salasana on Kalevin golftasoitus, pelkkä luku. Se on kaiverrettu golfpokaalin laattaan Kirjahylly-näkymässä.'],
+  [() => !game.hasEvidence('cayman_transfer'), 'Avaa tietokoneelta Kalevin kalenteri. Mustan kirjan mukaan siirtojen ajankohdat on sovittu Raimon kanssa. Merkitse siirtomerkintä.'],
+  [() => !game.hasEvidence('offshore_account'), 'Mustan kirjan viimeinen rivi: ”Tiliotteet: ylpeyteni takana.” Kalevin ylpeys roikkuu seinällä Sohva-näkymässä. Nosta kehystä.'],
   [() => true, 'Kaikki todisteet on löydetty. Lähetä tarkastusraportti (oikea yläkulma) ennen kuin Kalevi palaa.'],
 ];
 const nextHint = () => HINTS.find(([when]) => when())[1];
@@ -628,7 +628,7 @@ const hints = {
   start() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      if (!introOpen && !finale?.ending) toast('Jumissa? Voit pyytää vihjeen yläkulmasta – se maksaa kolme minuuttia aikaa.', 'hint');
+      if (!introOpen && !finale?.ending) toast('Jumissa? Voit pyytää vihjeen yläkulmasta – se maksaa viisi minuuttia aikaa.', 'hint');
       this.start();
     }, NUDGE_DELAY * 1000);
   },
