@@ -116,6 +116,7 @@ viides todiste voi löytyä vahingossa ensimmäisenä (avoin kysymys, luku 11).
   yläreunan keskellä; vihje korostetaan sinisellä kehyksellä ja otsikolla ”Vihje”. Sivutiedotteet
   (ajan varoitukset, jumissa-muistutus 90 s välein, vastaajan valo) pieninä vasemmassa
   yläkulmassa, jotta ne eivät peitä kelloa eivätkä vihjettä.
+- **Sulkuruksi** (✕) on kaikkien ikkunoiden oikeassa yläkulmassa: lähikuva, lukunäkymä, lukot, puhelinvastaaja, salasana, silppuri, raportti, varmistus, tauko ja ilmoitukset (myös vihje). Puhelimella ilmoitukset näkyvät alapalkin yläpuolella.
 - **Tauko** (nappi tai P) pysäyttää kellon ja peittää ruudun; mitään muuta ei voi tehdä ennen
   kuin pelaaja jatkaa.
 

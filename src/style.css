@@ -1108,7 +1108,8 @@ body.prologue-open .title { display: none; }
   .nav button { padding: 9px 11px; font-size: 15px; }
   .inspect-buttons button { flex-basis: 100%; }
   .inspect-hint { font-size: 13px; }
-  .toast { top: auto; bottom: 84px; font-size: 16px; }
+  /* puhelimella ilmoitukset alapalkin yläpuolelle; vihjeelläkin vain alareuna, muuten se venyisi koko ruudun korkuiseksi */
+  .toast, .toast.hint { top: auto; bottom: 84px; font-size: 16px; max-height: calc(100vh - 160px); overflow-y: auto; }
 }
 
 /* Silppuripulma: laskun suikaleet vedetään oikeaan järjestykseen */
@@ -1167,3 +1168,42 @@ body.prologue-open .title { display: none; }
 .confirm-card .lock-buttons { margin-top: 16px; }
 .report-reason label > span { display: flex; flex-direction: column; gap: 3px; }
 .report-reason-note { font-size: 12.5px; line-height: 1.35; color: var(--ui-muted); }
+
+/* Sulkuruksi ikkunoiden oikeassa yläkulmassa */
+.modal-x {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ui-text);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--ui-border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.modal-x:hover { background: rgba(255, 255, 255, 0.16); }
+.lock-card, .inspect-card { position: relative; }
+.lock-card h2, .inspect-card h2 { padding-right: 40px; padding-left: 40px; }
+.inspect-card h2 { padding-left: 0; }
+/* lukunäkymän ✕ otsikkorivillä: ei absoluuttinen */
+.overlay-close.modal-x { position: static; flex: none; padding: 0; }
+/* ilmoituksen ✕: ilmoitus on klikattava, kun se näkyy */
+.toast.visible { pointer-events: auto; }
+.toast { padding-right: 52px; }
+.toast .modal-x { top: 50%; transform: translateY(-50%); width: 30px; height: 30px; font-size: 15px; }
+/* tauon ✕ ruudun oikeassa yläkulmassa */
+.pause-overlay .modal-x { top: 18px; right: 18px; width: 44px; height: 44px; font-size: 20px; }
+/* tulosnäkymän kortissa ei ruksia; raportin ja varmistuksen kortissa on */
+@media (max-width: 760px) {
+  .modal-x { width: 40px; height: 40px; }
+  .toast .modal-x { width: 34px; height: 34px; }
+}

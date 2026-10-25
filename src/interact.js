@@ -43,6 +43,7 @@ export class Interaction {
     this.label = document.getElementById('hover-label');
     this.panel = document.getElementById('inspect');
     document.getElementById('inspect-close').addEventListener('click', () => this.close());
+    document.getElementById('inspect-x').addEventListener('click', () => this.close());
     addEventListener('keydown', (e) => { if (e.key === 'Escape') this.close(); });
     addEventListener('resize', () => {
       this.inspectCamera.aspect = innerWidth / innerHeight;

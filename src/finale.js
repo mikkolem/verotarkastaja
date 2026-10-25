@@ -1,6 +1,7 @@
 // Pelin loppuosa: 30 minuutin aikaraja, tarkastusraportti ja loppukohtaus,
 // jossa ovi aukeaa ja Kalevi palaa lounaalta.
 import { EVIDENCE, EVIDENCE_CATEGORY, EVIDENCE_PLACE, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
+import { closeX } from './ui.js';
 
 const TIME_LIMIT = 30 * 60;            // sekuntia
 const HINT_COST = 5 * 60;              // vihje vähentää aikaa näin monta sekuntia
@@ -89,6 +90,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   const pauseCard = el('div', 'pause-card');
   const resume = el('button', 'lock-open pause-resume', '▶ Jatka');
   pauseCard.append(el('div', 'pause-title', 'Tauko'), el('p', 'pause-text', 'Kello on pysähdyksissä. Kalevi syö lounastaan rauhassa.'), resume);
+  pauseOverlay.appendChild(closeX(() => setPaused(false), 'Jatka peliä'));
   pauseOverlay.appendChild(pauseCard);
   document.body.appendChild(pauseOverlay);
   resume.addEventListener('click', () => setPaused(false));
@@ -194,7 +196,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     const buttons = el('div', 'lock-buttons');
     buttons.append(complete ? cancel : send, complete ? send : cancel);
     const help = el('p', 'report-help', status);
-    card.append(list, help, buttons);
+    card.append(list, help, buttons, closeX(() => overlay.remove()));
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     cancel.addEventListener('click', () => overlay.remove());
@@ -228,7 +230,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     buttons.append(ok, back);
     card.append(el('h2', null, 'Lähetetäänkö raportti?'), el('p', 'confirm-lead', 'Lähettäminen päättää tarkastuksen. Et voi palata huoneeseen.'));
     lines.forEach((t) => card.appendChild(el('p', 'confirm-line', t)));
-    card.appendChild(buttons);
+    card.append(buttons, closeX(() => { overlay.remove(); onBack?.(); }));
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     back.focus();

@@ -9,6 +9,15 @@ function el(tag, className, text) {
   return e;
 }
 
+// Sulkuruksi ikkunan oikeaan yläkulmaan (kaikissa ikkunoissa, myös puhelimella).
+export function closeX(onClick, label = 'Sulje') {
+  const b = el('button', 'modal-x', '✕');
+  b.type = 'button';
+  b.setAttribute('aria-label', label);
+  b.addEventListener('click', (e) => { e.stopPropagation(); onClick(); });
+  return b;
+}
+
 // Esc sulkee päällimmäisen ikkunan eikä mitään sen alla.
 function onEscape(close) {
   const handler = (e) => {
@@ -49,7 +58,8 @@ export function toast(message, type = 'info') {
   const body = el('span', 'toast-body');
   if (type === 'hint') body.appendChild(el('span', 'toast-kicker', 'Vihje'));
   body.appendChild(el('span', null, message));
-  toastEl.replaceChildren(el('span', 'toast-icon', TOAST_ICONS[type]), body);
+  const x = closeX(() => { clearTimeout(toastTimer); toastEl.classList.remove('visible'); }, 'Sulje ilmoitus');
+  toastEl.replaceChildren(el('span', 'toast-icon', TOAST_ICONS[type]), body, x);
   void toastEl.offsetWidth;   // käynnistää näkyviin liukumisen uudelleen
   toastEl.classList.add('visible');
   clearTimeout(toastTimer);
@@ -172,7 +182,8 @@ export function readView(title, pages, { onMark, isMarked } = {}) {
   const overlay = el('div', 'overlay read');
   const head = el('div', 'overlay-head');
   const counter = el('span', 'read-counter');
-  const close = el('button', 'overlay-close', 'Sulje');
+  const close = el('button', 'overlay-close modal-x', '✕');
+  close.setAttribute('aria-label', 'Sulje');
   const heading = el('h2', null, title);
   heading.appendChild(counter);
   head.append(heading, close);
@@ -276,7 +287,7 @@ export function codeLock({ title, digits, code, hint, onOpen, labels }) {
   const buttons = el('div', 'lock-buttons');
   buttons.append(cancel, open);
   card.prepend(el('h2', null, title));
-  card.append(wheels, message, buttons);
+  card.append(wheels, message, buttons, closeX(() => done()));
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
@@ -330,7 +341,7 @@ export function voicemail(messages, { onDone, onMessage } = {}) {
   const close = el('button', 'lock-cancel', 'Sulje');
   const buttons = el('div', 'lock-buttons');
   buttons.append(close, next);
-  card.append(el('h2', null, 'Puhelinvastaaja'), counter, from, wave, text, buttons);
+  card.append(el('h2', null, 'Puhelinvastaaja'), counter, from, wave, text, buttons, closeX(() => done()));
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
@@ -390,7 +401,7 @@ export function passwordPrompt({ title, hint, check, failHint, onOpen }) {
   cancel.type = 'button';
   const buttons = el('div', 'lock-buttons');
   buttons.append(cancel, open);
-  card.append(el('h2', null, title), el('div', 'login-user', 'Kalevi K.'), input, message, buttons);
+  card.append(el('h2', null, title), el('div', 'login-user', 'Kalevi K.'), input, message, buttons, closeX(() => done()));
   overlay.appendChild(card);
   document.body.appendChild(overlay);
   input.focus();
@@ -444,7 +455,7 @@ export function shredPuzzle({ canvas, strips = 5, title = 'Silppurin säiliö', 
   const cancel = el('button', 'lock-cancel', 'Jätä kesken');
   const buttons = el('div', 'lock-buttons');
   buttons.append(cancel);
-  card.append(el('h2', null, title), row, message, buttons);
+  card.append(el('h2', null, title), row, message, buttons, closeX(() => { done(); onCancel?.(); }));
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
