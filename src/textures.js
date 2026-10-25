@@ -152,3 +152,26 @@ export function skyTexture() {
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
 }
+
+// Harjattu teräs: vaakasuuntaiset hiusnaarmut ja hento laikukkuus (kassakaappi, silppurin terät).
+export function brushedTexture({ base = 0x4a4d52, seed = 21, size = 512, meters = 0.6 } = {}, anisotropy) {
+  const B = hexToRgb(base);
+  return toTextures(paint(size, (u, v) => {
+    const streak = noise(u * 2, v * 900, 1, 1, seed) * 0.6 + noise(u * 6, v * 300, 1, 1, seed + 3) * 0.4;
+    const blotch = fbm(u, v, 6, 6, 4, seed + 7);
+    const scratch = noise(u * 400, v * 400, 1, 1, seed + 11) > 0.985 ? 0.25 : 0;
+    const k = 0.82 + (streak - 0.5) * 0.25 + (blotch - 0.5) * 0.16 + scratch;
+    return { color: B.map((x) => Math.min(255, x * k)), height: 0.5 + (streak - 0.5) * 0.5 + scratch };
+  }), meters, anisotropy);
+}
+
+// Hienojakoinen muovipinta: pieni rakeisuus ja sormenjälkimäiset tummemmat läikät.
+export function plasticTexture({ base = 0x55575a, seed = 31, size = 512, meters = 0.4 } = {}, anisotropy) {
+  const B = hexToRgb(base);
+  return toTextures(paint(size, (u, v) => {
+    const grain = noise(u, v, 400, 400, seed);
+    const smudge = fbm(u, v, 5, 5, 3, seed + 2);
+    const k = 0.9 + (grain - 0.5) * 0.12 + (smudge - 0.5) * 0.14;
+    return { color: B.map((x) => Math.min(255, x * k)), height: 0.5 + (grain - 0.5) * 0.6 };
+  }), meters, anisotropy);
+}

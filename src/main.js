@@ -268,6 +268,8 @@ async function loadRoom() {
     scene.add(obj);
   }
   addLampLight(scene.getObjectByName('lamp'));
+  // roskakori on mallissa mukana, mutta se jätettiin pois pelistä (heikko malli, ei roolia)
+  scene.getObjectByName('waste_bin')?.removeFromParent();
   // Käsialafontti ladataan verkosta (index.html); paperit piirretään vasta sen jälkeen.
   try { await Promise.race([document.fonts.load('30px Kalam'), new Promise((r) => setTimeout(r, 2500))]); } catch { /* ilman fonttia */ }
   addPaperItems(scene);

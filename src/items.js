@@ -250,11 +250,9 @@ export const ITEMS = {
       }),
     }] : []),
   },
-  waste_bin: { title: 'Roskakori', text: 'Pari rypistettyä kahvikupin kantta. Siivooja kävi aamulla.' },
 
   // --- sisustus (decor.js) ---
   mug: { title: 'Kahvikuppi', text: '”Maailman paras johtaja.” Kirjattu edustuskuluksi. Kahvi on vielä lämmintä.' },
-  pens: { title: 'Kynäpurkki', text: 'Neljä kynää, joista yksikään ei toimi. Allekirjoitukset tehdään ilmeisesti muualla.' },
   papers: { title: 'Paperipino', text: 'Päällimmäisenä pankin tiliote. Joku on yliviivannut siitä kesäkuun panot. Tarkempi ote on Kirjanpito 2025 -mapissa.' },
   decanter: { title: 'Viskikarahvi', text: 'Single malt, 18 vuotta. Kirjanpidossa: ”neuvottelutarjoilut”. Lasissa on vielä tilkka – lounaalle lähdettiin kiireellä.' },
   trophy: {

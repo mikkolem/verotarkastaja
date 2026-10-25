@@ -43,8 +43,8 @@ Pelaaja liikkuu viiden kiinteän kuvakulman välillä (järjestys myötäpäivä
 
 | Kuvakulma | Mitä siellä on |
 |---|---|
-| **Työpöytä** | kannettava tietokone (kalenteri), muistilappu kannessa, pöytälaatikot A ja B, kahvikuppi, kynäpurkki, paperipino (tiliote), lukulasit, nitoja, mökkikuva kehyksessä, pöytälamppu |
-| **Ikkuna** | viherkasvi (”taideteos”, avain ruukun alla), paperisilppuri, roskakori, seinäkello |
+| **Työpöytä** | kannettava tietokone (kalenteri), muistilappu kannessa, pöytälaatikot A ja B, kahvikuppi, paperipino (tiliote), lukulasit, nitoja, mökkikuva kehyksessä, pöytälamppu |
+| **Ikkuna** | viherkasvi (”taideteos”, avain ruukun alla), paperisilppuri, seinäkello |
 | **Sohva** | Chesterfield-sohva, kukkatyyny, kunniakirja ”Vuoden veronmaksaja” seinällä |
 | **Ovi** | sivupöytä: puhelinvastaaja, muistikirja, viskikarahvi ja lasi; ALV-juliste; ovi käytävään |
 | **Kirjahylly** | kirjasarjat, mapit (Kirjanpito 2025, Kirjanpito 2024, Tilinpäätös), golfpokaali, kassakaappi alahyllyllä |
@@ -109,13 +109,13 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 
 **Huonekalut:** työpöytä (2 laatikkoa), nahkatuoli, kirjahylly, sohva, kassakaappi, naulakko
 
-**Esineet:** kannettava tietokone, pöytälamppu, puhelinvastaaja, seinäkello, viherkasvi ruukussa, paperisilppuri, roskakori, viskikarahvi ja lasi, kahvikuppi, kynäpurkki, paperipino, mapit (3), kirjasarjat, golfpokaali, sohvatyyny, kehykset (kunniakirja, mökkikuva), lukulasit, nitoja, muistikirja, muistilaput, kuitit, lasku (silputtu), avain, juliste. Kalenteri on tietokoneen näytöllä, ei pöydällä. Naulakkoa ei ole.
+**Esineet:** kannettava tietokone, pöytälamppu, puhelinvastaaja, seinäkello, viherkasvi ruukussa, paperisilppuri, viskikarahvi ja lasi, kahvikuppi, paperipino, mapit (3), kirjasarjat, golfpokaali, sohvatyyny, kehykset (kunniakirja, mökkikuva), lukulasit, nitoja, muistikirja, muistilaput, kuitit, lasku (silputtu), avain, juliste. Kalenteri on tietokoneen näytöllä, ei pöydällä. Naulakkoa ei ole.
 
 **Mistä mallit tulevat (toteutunut):**
 - Huone, ovi, käytävä, työpöytä, kirjahylly ja sivupöytä: Blender-skripti blender/build_room.py
-- Puhelinvastaaja, kassakaappi, mapit, silppuri, roskakori: blender/build_props.py
+- Puhelinvastaaja, kassakaappi, mapit, silppuri: blender/build_props.py (roskakori on mallissa, mutta poistetaan latauksessa). Kassakaapin näppäimistö, kyltti ja pultit sekä silppurin ikkuna, merkki ja paneeli lisätään koodilla (src/decor.js). Teräs ja muovi saavat proseduraaliset harjaus- ja rakeisuustekstuurit (src/textures.js).
 - 13 valmista Poly Havenin CC0-mallia (src/props.js), pakattu `npm run models`-komennolla
-- Kahvikuppi, kynäpurkki, paperipino, karahvi, pokaali ja tyyny: three.js:n perusmuodot (src/decor.js)
+- Kahvikuppi, paperipino, karahvi, pokaali (marmorijalusta, messinkimalja kahvoineen, kaiverrettu laatta) ja tyyny: three.js:n perusmuodot (src/decor.js)
 - Paperit ja tekstit piirretään canvakselle (src/paper.js), käsiala Kalam-fontilla
 - Henkilökuvat ja kollaasi: tekoälyllä tehdyt piirroskuvat (public/characters, public/comic)
 
@@ -163,6 +163,6 @@ Ei ääniä. Kaikki tehosteet on valittu niin, ettei huonetta tarvitse piirtää
   ympäristökartta. Lakattu pöytä ja messinki heijastavat ikkunaa.
 - **Lähikuva**: esine lentää huoneesta ruudun keskelle ja tausta sumenee (12 näytteen sumennus).
 - **Kuvakulmasiirtymä** kiertää katseen suuntaa (slerp), ei kohdepistettä.
-- **Sisustus** (src/decor.js): kahvikuppi, kynäpurkki, paperipino, viskikarahvi ja lasi,
-  golfpokaali, sohvatyyny; kirjasarjat eri sävyissä. Rakennettu three.js:n perusmuodoista.
+- **Sisustus** (src/decor.js): kahvikuppi, paperipino, viskikarahvi ja lasi, golfpokaali,
+  sohvatyyny; kirjasarjat eri sävyissä. Rakennettu three.js:n perusmuodoista.
 - **Käsialafontti** Kalam Google Fontsista (index.html); paperit piirretään vasta fontin latauduttua.

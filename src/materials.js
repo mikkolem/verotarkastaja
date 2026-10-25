@@ -1,6 +1,6 @@
 // Korvaa Blenderistä tulevat materiaalit nimen perusteella realistisemmilla.
 import * as THREE from 'three';
-import { mottledTexture, parquetTexture, woodTexture } from './textures.js';
+import { brushedTexture, mottledTexture, parquetTexture, plasticTexture, woodTexture } from './textures.js';
 
 // Antaa selaimelle välissä mahdollisuuden piirtää latausnäkymä uudelleen.
 // setTimeout varmistaa etenemisen myös taustavälilehdessä, jossa
@@ -19,6 +19,9 @@ export async function createMaterials(anisotropy, onProgress = () => {}) {
     wall: () => mottledTexture({ base: 0x3f5243, variance: 0.05, seed: 4 }, anisotropy),
     ceiling: () => mottledTexture({ base: 0xd2ccbf, variance: 0.03, seed: 8 }, anisotropy),
     leather: () => mottledTexture({ base: 0x4a2414, variance: 0.12, seed: 5, meters: 0.5, freq: 16 }, anisotropy),
+    steel: () => brushedTexture({ base: 0x50545a, seed: 21 }, anisotropy),
+    plasticDark: () => plasticTexture({ base: 0x1a1a1c, seed: 31 }, anisotropy),
+    plasticGrey: () => plasticTexture({ base: 0x5a5c60, seed: 37 }, anisotropy),
   };
   const tex = {};
   const names = Object.keys(jobs);
@@ -27,7 +30,7 @@ export async function createMaterials(anisotropy, onProgress = () => {}) {
     tex[name] = jobs[name]();
     onProgress((i + 1) / names.length);
   }
-  const { walnut, mahogany, parquet, wall, ceiling, leather } = tex;
+  const { walnut, mahogany, parquet, wall, ceiling, leather, steel, plasticDark, plasticGrey } = tex;
 
   return {
     wall_paint: new THREE.MeshStandardMaterial({
@@ -65,12 +68,18 @@ export async function createMaterials(anisotropy, onProgress = () => {}) {
     wall_hall: new THREE.MeshStandardMaterial({ color: 0xb9b2a4, roughness: 0.9 }),
 
     // erikoisesineet (blender/build_props.py)
-    plastic_black: new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.35 }),
-    plastic_grey: new THREE.MeshStandardMaterial({ color: 0x55575a, roughness: 0.5 }),
+    plastic_black: new THREE.MeshPhysicalMaterial({
+      map: plasticDark.map, bumpMap: plasticDark.bump, bumpScale: 0.15, roughness: 0.42, clearcoat: 0.25, clearcoatRoughness: 0.4,
+    }),
+    plastic_grey: new THREE.MeshStandardMaterial({ map: plasticGrey.map, bumpMap: plasticGrey.bump, bumpScale: 0.2, roughness: 0.55 }),
     led_red: new THREE.MeshStandardMaterial({
       color: 0x330000, emissive: 0xff2010, emissiveIntensity: 4, roughness: 0.3,
     }),
-    steel_dark: new THREE.MeshStandardMaterial({ color: 0x2a2c30, roughness: 0.45, metalness: 0.9 }),
+    // harjattu teräs: kassakaappi, silppurin terälista
+    steel_dark: new THREE.MeshPhysicalMaterial({
+      map: steel.map, bumpMap: steel.bump, bumpScale: 0.35, roughness: 0.38, metalness: 0.95,
+      clearcoat: 0.2, clearcoatRoughness: 0.3,
+    }),
     chrome: new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.15, metalness: 1 }),
     binder_blue: new THREE.MeshStandardMaterial({ color: 0x1d3466, roughness: 0.55 }),
     binder_red: new THREE.MeshStandardMaterial({ color: 0x7a1410, roughness: 0.55 }),
