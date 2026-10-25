@@ -42,15 +42,35 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   const reportButton = el('button', 'timer-report', 'Tarkastusraportti');
   reportButton.addEventListener('click', () => openReport());
   const box = el('div', 'timer-box');
-  // Vihje maksaa aikaa: näytetään vihje nykyiseen vaiheeseen ja kello hyppää eteenpäin.
-  const hintButton = el('button', 'timer-hint', `💡 Vihje (−${HINT_COST / 60} min)`);
-  hintButton.title = 'Näytä vihje seuraavaan vaiheeseen. Maksaa kolme minuuttia aikaa.';
+  // Vihje maksaa aikaa vain ensimmäisellä kerralla: saman vaiheen vihjeen voi
+  // pyytää uudelleen ilmaiseksi. Kun kaikki todisteet on löydetty, vihje on ilmainen.
+  const hintButton = el('button', 'timer-hint');
+  const hintText = el('span', null, '💡 Pyydä vihje');
+  const hintCost = el('span', 'timer-hint-cost');
+  hintButton.append(hintText, hintCost);
+  const paidHints = new Set();
+  const hintIsFree = (hint) => paidHints.has(hint) || game.evidence.length === EVIDENCE_TOTAL;
+  const renderHint = () => {
+    const free = hintIsFree(nextHint());
+    const label = free ? 'ilmainen' : `−${HINT_COST / 60} min`;
+    if (hintCost.textContent !== label) {
+      hintCost.textContent = label;
+      hintButton.classList.toggle('free', free);
+      hintButton.title = free
+        ? 'Tämän vaiheen vihje on jo maksettu: näet sen uudelleen ilmaiseksi.'
+        : `Näytä vihje seuraavaan vaiheeseen. Maksaa ${HINT_COST / 60} minuuttia aikaa.`;
+    }
+  };
   hintButton.addEventListener('click', () => {
     if (ending || !running) return;
-    hintsUsed++;
-    elapsed += HINT_COST;
+    const hint = nextHint();
+    if (!hintIsFree(hint)) {
+      paidHints.add(hint);
+      hintsUsed++;
+      elapsed += HINT_COST;
+    }
     render();
-    toast(nextHint(), 'hint');
+    toast(hint, 'hint');
   });
   box.append(timer, hintButton, reportButton);
   // yläkulman tietojen (tavarat, todisteet, ohjeet) eteen samalle riville
@@ -58,6 +78,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   const render = () => {
     const left = Math.max(0, TIME_LIMIT - elapsed);
     timer.textContent = `⏱ ${fmt(left)}`;
+    renderHint();
     timer.classList.toggle('urgent', left <= 120);
   };
   render();
@@ -110,21 +131,59 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
       item.append(el('span', 'report-check', ok ? '✓' : ''), body);
       list.appendChild(item);
     });
-    const status = found === EVIDENCE_TOTAL
+    const complete = found === EVIDENCE_TOTAL;
+    const status = complete
       ? 'Kaikki todisteet on koottu. Valitse jokaiselle peruste ja lähetä raportti.'
-      : `Todisteita ${found}/${EVIDENCE_TOTAL}. Valitse löydöille peruste. Voit lähettää raportin nyt tai jatkaa tutkimista.`;
-    const send = el('button', 'lock-open', found === EVIDENCE_TOTAL ? 'Lähetä raportti' : 'Lähetä keskeneräisenä');
-    const cancel = el('button', 'lock-cancel', 'Jatka tutkimista');
+      : `Todisteita ${found}/${EVIDENCE_TOTAL}. Valitse löydöille peruste ja jatka tutkimista. `
+        + 'Raportin lähettäminen päättää tarkastuksen.';
+    // Kesken: ”Jatka tutkimista” on päätoiminto, lähetys toissijainen.
+    // Valmis: ”Lähetä raportti” on päätoiminto.
+    const send = el('button', complete ? 'lock-open' : 'lock-cancel', complete ? 'Lähetä raportti' : 'Lähetä keskeneräisenä');
+    const cancel = el('button', complete ? 'lock-cancel' : 'lock-open', 'Jatka tutkimista');
     const buttons = el('div', 'lock-buttons');
-    buttons.append(cancel, send);
-    card.append(list, el('p', 'report-help', status), buttons);
+    buttons.append(complete ? cancel : send, complete ? send : cancel);
+    const help = el('p', 'report-help', status);
+    card.append(list, help, buttons);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     cancel.addEventListener('click', () => overlay.remove());
     send.addEventListener('click', () => {
-      overlay.remove();
-      finish({ reason: 'report' });
+      const missingReasons = Object.keys(EVIDENCE).filter((id) => game.hasEvidence(id) && !chosen[id]).length;
+      if (complete && missingReasons === 0) {
+        overlay.remove();
+        finish({ reason: 'report' });
+        return;
+      }
+      confirmSend({
+        missing: EVIDENCE_TOTAL - found,
+        missingReasons,
+        onBack: () => overlay.remove(),   // takaisin huoneeseen, raportti sulkeutuu
+        onConfirm: () => { overlay.remove(); finish({ reason: 'report' }); },
+      });
     });
+  }
+
+  // Varmistus ennen keskeneräisen raportin lähettämistä: peli päättyy siihen.
+  function confirmSend({ missing, missingReasons, onConfirm, onBack }) {
+    const overlay = el('div', 'overlay lock confirm');
+    const card = el('div', 'lock-card confirm-card');
+    const lines = [];
+    if (missing > 0) lines.push(`${missing} ${missing === 1 ? 'todiste jää' : 'todistetta jää'} löytymättä.`);
+    if (missingReasons > 0) lines.push(`${missingReasons} ${missingReasons === 1 ? 'löydöltä' : 'löydöltä'} puuttuu peruste, mikä laskee arvosanaa.`);
+    lines.push(`Aikaa on vielä ${fmt(Math.max(0, TIME_LIMIT - elapsed))}.`);
+    const back = el('button', 'lock-open', 'Jatka tutkimista');
+    const ok = el('button', 'lock-cancel', 'Lähetä silti');
+    const buttons = el('div', 'lock-buttons');
+    buttons.append(ok, back);
+    card.append(el('h2', null, 'Lähetetäänkö raportti?'), el('p', 'confirm-lead', 'Lähettäminen päättää tarkastuksen. Et voi palata huoneeseen.'));
+    lines.forEach((t) => card.appendChild(el('p', 'confirm-line', t)));
+    card.appendChild(buttons);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    back.focus();
+    const close = () => overlay.remove();
+    back.addEventListener('click', () => { close(); onBack?.(); });
+    ok.addEventListener('click', () => { close(); onConfirm(); });
   }
 
   // --- loppu --------------------------------------------------------------------------
