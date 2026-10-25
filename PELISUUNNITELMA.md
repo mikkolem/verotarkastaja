@@ -11,7 +11,7 @@ Muita nimiehdotuksia: *Yllätystarkastus*, *Kivi & Kumppanit*, *Toinen mappi*.
 
 - **Miksi:** tekniikkademo siitä, että näyttävän 3D-selainpelin voi tehdä Claude-avusteisesti.
 - **Painopiste:** mahdollisimman realistinen ja näyttävä ulkoasu. Pelin ei tarvitse olla pitkä.
-- **Kesto:** noin 10–15 minuuttia.
+- **Kesto:** noin 15–25 minuuttia, aikaraja 30 minuuttia.
 - **Tyyli:** huumoria, ei vakava trilleri.
 - **Vaikeus:** alussa helppoa. Kuka tahansa pystyy ratkaisemaan pulmat, mutta kirjanpidon osaamisesta on apua.
 - **Kieli:** suomi.
@@ -20,7 +20,11 @@ Muita nimiehdotuksia: *Yllätystarkastus*, *Kivi & Kumppanit*, *Toinen mappi*.
 
 Pelaaja on Verovirasto-nimisen (keksitty virasto) tarkastaja. Rakennusliike **Kivi & Kumppanit Oy:n** kirjanpidossa on ollut outoja lukuja, ja nyt tehdään yllätystarkastus.
 
-Toimitusjohtaja **Kalevi Kivi** on "lähtenyt lounaalle" ja palaa noin 15 minuutin kuluttua. Siihen mennessä pelaajan pitää löytää todisteet piilotetusta, toisesta kirjanpidosta ("laatikko B") ja koota tarkastusraportti.
+Toimitusjohtaja **Kalevi Kivi** on "lähtenyt lounaalle" ja palaa noin 30 minuutin kuluttua. Siihen mennessä pelaajan pitää todistaa, että toinen, oikea kirjanpito on olemassa, ja koota tarkastusraportti.
+
+**"Laatikko B"** on Kalevin oma kiertoilmaus koko rinnakkaiselle kirjanpidolle, ei fyysinen laatikko. Työpöydän laatikot A ja B ovat hänen vitsinsä, kassakaapin musta kirja on itse B-kirjanpito. Kirje sanoo sen ääneen: "Se ei ole laatikko."
+
+**Tämä ei ole virallinen verotarkastus** vaan epävirallinen käynti ennen sitä (virallinen alkaa ensi kuussa, "siihen mennessä paperit ovat silppurissa"). Oikea tarkastus ei tonki laatikoita johtajan ollessa lounaalla; peli on salapoliisityötä tarkastajan vaatteissa, ja prologi tunnustaa sen huumorilla. Sisältö (termit, kirjaukset, ALV) on silti asiallisesti oikein.
 
 Kalevia ei nähdä pelin aikana, mutta huoneen tavarat kertovat hänestä kaiken. Hän astuu ovesta
 vasta loppukohtauksessa (henkilökuva ja repliikki, joka riippuu tuloksesta).
@@ -49,21 +53,18 @@ Esineitä voi klikata, nostaa lähemmäs ja pyöritellä. Läheltä katsottaessa
 
 ## 4. Pulmaketju (toteutettu)
 
-Ei laskutehtäviä: koodit löytyvät huoneesta tutkimalla, ja kirjanpidon osaaminen auttaa
-tunnistamaan todisteita. Jokainen vaihe vie eri kuvakulmaan. Koodit (diplomin vuosi,
-hääpäivä ja golftasoitus) arvotaan joka pelikerralla (`SECRETS`, src/game.js), ja jokaiseen
-koodiin on kaksi lähdettä.
+Ei laskutehtäviä. Viisi todistetta vaikeusjärjestyksessä: kaksi ensimmäistä ovat ohjattuja
+(laput kertovat paikan), kolmas vaatii kahden lähteen yhdistämistä, kaksi viimeistä päättelyä
+ilman suoraa ohjausta. Koodit (diplomin vuosi, hääpäivä, golftasoitus) arvotaan joka
+pelikerralla (`SECRETS`, src/game.js).
 
-| # | Missä | Mitä tapahtuu | Tulos |
-|---|---|---|---|
-| 1 | Työpöytä → Ikkuna | Tietokoneen kannen lappu: ”Varavain siellä missä taide kasvaa.” Viherkasvi on kirjattu taideteokseksi (myös Tilinpäätös-mapin taseessa) → **Nosta ruukkua** | Messinkiavain |
-| 2 | Työpöytä | Laatikko A avautuu avaimella: kuitit ja Pirjon lappu | – |
-| 2a | Lukunäkymä | Kolmessa kuitissa on asiakkaan nimi, yhdessä toimitusosoite mökille: kiuas | **Todiste 1**: peitelty osinko |
-| 2b | Sohva | Pirjon lappu: koodi on vuosi, josta Kalevi on ylpein → diplomi ”Vuoden veronmaksaja” | Laatikko B: **diplomin vuosi** |
-| 3 | Työpöytä → Ikkuna | Laatikossa B puolikas lasku ja lappu ”Silppuri / Kassakaappi: HÄÄPÄIVÄ”. Silppurin suikaleet kootaan vetämällä oikeaan järjestykseen (5 suikaletta) | **Todiste 2**: ohimyynti, lasku 117 Cayman-yhtiölle (ALV 0 %) |
-| 3b | Ovi / Työpöytä | Vaimo mainitsee hääpäivän puhelinvastaajassa; sama päivä lukee mökkikuvan reunassa | Kassakaappi: **PPKK** (rullat DEBET / KREDIT) |
-| 4 | Kirjahylly | Kassakaapissa musta ”Kirjanpito B” (vertailu: Kirjanpito 2025 -mapin tuloslaskelma) | **Todiste 3**: kaksoiskirjanpito |
-| 4b | Kirjahylly → Työpöytä | Salasanavihje ”tasoitukseni”: Raimo sanoo, että tasoitus on kaiverrettu hyllyn golfpokaaliin. Kalenterissa pe 27.6. ”siirto Caymanille 870 000 €” | **Todiste 4**: lähipiirisiirto |
+| # | Todiste | Johtava vihje | Paikka | Vaikeus |
+|---|---|---|---|---|
+| 1 | **Kiuas edustuskuluissa** (peitelty osinko) | Tietokoneen lappu: ”Varavain A kukkaruukun alla” → avaimessa ”A” → laatikko A. Kolmessa kuitissa asiakkaan nimi, yhdessä toimitusosoite mökille | Kasvi → laatikko A → kuitit | Helppo, ohjattu |
+| 2 | **Lasku 117 Cayman-yhtiölle** (ohimyynti) | Pirjon lappu laatikossa A: ”koodi on vuosi kunniakirjassa sohvan yläpuolella” → laatikko B → lappu ”silppuri ikkunan alla” → suikaleet kootaan vetämällä | Sohva → laatikko B → silppuri | Helppo–keski |
+| 3 | **Musta B-kirjanpito** (kaksoiskirjanpito) | Lappu: ”Kassakaappi: HÄÄPÄIVÄ”. Päivä pitää itse löytää: vaimon viesti vastaajassa tai mökkikuvan päiväys. Rullat DEBET / KREDIT | Vastaaja / mökkikuva → kassakaappi | Keskitaso |
+| 4 | **Kalenterin siirto 870 000 €** (lähipiirisiirto) | Salasanavihje ”tasoitukseni”, Raimon vitsi tasoituksesta, pokaali hyllyssä (”Tasoitus NN”). B-kirja: ”ajankohdat sovittu Raimon kanssa” | Pokaali → tietokone → kalenteri | Vaikea |
+| 5 | **Cayman-tiliote Kalevin omissa nimissä, 2,1 milj. €** (ilmoittamaton ulkomainen tili) | B-kirjan viimeinen rivi: ”Tiliotteet: ylpeyteni takana.” Kunniakirja roikkuu vinossa → ”Nosta kehystä” → teipattu kirjekuori | Sohva → kunniakirja | Vaikein |
 
 **Tukimateriaali mapeissa:** Kirjanpito 2025 -mapissa on tuloslaskelman lisäksi tositeluettelo
 (ML 117 puuttuu välistä) ja pankin tiliote (pano Kivi Consulting Ltd:ltä, jolle ei ole tositetta).
@@ -73,10 +74,13 @@ Tilinpäätös-mapissa on tase (taide-esineet 12 000 €, 1 kpl viherkasvi; nito
 merkkivalo syttyy uudelleen.
 
 **Loppu:** tarkastusraportissa jokaiselle löydetylle todisteelle valitaan peruste kolmesta
-vaihtoehdosta (oikea termi, uskottava väärä, hölmö). Raportin voi lähettää milloin tahansa.
-15 minuutin aikarajan lopussa ovi aukeaa ja Kalevi palaa. Arvosana määräytyy todisteiden,
-oikeiden perusteiden ja käytettyjen vihjeiden mukaan. Vihje maksaa minuutin, väärä
-epäilymerkintä puoli minuuttia. Tuloksen alla listataan pelissä esiintyneet termit.
+vaihtoehdosta (oikea termi, uskottava väärä, hölmö). Jokaisen vaihtoehdon alla on tarkastajan
+yhden rivin muistiinpano, joka selittää termin: termit selitetään vain raportissa ja tuloksessa,
+ei huoneessa. Puuttuvan todisteen kohdalla näkyy vain kategoria ("myynti, jota ei ole kirjattu").
+Raportin voi lähettää milloin tahansa. 30 minuutin aikarajan lopussa ovi aukeaa ja Kalevi palaa.
+Arvosana määräytyy todisteiden, oikeiden perusteiden ja käytettyjen vihjeiden mukaan.
+Vihje maksaa kolme minuuttia; väärästä epäilymerkinnästä ei ole sakkoa. Tuloksen alla on
+termilista yhden rivin selityksineen.
 
 **Prologi (src/prologue.js):** kollaasikuva henkilöistä (public/comic/collage.jpg) koko
 ruudun taustana, sen päällä kolme diaa: 1) tarina ja pelin idea kolmessa virkkeessä,
@@ -130,7 +134,8 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 4. ✅ **Viimeistely:** huumoriyksityiskohdat, vihjeet, loppukohtaus ja prologi (ei ääniä).
 5. ✅ **Julkaisu:** GitHub Pages.
 6. ✅ **Wow-tehosteet ja termit:** valonsäteet, laskeva aurinko, satunnaiset koodit, silppuripeli, raportin perusteet (ks. luvut 4 ja 10).
-7. **Seuraavaksi:** pelin jatkokehitys (tutoriaalin keventäminen, Sohva-näkymän sisältö, aikarajan näkyvyys, vaihtuvat todisteet, Kalevin repliikit löydösten mukaan).
+7. ✅ **Tarina ja vaikeuskaari:** Laatikko B kiertoilmauksena, epävirallinen käynti, viides todiste, 30 min, vihje 3 min, raportin selitykset.
+8. **Seuraavaksi:** UI-hionta, Sohva-näkymän sisältö, aikarajan näkyvyys, Kalevin repliikit löydösten mukaan.
 
 ## 9. Avoimet kysymykset
 
@@ -138,10 +143,11 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 - Cloudflare Pagesiin siirtyminen: milloin, vai jäädäänkö GitHub Pagesiin?
 
 Ratkaistut:
-- Aikaraja on oikea: kello käy, vihje maksaa minuutin, väärä merkintä puoli minuuttia, lopussa Kalevi palaa.
+- Aikaraja on oikea: 30 minuuttia, kello käy, vihje maksaa kolme minuuttia, lopussa Kalevi palaa.
 - Pelaaja on ”Sinä”, verotarkastaja, ilman nimeä. Virastossa kutsutaan ”Pilkuksi”.
 - Peli toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio ja prologi mukautuvat), mutta ensisijainen kohde on tietokoneen selain.
-- Raportissa jokaiselle todisteelle kolme perustevaihtoehtoa: oikea, uskottava väärä ja hölmö.
+- Raportissa jokaiselle todisteelle kolme perustevaihtoehtoa: oikea, uskottava väärä ja hölmö, kukin selitysrivillä.
+- Termit selitetään vain raportissa ja tuloksessa, henkilön äänellä, ei huoneessa.
 
 ## 10. Visuaaliset tehosteet (toteutettu)
 
@@ -151,7 +157,7 @@ Ei ääniä. Kaikki tehosteet on valittu niin, ettei huonetta tarvitse piirtää
   auringon suuntaan. Noin 30 nelikulmiota, lisäävä sekoitus. Piilotetaan AO- ja ääriviivapassien
   ajaksi, jotteivät ne kirjoita syvyyttä.
 - **Pöly** näkyy vain säteen sisällä ja lamellien raidoissa; kameran lähellä häivytetään.
-- **Aurinko laskee** pelin 15 minuutin aikana: suunta madaltuu, väri lämpenee, varjot pitenevät.
+- **Aurinko laskee** pelin 30 minuutin aikana: suunta madaltuu, väri lämpenee, varjot pitenevät.
   Päivitetään 20 sekunnin välein (varjokartta lasketaan silloin uudelleen).
 - **Heijastukset**: huone kuvataan kerran latauksessa kuutiokameralla ja kuvasta tehdään
   ympäristökartta. Lakattu pöytä ja messinki heijastavat ikkunaa.

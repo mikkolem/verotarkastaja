@@ -15,7 +15,8 @@ export const PROPS = [
 
   // --- seinät ---
   // "Vuoden veronmaksaja 1998" sohvan yläpuolella (diplomin teksti: paper.js)
-  { name: 'diploma', url: 'fancy_picture_frame_01', position: [2.5, 1.55, 0.65], rotationY: -PI / 2 },
+  // kehys roikkuu hieman vinossa: hiljainen vihje siitä, että sitä on nosteltu (todiste 5 takana)
+  { name: 'diploma', url: 'fancy_picture_frame_01', position: [2.5, 1.55, 0.65], rotationY: -PI / 2, rotationZ: 0.035 },
   // kello ikkunan vasemmalla puolella, näkyy sekä työpöydän että ikkunan suunnasta
   { name: 'clock', url: 'wall_clock', position: [-1.3, 1.8, -2.0] },
 

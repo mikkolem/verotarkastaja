@@ -253,18 +253,20 @@ body.inspecting canvas:active { cursor: grabbing; }
 @media (max-width: 900px) { .toast { top: 112px; } }
 
 /* Tavarat ja todisteet oikeassa yläkulmassa */
+/* Oikea yläkulma kahdessa rivissä: 1) kello, vihje, raportti 2) tavarat, todisteet, ohjeet.
+   Rivit tasataan oikeaan reunaan eivätkä ne leviä otsikon päälle. */
 .hud {
   position: fixed;
   top: 18px;
   right: 18px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 6px;
-  max-width: calc(100vw - 220px);
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: calc(100vw - 240px);
 }
-.hud-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.hud-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; }
+.hud-items { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .hud-chip, .hud-evidence {
   padding: 8px 14px;
   font: inherit;
@@ -293,8 +295,7 @@ body.inspecting canvas:active { cursor: grabbing; }
 .hud-help:hover { color: var(--ui-text); }
 .hud-label { align-self: center; font-size: 14px; color: var(--ui-muted); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8); }
 .hud-list {
-  flex-basis: 100%;
-  margin: 4px 0 0;
+  margin: 0;
   padding: 12px 16px 12px 30px;
   font-size: 15px;
   line-height: 1.45;
@@ -570,6 +571,10 @@ body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
+/* tulosruudun auetessa Kalevin kortti pienenee eikä peitä tulosta */
+body.result-open .kalevi-arrives { width: min(150px, 22vw); top: 70px; transition: width 0.5s; }
+body.result-open .kalevi-quote { display: none; }
+@media (max-width: 760px) { body.result-open .kalevi-arrives { display: none; } }
 .kalevi-quote::before {
   content: '';
   position: absolute;
@@ -874,6 +879,7 @@ body.prologue-open .title { display: none; }
 #loading {
   position: fixed;
   inset: 0;
+  z-index: 40;   /* yläkulman painikkeiden päällä latauksen ajan */
   display: grid;
   place-items: center;
   background: #0d0b09;
@@ -975,4 +981,11 @@ body.prologue-open .title { display: none; }
 .report-reason input { margin: 3px 0 0; accent-color: var(--ui-accent); }
 .report-reason label:has(input:checked) { border-color: var(--ui-accent); background: rgba(216, 176, 106, 0.14); }
 .report-item-body { flex: 1; min-width: 0; }
-.result-terms { margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: var(--ui-muted); }
+.report-reason label > span { display: flex; flex-direction: column; gap: 3px; }
+.report-reason-note { font-size: 12.5px; line-height: 1.35; color: var(--ui-muted); }
+.result-terms { margin: 14px 0 0; text-align: left; font-size: 13.5px; line-height: 1.4; color: var(--ui-muted); max-height: 28vh; overflow-y: auto; }
+.result-terms-title { font-weight: 700; color: var(--ui-text); margin-bottom: 6px; }
+.result-terms div { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 3px 0; border-top: 1px solid rgba(255, 236, 205, 0.08); }
+.result-terms div dt { color: var(--ui-accent); font-weight: 600; }
+.result-terms dd { margin: 0; }
+.result .lock-card { width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto; }

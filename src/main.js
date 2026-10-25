@@ -31,7 +31,7 @@ import './style.css';
 // Ikkuna-aukko (vastaa blender/build_room.py:n mittoja)
 const WINDOW = { x0: -0.2, x1: 1.4, y0: 0.9, y1: 2.3, z: -2.0 };
 // Suunta kohti aurinkoa: ylhäältä, ikkunan takaa ja hieman sivusta.
-// Pelin 15 minuutin aikana aurinko laskee kohti SUN_DIR_END-suuntaa ja
+// Pelin 30 minuutin aikana aurinko laskee kohti SUN_DIR_END-suuntaa ja
 // valo lämpenee (ks. updateSun).
 const SUN_DIR = new THREE.Vector3(3, 4.5, -7).normalize();
 const SUN_DIR_END = new THREE.Vector3(3.6, 2.4, -7).normalize();
@@ -252,7 +252,7 @@ async function loadRoom() {
   }
 
   const used = new Set();
-  for (const { name, url, position, rotationY = 0, scale = 1 } of PROPS) {
+  for (const { name, url, position, rotationY = 0, rotationZ = 0, scale = 1 } of PROPS) {
     // ensimmäinen käyttö saa alkuperäisen, seuraavat kopion (jakavat geometrian)
     const source = propModels[propUrls.indexOf(url)].scene;
     const obj = used.has(url) ? source.clone() : source;
@@ -260,6 +260,7 @@ async function loadRoom() {
     obj.name = name;
     obj.position.set(...position);
     obj.rotation.y = rotationY;
+    obj.rotation.z = rotationZ;
     obj.scale.setScalar(scale);
     obj.traverse((o) => {
       if (o.isMesh) o.castShadow = o.receiveShadow = true;
@@ -556,12 +557,11 @@ game.onChange(() => {
   roomDirty = true;
 });
 
-const WRONG_MARK_COST = 30;   // sekuntia aikaa väärästä merkinnästä
-
 // Lukunäkymät, jotka eivät ole huoneessa omina esineinään
 const READ_TITLES = {
   invoice_assembled: 'Koottu myyntilasku',
   calendar: 'Kalevin kalenteri',
+  offshore_statement: 'Kunniakirjan takaa: tiliote',
 };
 
 // Esineiden toiminnot (items.js) käyttävät näitä.
@@ -594,9 +594,7 @@ interaction.api = {
         } else if (page.evidence) {
           toast('Tämä on jo merkitty todisteeksi.');
         } else {
-          // väärä epäily maksaa puoli minuuttia: todisteita ei kannata arvata läpi
-          finale?.skip(WRONG_MARK_COST);
-          toast(`${page.wrongText ?? 'Tässä ei näytä olevan mitään epäilyttävää.'} (−${WRONG_MARK_COST} s)`);
+          toast(page.wrongText ?? 'Tässä ei näytä olevan mitään epäilyttävää.');
         }
       },
     });
@@ -609,16 +607,17 @@ inventoryHud(game, { onHelp: () => { interaction.close(); showIntro(); } });
 // etene NUDGE_DELAY sekuntiin, muistutetaan napista – vihjettä ei anneta ilmaiseksi.
 const NUDGE_DELAY = 90;
 const HINTS = [
-  [() => !game.has('key'), 'Tietokoneen kannessa on muistilappu. Mitä tässä huoneessa on kirjattu taiteeksi?'],
-  [() => !game.is('drawer_a_open'), 'Messinkiavain sopii johonkin työpöydän laatikkoon.'],
-  [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit. Mikä niistä ei ole yrityksen kulu – vaikka juhannuksena ostettu?'],
-  [() => !game.is('drawer_b_open'), 'Laatikon A lappu: koodi on vuosi, josta Kalevi on ylpein. Katso sohvan yläpuolelle.'],
-  [() => !game.has('invoice_bottom'), 'Laatikon B lappu muistuttaa silppurista. Löytyisikö sieltä laskun loppuosa?'],
-  [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku ja merkitse se. Löytyykö tämä tulo virallisesta kirjanpidosta?'],
-  [() => !game.is('safe_open'), 'Kassakaapin koodi on hääpäivä, päivä ja kuukausi. Vaimo mainitsee sen puhelinvastaajassa, ja mökkikuvassa lukee sama.'],
-  [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapista löytynyt musta kirja.'],
-  [() => !game.is('laptop_open'), 'Tietokoneen salasanavihje on ”tasoitukseni”. Golfkaveri sanoo, että se on kaiverrettu kirjahyllyn pokaaliin.'],
-  [() => !game.hasEvidence('cayman_transfer'), 'Katso Kalevin kalenteria tietokoneelta. Mitä perjantaina tapahtuu?'],
+  [() => !game.has('key'), 'Tietokoneen kannessa on muistilappu: varavain on kukkaruukun alla. Kasvi on ikkunan vieressä.'],
+  [() => !game.is('drawer_a_open'), 'Avaimessa lukee ”A”. Työpöydän vasemmassa laatikossa on sama kirjain.'],
+  [() => !game.hasEvidence('kiuas'), 'Lue laatikon A kuitit. Kolmessa on asiakkaan nimi, yhdessä toimitusosoite mökille.'],
+  [() => !game.is('drawer_b_open'), 'Pirjon lappu laatikossa A: koodi on vuosi kunniakirjassa sohvan yläpuolella.'],
+  [() => !game.has('invoice_bottom'), 'Laatikon B lappu: silppuri on ikkunan alla. Kokoa suikaleet.'],
+  [() => !game.hasEvidence('cayman_invoice'), 'Lue koottu lasku ja merkitse se. Tämä tulo ei ole virallisessa kirjanpidossa.'],
+  [() => !game.is('safe_open'), 'Kassakaapin koodi on hääpäivä: päivä ja kuukausi. Kuka tietäisi sen paremmin kuin vaimo? Puhelinvastaaja on oven vieressä.'],
+  [() => !game.hasEvidence('second_ledger'), 'Lue kassakaapista löytynyt musta kirja ja merkitse se.'],
+  [() => !game.is('laptop_open'), 'Salasanavihje ”tasoitukseni” tarkoittaa golftasoitusta. Luku on kaiverrettu johonkin tässä huoneessa.'],
+  [() => !game.hasEvidence('cayman_transfer'), 'B-kirjan mukaan siirtojen ajankohdat on sovittu Raimon kanssa. Kalevin kalenteri on tietokoneella.'],
+  [() => !game.hasEvidence('offshore_account'), 'B-kirjan viimeinen rivi: ”Tiliotteet: ylpeyteni takana.” Mistä Kalevi on ylpein? Nosta sitä.'],
   [() => true, 'Kaikki todisteet on löydetty. Lähetä tarkastusraportti (oikea yläkulma) ennen kuin Kalevi palaa.'],
 ];
 const nextHint = () => HINTS.find(([when]) => when())[1];
@@ -627,7 +626,7 @@ const hints = {
   start() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      if (!introOpen && !finale?.ending) toast('Jumissa? Voit pyytää vihjeen yläkulmasta – se maksaa minuutin aikaa.', 'hint');
+      if (!introOpen && !finale?.ending) toast('Jumissa? Voit pyytää vihjeen yläkulmasta – se maksaa kolme minuuttia aikaa.', 'hint');
       this.start();
     }, NUDGE_DELAY * 1000);
   },

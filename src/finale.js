@@ -1,11 +1,12 @@
-// Pelin loppuosa: 15 minuutin aikaraja, tarkastusraportti ja loppukohtaus,
+// Pelin loppuosa: 30 minuutin aikaraja, tarkastusraportti ja loppukohtaus,
 // jossa ovi aukeaa ja Kalevi palaa lounaalta.
-import { EVIDENCE, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
+import { EVIDENCE, EVIDENCE_CATEGORY, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
 
-const TIME_LIMIT = 15 * 60;            // sekuntia
-const HINT_COST = 60;                  // vihje vähentää aikaa näin monta sekuntia
+const TIME_LIMIT = 30 * 60;            // sekuntia
+const HINT_COST = 3 * 60;              // vihje vähentää aikaa näin monta sekuntia
 const START_CLOCK = 12 * 60 + 3;       // tarinan kellonaika alussa (12.03)
 const WARNINGS = [
+  [10 * 60, 'Sihteeri soittaa: Kalevi on tilannut jälkiruoan. Kymmenen minuuttia jäljellä.'],
   [5 * 60, 'Käytävältä kuuluu askelia… ei, se oli vain siivooja. Viisi minuuttia jäljellä.'],
   [2 * 60, 'Hissi kilahtaa alakerrassa! Kaksi minuuttia jäljellä.'],
   [30, 'Oven takaa kuuluu avainten kilinää!'],
@@ -31,7 +32,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   const chosen = {};
   // vaihtoehtojen järjestys arvotaan kerran, jotta oikea ei ole aina ensimmäinen
   const shuffled = Object.fromEntries(Object.entries(REASONS).map(([id, list]) => [id, [...list].sort(() => Math.random() - 0.5)]));
-  const correctReasons = () => Object.keys(REASONS).filter((id) => game.hasEvidence(id) && chosen[id] === REASONS[id][0]).length;
+  const correctReasons = () => Object.keys(REASONS).filter((id) => game.hasEvidence(id) && chosen[id] === REASONS[id][0].text).length;
   let warned = 0;
   let ending = false;
 
@@ -43,7 +44,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   const box = el('div', 'timer-box');
   // Vihje maksaa aikaa: näytetään vihje nykyiseen vaiheeseen ja kello hyppää eteenpäin.
   const hintButton = el('button', 'timer-hint', `💡 Vihje (−${HINT_COST / 60} min)`);
-  hintButton.title = 'Näytä vihje seuraavaan vaiheeseen. Maksaa minuutin aikaa.';
+  hintButton.title = 'Näytä vihje seuraavaan vaiheeseen. Maksaa kolme minuuttia aikaa.';
   hintButton.addEventListener('click', () => {
     if (ending || !running) return;
     hintsUsed++;
@@ -88,18 +89,20 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
       const ok = game.hasEvidence(id);
       const item = el('li', `report-item${ok ? ' found' : ''}`);
       const body = el('div', 'report-item-body');
-      body.appendChild(el('div', null, ok ? EVIDENCE[id] : `Todiste ${i + 1}: ei vielä löydetty`));
+      body.appendChild(el('div', null, ok ? EVIDENCE[id] : `Todiste ${i + 1}: ${EVIDENCE_CATEGORY[id]} – ei vielä löydetty`));
       if (ok) {
-        // peruste valitaan kolmesta vaihtoehdosta
+        // peruste valitaan kolmesta vaihtoehdosta; muistiinpano selittää termin
         const reasons = el('div', 'report-reason');
-        shuffled[id].forEach((text) => {
+        shuffled[id].forEach(({ text, note }) => {
           const lab = el('label');
           const input = el('input');
           input.type = 'radio';
           input.name = `reason-${id}`;
           input.checked = chosen[id] === text;
           input.addEventListener('change', () => { chosen[id] = text; });
-          lab.append(input, el('span', null, text));
+          const span = el('span');
+          span.append(el('span', 'report-reason-text', text), el('span', 'report-reason-note', note));
+          lab.append(input, span);
           reasons.appendChild(lab);
         });
         body.appendChild(reasons);
@@ -161,13 +164,15 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     if (found === EVIDENCE_TOTAL && hintsUsed <= 1 && reasons === EVIDENCE_TOTAL) return ['Erinomainen', 'Kahdenkertainen kirjanpito, kaksinkertainen tarkastaja. Pirjon mielestä olisit loistava kirjanpitäjä.'];
     if (found === EVIDENCE_TOTAL && reasons >= EVIDENCE_TOTAL - 1) return ['Kiitettävä', 'Kaikki todisteet koossa ja perusteet lähes kohdallaan. Kalevin juristit tekevät ylitöitä.'];
     if (found === EVIDENCE_TOTAL) return ['Hyvä', 'Todisteet löytyivät, mutta perustelut horjuvat. Kalevin juristit löytävät aukon.'];
-    if (found === 3) return ['Hyvä', 'Kalevi saa jälkiverot ja veronkorotukset. Golfmatkat jäävät väliin.'];
-    if (found === 2) return ['Tyydyttävä', 'Tapaus siirtyy jatkoselvitykseen. Kesämökin sauna jää lämpiämään.'];
-    if (found === 1) return ['Välttävä', 'Yksi kiuas ei vielä kaada imperiumia. Kalevi lähtee ”golfmatkalle”.'];
+    if (found === 4) return ['Hyvä', 'Cayman-tili jäi löytymättä, mutta B-kirjanpito riittää. Kalevi saa jälkiverot ja veronkorotukset.'];
+    if (found === 3) return ['Tyydyttävä', 'Toinen kirjanpito on todistettu. Virallinen tarkastus jatkaa siitä, mihin jäit.'];
+    if (found === 2) return ['Välttävä', 'Tapaus siirtyy jatkoselvitykseen. Kesämökin sauna jää lämpiämään.'];
+    if (found === 1) return ['Heikko', 'Yksi kiuas ei vielä kaada imperiumia. Kalevi lähtee ”golfmatkalle”.'];
     return ['Hylätty', 'Kalevi tarjoaa sinulle viskiä. Kieltäydyt, mutta todisteita ei ole.'];
   }
 
   function showResult({ reason, found }) {
+    document.body.classList.add('result-open');   // Kalevin kortti pienenee tuloksen tieltä
     const [title, line] = grade(found);
     const overlay = el('div', 'overlay lock result');
     const card = el('div', 'lock-card');
@@ -185,8 +190,16 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
         `aikaa kului ${fmt(Math.min(elapsed, TIME_LIMIT))}`,
         `vihjeitä ${hintsUsed}`,
       ].filter(Boolean).join(' · ')),
-      el('p', 'result-terms', `Tarkastuksessa vastaan tulleet termit: ${TERMS.join(', ')}.`),
     );
+    // termit yhden rivin selityksineen
+    const terms = el('dl', 'result-terms');
+    terms.appendChild(el('dt', 'result-terms-title', 'Tarkastuksessa vastaan tulleet termit'));
+    TERMS.forEach(([term, note]) => {
+      const row = el('div');
+      row.append(el('dt', null, term), el('dd', null, note));
+      terms.appendChild(row);
+    });
+    card.appendChild(terms);
     const again = el('button', 'lock-open', 'Pelaa uudelleen');
     again.addEventListener('click', () => location.reload());
     const buttons = el('div', 'lock-buttons');

@@ -231,7 +231,8 @@ function pirjoNoteTexture() {
     paperBackground(g, w, h, '#fbf8ee');
     g.fillStyle = '#5a2a6a';
     g.font = `27px ${HAND}`;
-    ['Kalevi,', 'laatikon B koodi on', 'se vuosi, josta olet', 'niin ylpeä.', 'Unohdat sen aina.', '        – P.'].forEach((l, i) => g.fillText(l, 26, 60 + i * 56));
+    g.font = `25px ${HAND}`;
+    ['Kalevi,', 'laatikon B koodi on', 'se vuosi, joka lukee', 'kunniakirjassasi', 'sohvan yläpuolella.', '        – P.'].forEach((l, i) => g.fillText(l, 24, 60 + i * 56));
   });
 }
 
@@ -278,7 +279,8 @@ function safeNoteTexture() {
     }
     g.fillStyle = '#1f3a8a';
     g.font = `30px ${HAND}`;
-    ['Silppuri –', 'älä unohda!!!', '', 'Kassakaappi:', 'HÄÄPÄIVÄ', '(älä kirjoita ylös)'].forEach((l, i) => g.fillText(l, 28, 62 + i * 42));
+    g.font = `27px ${HAND}`;
+    ['Silppuri ikkunan', 'alla – tyhjennä!!!', '', 'Kassakaappi:', 'HÄÄPÄIVÄ', '(älä kirjoita ylös)'].forEach((l, i) => g.fillText(l, 24, 62 + i * 42));
   });
 }
 
@@ -538,6 +540,59 @@ function balanceSheetCanvas() {
   return c;
 }
 
+// Todiste 5: Cayman National Bankin tiliote Kalevin omissa nimissä, kunniakirjan takana.
+function offshoreStatementCanvas() {
+  const c = document.createElement('canvas');
+  c.width = 600;
+  c.height = 840;
+  const g = c.getContext('2d');
+  paperBackground(g, c.width, c.height, '#f6f4ee');
+  g.fillStyle = '#0b3d5c';
+  g.fillRect(0, 0, c.width, 80);
+  g.fillStyle = '#fff';
+  g.font = `bold 28px ${SERIF}`;
+  g.fillText('CAYMAN NATIONAL BANK', 30, 50);
+  g.fillStyle = '#222';
+  g.font = `16px ${MONO}`;
+  g.fillText('Account statement · June 2025', 30, 115);
+  g.fillText('Account holder: KALEVI KIVI (private)', 30, 142);
+  g.fillText('Harbour Road 7, George Town', 30, 166);
+  g.fillRect(30, 185, c.width - 60, 1);
+  const rows = [
+    ['03 Jun', 'Transfer from Kivi Consulting Ltd', '210 000,00'],
+    ['12 Jun', 'Transfer from Kivi Consulting Ltd', '185 000,00'],
+    ['19 Jun', 'Golf Club Grand Cayman', '−2 400,00'],
+    ['26 Jun', 'Transfer from Kivi Consulting Ltd', '240 000,00'],
+    ['30 Jun', 'Interest', '4 812,55'],
+  ];
+  rows.forEach((r, i) => {
+    const y = 225 + i * 44;
+    if (i % 2) { g.fillStyle = '#e8ecef'; g.fillRect(30, y - 28, c.width - 60, 40); }
+    g.fillStyle = '#222';
+    g.font = `16px ${MONO}`;
+    g.textAlign = 'left';
+    g.fillText(r[0], 30, y);
+    g.fillText(r[1], 120, y);
+    g.textAlign = 'right';
+    g.fillText(r[2], c.width - 30, y);
+  });
+  g.textAlign = 'left';
+  g.font = `bold 18px ${MONO}`;
+  g.fillText('Balance 30 Jun 2025', 30, 500);
+  g.textAlign = 'right';
+  g.fillText('EUR 2 104 812,55', c.width - 30, 500);
+  g.textAlign = 'left';
+  g.font = `14px ${MONO}`;
+  g.fillStyle = '#555';
+  g.fillText('Not reported to any tax authority. Confidential.', 30, 560);
+  // Kalevin oma merkintä
+  g.fillStyle = '#1f3a8a';
+  g.font = `26px ${HAND}`;
+  g.fillText('Eläkerahasto. Ei Pirjolle.', 30, 660);
+  g.fillText('– K.K.', 420, 700);
+  return c;
+}
+
 // Silppurin säiliöstä löytyvä laskun alaosa (silppuripulmaa varten).
 export function shredderCanvas() {
   return once('invoice_bottom', invoiceBottomCanvas);
@@ -577,10 +632,10 @@ function secretLedgerCanvas() {
   g.textAlign = 'left';
   g.fillStyle = '#1f3a8a';
   g.font = `28px ${HAND}`;
-  ['Ero siirretty Caymanille', '”golfmatkoina”.', 'Ks. kalenteri!'].forEach((l, i) => g.fillText(l, 40, 560 + i * 46));
+  ['Ero siirretty Caymanille', '”golfmatkoina”. Ajankohdat', 'sovittu Raimon kanssa.', '', 'Tiliotteet: ylpeyteni takana.'].forEach((l, i) => g.fillText(l, 40, 540 + i * 44));
   g.fillStyle = '#7a1410';
   g.font = `italic 17px ${SERIF}`;
-  g.fillText('(Viherkasvin todellinen hinta: 89 € Plantagenista.)', 40, 780);
+  g.fillText('(Viherkasvin todellinen hinta: 89 € Plantagenista.)', 40, 800);
   return c;
 }
 
@@ -693,7 +748,7 @@ export function addPaperItems(scene) {
 
   // Varavainlappu teipattuna tietokoneen kanteen pelaajan puolelle, jotta se
   // huomataan heti ensimmäisestä kuvakulmasta.
-  const noteKey = sheet('note_avain', noteTexture('Varavain\nsiellä missä\ntaide kasvaa'), 0.1, 0.1, { back: 0xf2dc5e });
+  const noteKey = sheet('note_avain', noteTexture('Varavain A\nkukkaruukun\nalla!'), 0.1, 0.1, { back: 0xf2dc5e });
   noteKey.rotation.set(-0.12, 0, 0.06);
   noteKey.position.set(0.95, 0.97, -0.584);
   scene.add(noteKey);
@@ -764,6 +819,9 @@ export function pagesFor(key) {
     ];
   }
   if (key === 'binder_3') return [{ canvas: once('balance', balanceSheetCanvas), label: 'Tase' }];
+  if (key === 'offshore_statement') {
+    return [{ canvas: once('offshore', offshoreStatementCanvas), label: 'Cayman National Bank, tiliote', markable: true, evidence: 'offshore_account' }];
+  }
   if (key === 'ledger_book') {
     return [{ canvas: once('secret', secretLedgerCanvas), label: 'B-kirjanpito', markable: true, evidence: 'second_ledger' }];
   }

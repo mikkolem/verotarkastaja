@@ -47,7 +47,10 @@ export function inventoryHud(game, { onHelp }) {
   const list = el('ul', 'hud-list');
   list.hidden = true;
   evidence.addEventListener('click', () => { list.hidden = !list.hidden; });
-  hud.append(items, evidence, help, list);
+  // toinen rivi: tavarat, todisteet ja ohjeet (ensimmäisellä rivillä kello, vihje ja raportti)
+  const row = el('div', 'hud-row');
+  row.append(items, evidence, help);
+  hud.append(row, list);
   document.body.appendChild(hud);
 
   game.onChange(() => {

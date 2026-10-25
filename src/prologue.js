@@ -23,17 +23,17 @@ const SLIDES = [
     lines: [
       'Rakennusliike Kivi & Kumppanit Oy ilmoittaa liikevaihdokseen puolet siitä, mitä sen pankkitilille tulee.',
       'Kirjanpitäjä on huomannut sen. Toimitusjohtaja ei ole huomannut, että kirjanpitäjä on huomannut.',
-      'Sinä olet Veroviraston tarkastaja. Tänään pöydällesi tuli kirje ilman lähettäjää.',
+      'Sinä olet Veroviraston tarkastaja. Virallinen tarkastus alkaa ensi kuussa – siihen mennessä paperit ovat silppurissa. Tänään pöydällesi tuli kirje ilman lähettäjää.',
     ],
   },
   {
     kind: 'letter',
     kicker: 'Kirje on kirjoitettu koneella. Ei allekirjoitusta.',
     lines: [
-      'Kalevi Kivi pitää toista kirjanpitoa. Oikeaa.',
-      'Se on hänen työhuoneessaan. Hän kutsuu sitä ”laatikko B:ksi”.',
-      'Hän lähtee lounaalle tasan kello 12 ja palaa vartin päästä. Ovi jää raolleen.',
-      'Etsi todisteet ennen kuin hän palaa.',
+      'Kalevi Kivi pitää toista kirjanpitoa. Oikeaa. Hän kutsuu sitä ”laatikko B:ksi”. Se ei ole laatikko.',
+      'Kaikki on hänen työhuoneessaan, jos osaa katsoa.',
+      'Hän lähtee lounaalle tasan kello 12 ja palaa puolen tunnin päästä. Ovi jää raolleen.',
+      'Todista, että B on olemassa, ennen kuin hän palaa.',
       '– Joku, joka tietää',
     ],
   },

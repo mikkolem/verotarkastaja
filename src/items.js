@@ -12,7 +12,7 @@ const MESSAGES = [
   { from: 'Marjatta', time: 'tänään 10.40',
     text: () => `Kalle, kulta. Muistathan, että meidän hääpäivä on ${SECRETS.weddingText}, niin kuin joka vuosi. Älä unohda tällä kertaa! Ja juhannuksena saunotaan uudella kiukaalla.` },
   { from: 'Raimo, golfklubi', time: 'tänään 11.05',
-    text: 'Kalevi, Raimo tässä! Lauantaina klo 9 ykkösteellä. Ja se tasoitus, jonka kaiverrutit siihen hyllysi pokaaliin, ei ole tasoitus vaan toive, hahhah! Perjantain ”golfmatka” meni kai läpi?' },
+    text: 'Kalevi, Raimo tässä! Lauantaina klo 9 ykkösteellä. Ja se sinun tasoituksesi ei ole tasoitus vaan toive, hahhah! Perjantain ”golfmatka” meni kai läpi?' },
 ];
 
 // Pirjon jatkoviestit todisteiden mukaan (järjestyksessä, jossa ne löytyvät)
@@ -21,6 +21,7 @@ const PIRJO_FOLLOWUPS = {
   cayman_invoice: 'Lasku 117 näkyy tiliotteella mutta ei mapissa. Jos se on silppurissa, minä en ole koskaan ollut täällä töissä.',
   second_ledger: 'Se musta kirja kassakaapissa ei ole kirjanpitoa, Kalevi. Se on tunnustus.',
   cayman_transfer: 'Perjantain siirto. Minä irtisanoudun. Varavain on kukkaruukun alla, niin kuin aina.',
+  offshore_account: 'Se kuori oli siellä koko ajan. Minä ripustin sen kunniakirjan. Suoraan.',
 };
 let heard = 0;   // montako viestiä pelaaja on kuunnellut
 
@@ -53,11 +54,24 @@ export const ITEMS = {
       label: 'Nosta ruukkua',
       run: () => {
         game.give('key');
-        api.toast('Ruukun alta löytyi pieni messinkiavain! Se on nyt tavaroissasi.', 'item');
+        api.toast('Ruukun alta löytyi messinkiavain, jossa lukee ”A”. Se on nyt tavaroissasi.', 'item');
       },
     }]),
   },
-  diploma: { title: 'Kunniakirja', text: () => `Vuoden veronmaksaja ${SECRETS.year}. Myöntäjä: Kalevi Kivi. Saaja: Kalevi Kivi.` },
+  // Todiste 5 (vaikein): kehyksen takana on teipattu kirjekuori. Vihje B-kirjassa: ”ylpeyteni takana”.
+  diploma: {
+    title: 'Kunniakirja',
+    text: () => `Vuoden veronmaksaja ${SECRETS.year}. Myöntäjä: Kalevi Kivi. Saaja: Kalevi Kivi.${
+      game.has('envelope') ? ' Kehyksen takana oli teipattu kirjekuori.' : ' Kehys roikkuu hieman vinossa, kuin sitä olisi nosteltu usein.'}`,
+    actions: (api) => (game.has('envelope') ? [{ label: 'Lue tiliote', run: () => api.read('offshore_statement') }] : [{
+      label: 'Nosta kehystä',
+      run: () => {
+        game.give('envelope');
+        api.toast('Kehyksen takana oli teipattu kirjekuori: pankin tiliote.', 'item');
+        api.read('offshore_statement');
+      },
+    }]),
+  },
   clock: { title: 'Seinäkello', text: 'Tik, tak. Kalevin lounas ei kestä ikuisesti.' },
   books1: BOOKS, books2: BOOKS, books3: BOOKS, books4: BOOKS, books5: BOOKS,
 
@@ -98,8 +112,8 @@ export const ITEMS = {
     title: 'Pöytälaatikko A',
     text: () => {
       if (game.is('drawer_a_open')) return 'Laatikko on auki. Sisällä on kuittinippu ja käsin kirjoitettu lappu.';
-      if (game.has('key')) return 'Etulevyssä on pieni messinkikyltti: ”A”. Lukko näyttää sopivan löytämällesi avaimelle.';
-      return 'Etulevyssä on pieni messinkikyltti: ”A”. Lukossa. Avain on varmasti jossain lähellä – Kalevi ei vaikuta ihmiseltä, joka kantaa avaimia mukanaan.';
+      if (game.has('key')) return 'Etulevyssä on pieni messinkikyltti: ”A”. Avaimessasi lukee sama kirjain.';
+      return 'Etulevyssä on pieni messinkikyltti: ”A”. Lukossa. Tietokoneen kannessa oleva lappu kertoo, missä varavain on.';
     },
     actions: (api) => (!game.is('drawer_a_open') && game.has('key') ? [{
       label: 'Käytä messinkiavainta',
@@ -121,7 +135,7 @@ export const ITEMS = {
   // Pulma 2b: laatikon B koodi = vuosi, josta Kalevi on ylpein (diplomi 1998)
   note_pirjo: {
     title: 'Pirjon lappu',
-    text: 'Pirjon siistiä käsialaa: ”Kalevi, laatikon B koodi on se vuosi, josta olet niin ylpeä. Kirjoitin sen tähän, koska unohdat sen aina. – P.” Vuosilukua ei ole kirjoitettu.',
+    text: 'Pirjon siistiä käsialaa: ”Kalevi, laatikon B koodi on se vuosi, joka lukee kunniakirjassasi sohvan yläpuolella. Et unohda sitä, kun katsot seinälle. – P.”',
     rotation: [0, 0, 0],
   },
   drawer_b: {
@@ -135,7 +149,7 @@ export const ITEMS = {
         title: 'Laatikko B',
         digits: 4,
         code: SECRETS.year,
-        hint: 'Vihje: lue laatikon A lappu. Mistä vuodesta Kalevi on ylpein? Katso seiniä.',
+        hint: 'Vihje: Pirjon lappu laatikossa A kertoo, mistä vuosi löytyy. Käänny sohvalle.',
         onOpen: () => {
           api.close();
           api.openDrawer('drawer_b');
@@ -147,13 +161,13 @@ export const ITEMS = {
   },
   drawer_b_papers: {
     title: 'Laatikon B paperit',
-    text: 'Puolikas myyntilasku ja Kalevin käsin kirjoittama lappu.',
+    text: 'Puolikas myyntilasku ja Kalevin käsin kirjoittama lappu silppurista ja kassakaapista.',
     rotation: FLAT,
     actions: (api) => [{ label: 'Lue paperit', run: () => api.read('drawer_b_papers') }],
   },
   note_avain: {
     title: 'Muistilappu',
-    text: '”Varavain siellä missä taide kasvaa.” Kalevin muistisääntö, ilmeisesti. Mitä tässä huoneessa on kirjattu taiteeksi?',
+    text: '”Varavain A kukkaruukun alla. ÄLÄ KASTELE (taidetta).” Kalevin muistisääntö. Viherkasvi on ikkunan vieressä.',
     rotation: [0, 0, 0],
   },
 
