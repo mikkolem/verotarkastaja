@@ -1,6 +1,6 @@
 // Pienet sisustusesineet, jotka rakennetaan suoraan three.js:n perusmuodoista:
-// kahvikuppi, paperipino, viskikarahvi ja lasi, golfpokaali ja sohvatyyny, sekä
-// kassakaapin ja silppurin lisäosat Blender-mallien päälle. Lisäksi kirjasarjojen kopiot saavat eri sävyt, etteivät ne näytä
+// kahvikuppi, paperipino, viskikarahvi ja lasi, sekä kassakaapin, silppurin ja
+// pokaalin (Poly Havenin pikari) lisäosat valmiiden mallien päälle. Tyyny on Poly Havenin. Lisäksi kirjasarjojen kopiot saavat eri sävyt, etteivät ne näytä
 // samalta hyllyltä viisi kertaa. Kaikki kevyttä geometriaa, ei uusia latauksia.
 import * as THREE from 'three';
 import { SECRETS } from './game.js';
@@ -120,111 +120,6 @@ function whisky() {
   body.castShadow = stopper.castShadow = glass.castShadow = false;
   liquid.castShadow = dram.castShadow = true;
   return g;
-}
-
-// Golfpokaali, jonka laattaan on kaiverrettu Kalevin tasoitus (tietokoneen salasana).
-// Marmorijalusta, uurrettu varsi, levenevä malja kahvoineen ja kiillotettu messinki.
-function marbleTexture() {
-  return label(512, 512, (c, w, h) => {
-    c.fillStyle = '#1c1a1e';
-    c.fillRect(0, 0, w, h);
-    c.globalAlpha = 0.35;
-    for (let i = 0; i < 40; i++) {
-      c.strokeStyle = i % 3 ? '#4a4650' : '#8a8490';
-      c.lineWidth = 1 + Math.random() * 2.5;
-      c.beginPath();
-      let x = Math.random() * w, y = Math.random() * h;
-      c.moveTo(x, y);
-      for (let k = 0; k < 6; k++) {
-        x += (Math.random() - 0.5) * 220;
-        y += (Math.random() - 0.5) * 220;
-        c.quadraticCurveTo(x + (Math.random() - 0.5) * 80, y + (Math.random() - 0.5) * 80, x, y);
-      }
-      c.stroke();
-    }
-    c.globalAlpha = 1;
-  });
-}
-
-function trophy() {
-  const g = new THREE.Group();
-  g.name = 'trophy';
-  const brass = new THREE.MeshPhysicalMaterial({
-    color: 0xe2bd6e, roughness: 0.16, metalness: 1, clearcoat: 0.5, clearcoatRoughness: 0.15,
-  });
-  const brassIn = brass.clone();
-  brassIn.side = THREE.DoubleSide;
-  // marmorijalusta ja messinkinen kaulus
-  const marble = new THREE.MeshPhysicalMaterial({ map: marbleTexture(), roughness: 0.18, clearcoat: 0.8, clearcoatRoughness: 0.1 });
-  const base = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.05, 0.13), marble);
-  base.position.y = 0.025;
-  const base2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.02, 0.1), marble);
-  base2.position.y = 0.06;
-  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.036, 0.012, 32), brass);
-  collar.position.y = 0.076;
-  // uurrettu varsi (särmikäs lieriö) ja renkaat
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.015, 0.075, 12), brass);
-  stem.position.y = 0.12;
-  const ring1 = new THREE.Mesh(new THREE.TorusGeometry(0.016, 0.004, 10, 32), brass);
-  ring1.rotation.x = Math.PI / 2;
-  ring1.position.y = 0.158;
-  const ring2 = ring1.clone();
-  ring2.position.y = 0.084;
-  // malja: kapea pohja, levenevä ja ulospäin kaartuva reuna
-  const profile = [[0.012, 0], [0.03, 0.012], [0.046, 0.04], [0.054, 0.085], [0.056, 0.12], [0.062, 0.14], [0.058, 0.142], [0.05, 0.13], [0.046, 0.09], [0.034, 0.045], [0.02, 0.02]]
-    .map(([r, y]) => new THREE.Vector2(r, y));
-  const cup = new THREE.Mesh(new THREE.LatheGeometry(profile, 48), brassIn);
-  cup.position.y = 0.16;
-  // kahvat molemmin puolin
-  const handleGeo = new THREE.TorusGeometry(0.03, 0.005, 10, 32, Math.PI);
-  const handleL = new THREE.Mesh(handleGeo, brass);
-  handleL.position.set(-0.07, 0.245, 0);
-  handleL.rotation.set(0, 0, Math.PI / 2 + 0.25);
-  const handleR = new THREE.Mesh(handleGeo, brass);
-  handleR.position.set(0.07, 0.245, 0);
-  handleR.rotation.set(0, 0, -Math.PI / 2 - 0.25);
-  // golfpallo maljan päällä
-  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.02, 32, 24), new THREE.MeshPhysicalMaterial({
-    map: label(256, 128, (c, w, h) => {
-      c.fillStyle = '#f6f6f2';
-      c.fillRect(0, 0, w, h);
-      c.fillStyle = '#d9d9d4';
-      for (let y = 6; y < h; y += 12) for (let x = (y / 12) % 2 ? 6 : 0; x < w; x += 12) { c.beginPath(); c.arc(x, y, 3, 0, Math.PI * 2); c.fill(); }
-    }),
-    roughness: 0.45, clearcoat: 0.3,
-  }));
-  ball.position.y = 0.32;
-  // kaiverrettu laatta jalustan etupinnalla
-  const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.03), new THREE.MeshPhysicalMaterial({
-    map: label(512, 154, (c, w, h) => {
-      const grad = c.createLinearGradient(0, 0, w, h);
-      grad.addColorStop(0, '#f0d58a');
-      grad.addColorStop(0.5, '#c9a24e');
-      grad.addColorStop(1, '#e8c874');
-      c.fillStyle = grad;
-      c.fillRect(0, 0, w, h);
-      c.strokeStyle = '#8a6a26';
-      c.lineWidth = 6;
-      c.strokeRect(8, 8, w - 16, h - 16);
-      c.textAlign = 'center';
-      c.fillStyle = 'rgba(255,245,210,0.7)';
-      c.font = 'bold 36px Georgia, serif';
-      c.fillText('KESÄKISAT · KALEVI K.', w / 2 + 1, 58 + 1);
-      c.font = 'bold 50px Georgia, serif';
-      c.fillText(`TASOITUS ${SECRETS.handicap}`, w / 2 + 1, 120 + 1);
-      c.fillStyle = '#3a2a10';
-      c.font = 'bold 36px Georgia, serif';
-      c.fillText('KESÄKISAT · KALEVI K.', w / 2, 58);
-      c.font = 'bold 50px Georgia, serif';
-      c.fillText(`TASOITUS ${SECRETS.handicap}`, w / 2, 120);
-    }),
-    roughness: 0.25, metalness: 0.7, clearcoat: 0.4,
-  }));
-  plate.position.set(0, 0.027, 0.0655);
-  g.add(base, base2, collar, stem, ring1, ring2, cup, handleL, handleR, ball, plate);
-  g.position.set(-2.3, shelf(3), 0.55);
-  g.rotation.y = Math.PI / 2;
-  return shadowed(g);
 }
 
 // Kassakaapin oveen: valmistajan kyltti, näppäimistö näyttöineen ja kulmapultit.
@@ -391,37 +286,80 @@ function shredderDetails(scene) {
   }
 }
 
-// Kuvioitu tyyny sohvan kulmaan (isot kukkakuviot, ei tuotemerkkiä).
-function pillow(sofa) {
-  const g = new THREE.Group();
-  g.name = 'pillow';
-  const tex = label(512, 512, (c, w, h) => {
-    c.fillStyle = '#f4efe3';
-    c.fillRect(0, 0, w, h);
-    const petals = ['#c8322b', '#e0574a', '#1f2a44'];
-    [[120, 130, 110], [370, 110, 90], [150, 380, 95], [390, 370, 120], [270, 250, 60]].forEach(([x, y, r], i) => {
-      c.fillStyle = petals[i % 3];
-      c.beginPath();
-      for (let k = 0; k < 7; k++) {
-        const a = (k / 7) * Math.PI * 2;
-        c.ellipse(x + Math.cos(a) * r * 0.55, y + Math.sin(a) * r * 0.55, r * 0.5, r * 0.36, a, 0, Math.PI * 2);
-      }
-      c.fill();
-      c.fillStyle = '#1b1b1b';
-      c.beginPath();
-      c.arc(x, y, r * 0.18, 0, Math.PI * 2);
-      c.fill();
-    });
+// Poly Havenin messinkipikari pokaalina: vain ensimmäinen malja näytetään, ja sen
+// eteen lisätään kaiverrettu laatta (Kalevin tasoitus) sekä golfpallo maljan suulle.
+function trophyDetails(scene) {
+  const trophy = scene.getObjectByName('trophy');
+  if (!trophy) return;
+  let goblet;
+  trophy.traverse((o) => {
+    if (o.name === 'brass_goblet_02' || o.name === 'brass_goblet_03') o.visible = false;
+    if (o.name === 'brass_goblet_01') goblet = o;
   });
-  // pyöristetty tyyny: litistetty pallo
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 24), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }));
-  mesh.scale.set(1, 1, 0.42);
-  g.add(mesh);
-  // sohvan rajat kertovat istuimen korkeuden ja selkänojan paikan
+  // keskitetään näkyvä malja hyllypaikkaan (mallin origo ei ole maljan alla)
+  trophy.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(goblet ?? trophy);
+  const center = box.getCenter(new THREE.Vector3());
+  trophy.position.x += -2.3 - center.x;
+  trophy.position.z += 0.55 - center.z;
+  trophy.position.y += shelf(3) - box.min.y;
+  trophy.updateMatrixWorld(true);
+  box.setFromObject(goblet ?? trophy);
+  const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.028), new THREE.MeshPhysicalMaterial({
+    map: label(512, 160, (c, w, h) => {
+      const grad = c.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, '#f0d58a');
+      grad.addColorStop(0.5, '#c9a24e');
+      grad.addColorStop(1, '#e8c874');
+      c.fillStyle = grad;
+      c.fillRect(0, 0, w, h);
+      c.strokeStyle = '#8a6a26';
+      c.lineWidth = 6;
+      c.strokeRect(8, 8, w - 16, h - 16);
+      c.textAlign = 'center';
+      c.fillStyle = 'rgba(255,245,210,0.7)';
+      c.font = 'bold 36px Georgia, serif';
+      c.fillText('KESÄKISAT · KALEVI K.', w / 2 + 1, 60 + 1);
+      c.font = 'bold 52px Georgia, serif';
+      c.fillText(`TASOITUS ${SECRETS.handicap}`, w / 2 + 1, 124 + 1);
+      c.fillStyle = '#3a2a10';
+      c.font = 'bold 36px Georgia, serif';
+      c.fillText('KESÄKISAT · KALEVI K.', w / 2, 60);
+      c.font = 'bold 52px Georgia, serif';
+      c.fillText(`TASOITUS ${SECRETS.handicap}`, w / 2, 124);
+    }),
+    roughness: 0.25, metalness: 0.7, clearcoat: 0.4,
+  }));
+  // laatta nojaa pikarin jalkaan huoneen puolella (+x)
+  plate.position.set(box.max.x + 0.004, box.min.y + 0.016, (box.min.z + box.max.z) / 2);
+  plate.rotation.set(0, Math.PI / 2, 0);
+  plate.rotateX(-0.25);
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.021, 32, 24), new THREE.MeshPhysicalMaterial({
+    map: label(256, 128, (c, w, h) => {
+      c.fillStyle = '#f6f6f2';
+      c.fillRect(0, 0, w, h);
+      c.fillStyle = '#d9d9d4';
+      for (let y = 6; y < h; y += 12) for (let x = (y / 12) % 2 ? 6 : 0; x < w; x += 12) { c.beginPath(); c.arc(x, y, 3, 0, Math.PI * 2); c.fill(); }
+    }),
+    roughness: 0.45, clearcoat: 0.3,
+  }));
+  ball.position.set((box.min.x + box.max.x) / 2, box.max.y - 0.004, (box.min.z + box.max.z) / 2);
+  for (const p of [plate, ball]) {
+    p.castShadow = p.receiveShadow = true;
+    scene.add(p);
+    trophy.attach(p);
+  }
+}
+
+// Poly Havenin tyyny sohvan kulmaan selkänojaa vasten; paikka lasketaan sohvan rajoista.
+function placePillow(scene) {
+  const pillow = scene.getObjectByName('pillow');
+  const sofa = scene.getObjectByName('sofa');
+  if (!pillow || !sofa) return;
   const box = new THREE.Box3().setFromObject(sofa);
-  g.position.set(box.max.x - 0.2, box.min.y + (box.max.y - box.min.y) * 0.55, box.min.z + 0.33);
-  g.rotation.set(0.1, -Math.PI / 2 + 0.45, 0);
-  return shadowed(g);
+  const h = box.max.y - box.min.y;
+  pillow.position.set(box.max.x - 0.22, box.min.y + h * 0.42, box.min.z + 0.36);
+  pillow.rotation.set(0.12, -Math.PI / 2 + 0.35, 0);
 }
 
 // Kirjasarjojen kopiot eri sävyisiksi (ja hieman eri kokoisiksi).
@@ -441,10 +379,10 @@ function tintBooks(scene) {
 }
 
 export function addDecor(scene) {
-  scene.add(mug(), paperStack(), whisky(), trophy());
+  scene.add(mug(), paperStack(), whisky());
   safeDetails(scene);
   shredderDetails(scene);
-  const sofa = scene.getObjectByName('sofa');
-  if (sofa) scene.add(pillow(sofa));
+  trophyDetails(scene);
+  placePillow(scene);
   tintBooks(scene);
 }

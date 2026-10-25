@@ -114,8 +114,8 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 **Mistä mallit tulevat (toteutunut):**
 - Huone, ovi, käytävä, työpöytä, kirjahylly ja sivupöytä: Blender-skripti blender/build_room.py
 - Puhelinvastaaja, kassakaappi, mapit, silppuri: blender/build_props.py (roskakori on mallissa, mutta poistetaan latauksessa). Kassakaapin näppäimistö, kyltti ja pultit sekä silppurin ikkuna, merkki ja paneeli lisätään koodilla (src/decor.js). Teräs ja muovi saavat proseduraaliset harjaus- ja rakeisuustekstuurit (src/textures.js).
-- 13 valmista Poly Havenin CC0-mallia (src/props.js), pakattu `npm run models`-komennolla
-- Kahvikuppi, paperipino, karahvi, pokaali (marmorijalusta, messinkimalja kahvoineen, kaiverrettu laatta) ja tyyny: three.js:n perusmuodot (src/decor.js)
+- 15 valmista Poly Havenin CC0-mallia (src/props.js), pakattu `npm run models`-komennolla; niistä brass_goblets toimii golfpokaalina (yksi malja, kaiverrettu laatta koodilla) ja throw_pillows_01 sohvatyynynä
+- Kahvikuppi, paperipino ja karahvi: three.js:n perusmuodot (src/decor.js)
 - Paperit ja tekstit piirretään canvakselle (src/paper.js), käsiala Kalam-fontilla
 - Henkilökuvat ja kollaasi: tekoälyllä tehdyt piirroskuvat (public/characters, public/comic)
 
@@ -163,6 +163,6 @@ Ei ääniä. Kaikki tehosteet on valittu niin, ettei huonetta tarvitse piirtää
   ympäristökartta. Lakattu pöytä ja messinki heijastavat ikkunaa.
 - **Lähikuva**: esine lentää huoneesta ruudun keskelle ja tausta sumenee (12 näytteen sumennus).
 - **Kuvakulmasiirtymä** kiertää katseen suuntaa (slerp), ei kohdepistettä.
-- **Sisustus** (src/decor.js): kahvikuppi, paperipino, viskikarahvi ja lasi, golfpokaali,
-  sohvatyyny; kirjasarjat eri sävyissä. Rakennettu three.js:n perusmuodoista.
+- **Sisustus** (src/decor.js): kahvikuppi, paperipino, viskikarahvi ja lasi three.js:n
+  perusmuodoista; pokaali ja tyyny Poly Havenista; kirjasarjat eri sävyissä.
 - **Käsialafontti** Kalam Google Fontsista (index.html); paperit piirretään vasta fontin latauduttua.

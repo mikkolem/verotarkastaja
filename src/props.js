@@ -37,6 +37,11 @@ export const PROPS = [
   { name: 'stapler', url: 'vintage_stapler', position: [1.3, DESK_TOP + 0.013, -0.24], rotationY: 0.4 },
   { name: 'glasses', url: 'round_spectacles', position: [0.6, DESK_TOP + 0.023, -0.35], rotationY: -0.6 },
 
+  // --- Poly Havenin pikari pokaalina ja tyyny sohvalle (laatta ja tarkka paikka: decor.js) ---
+  // pikarisarjassa on kolme maljaa; vain ensimmäinen näytetään, muut piilotetaan latauksessa
+  { name: 'trophy', url: 'brass_goblets', position: [-2.3, shelf(3) - 0.004, 0.55 - 0.12], rotationY: PI / 2, scale: 0.95 },
+  { name: 'pillow', url: 'throw_pillows_01', position: [1.9, 0.45, 0.9], rotationY: -PI / 2, scale: 0.55 },
+
   // --- sivupöytä oven vieressä ---
   { name: 'binder', url: 'binder_notebook', position: [0.9, 0.85 + 0.002, 1.72], rotationY: 0.2 },
 ].map((p) => ({ ...p, url: `models/${p.url}.glb` }));

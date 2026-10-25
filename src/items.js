@@ -257,10 +257,10 @@ export const ITEMS = {
   decanter: { title: 'Viskikarahvi', text: 'Single malt, 18 vuotta. Kirjanpidossa: ”neuvottelutarjoilut”. Lasissa on vielä tilkka – lounaalle lähdettiin kiireellä.' },
   trophy: {
     title: 'Golfpokaali',
-    text: () => `Kesäkisat, Kalevi K. Laattaan on kaiverrettu ”Tasoitus ${SECRETS.handicap}”. Kalevi on ylpeä luvusta, jota kukaan muu ei pidä saavutuksena.`,
+    text: () => `Messinkipikari kesäkisoista, golfpallo suulla. Laattaan on kaiverrettu ”Tasoitus ${SECRETS.handicap}”. Kalevi on ylpeä luvusta, jota kukaan muu ei pidä saavutuksena.`,
     rotation: [0, -Math.PI / 2, 0],
   },
-  pillow: { title: 'Sohvatyyny', text: 'Kukkakuvioinen tyyny. Kirjanpidossa: ”neuvottelutilan tekstiilit”. Tyynyn alla on golfkentän tuloskortti.' },
+  pillow: { title: 'Sohvatyyny', text: 'Kirjanpidossa: ”neuvottelutilan tekstiilit”. Tyynyn alla on golfkentän tuloskortti.' },
 };
 
 // Mappien selkämyslaput (paper.js) kuuluvat samaan esineeseen kuin itse mappi.
