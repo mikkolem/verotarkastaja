@@ -190,6 +190,13 @@ Esineiden kuvaukset src/items.js, paperit src/paper.js.
 - Huone piirretään vain kameran liikkuessa; levossa päivittyy vain pöly (30 fps). Tarkkuus
   laskee automaattisesti, jos kone ei jaksa.
 - Julkaisu **GitHub Pagesissa** (.github/workflows/deploy.yml) jokaisesta pushista mainiin.
+- **Laatuprofiili** (src/quality.js): tietokoneella täysi jälkikäsittely (liukulukupuskuri 4x MSAA,
+  GTAO, ääriviiva, bloom, 4096 varjokartta). Puhelimella ja tabletilla, tai jos laite ei osaa
+  renderöidä liukulukuun, kevyt polku: ei MSAA:ta, AO:ta, ääriviivaa eikä bloomia, 2048 varjokartta,
+  puolet pienemmät koodilla lasketut tekstuurit ja 8-bittinen puskuri tarvittaessa. Syy: iPhone
+  Safarissa huone jäi mustaksi (pöly näkyi), koska liukulukupuskuri MSAA:lla ja jälkikäsittelyn
+  puskurit eivät toimineet. Kytkimet: `?quality=low|high`, `?target=8`, `?debug` (diagnoosirivi:
+  näytönohjain, profiili, virheet).
 - Toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio, prologi ja
   tulosnäkymä mukautuvat); ensisijainen kohde on tietokoneen selain.
 

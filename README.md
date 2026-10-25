@@ -47,6 +47,16 @@ Push `main`-haaraan julkaisee pelin GitHub Pagesiin automaattisesti.
 - `public/characters/` – henkilökuvat (Kalevi, Pirjo, pelaaja)
 - `public/comic/collage.jpg` – prologin taustakollaasi
 
+## Mobiili ja testauskytkimet
+
+Puhelimella peli käyttää automaattisesti kevyempää renderöintiä (`src/quality.js`). Osoitteen perään voi lisätä:
+
+| Kytkin | Mitä tekee |
+|---|---|
+| `?debug` | näyttää diagnoosirivin: näytönohjain, laatuprofiili ja virheet |
+| `?quality=low` / `?quality=high` | pakottaa kevyen tai täyden renderöinnin |
+| `?target=8` | pakottaa 8-bittisen puskurin (simuloi laitetta ilman liukulukupuskuria) |
+
 ## Ohjaus
 
 Alapalkin napit, ruudun reunojen nuolet tai nuolinäppäimet ← →. Esinettä klikkaamalla se avautuu

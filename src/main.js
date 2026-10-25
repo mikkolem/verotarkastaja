@@ -13,6 +13,7 @@ import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 
 import { createMaterials } from './materials.js';
+import { debugOverlay, detectQuality } from './quality.js';
 import { createDust } from './dust.js';
 import { createShafts } from './shafts.js';
 import { addDecor } from './decor.js';
@@ -56,6 +57,9 @@ renderer.shadowMap.autoUpdate = false;
 renderer.toneMapping = THREE.AgXToneMapping;
 renderer.toneMappingExposure = 1.1;
 document.getElementById('app').appendChild(renderer.domElement);
+// Laatuprofiili (quality.js): tietokoneella kuten ennenkin, puhelimella kevyt polku.
+const quality = detectQuality(renderer);
+const updateDebug = debugOverlay(renderer, quality);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.05, 60);
@@ -81,7 +85,7 @@ const sun = new THREE.DirectionalLight(0xfff0d8, 7);
 sun.target.position.set(0.6, 0.8, -0.6);
 sun.position.copy(sun.target.position).addScaledVector(SUN_DIR, 12);
 sun.castShadow = true;
-sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.mapSize.set(quality.shadowSize, quality.shadowSize);
 Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 4, far: 24 });
 sun.shadow.bias = -0.0002;
 sun.shadow.normalBias = 0.012;
@@ -233,7 +237,7 @@ async function loadRoom() {
   showProgress('textures', 0, 'Lakataan puupintoja…');
   const materials = await createMaterials(renderer.capabilities.getMaxAnisotropy(), (p) => {
     showProgress('textures', p);
-  });
+  }, { textureScale: quality.textureScale });
   showProgress('textures', 1, 'Kannetaan huonekaluja…');
   const [room, custom, ...propModels] = await Promise.all(modelPromises);
   showProgress('model', 1);
@@ -286,7 +290,7 @@ async function loadRoom() {
   // Heijastukset: huone kuvataan kerran kuutiokameralla keskeltä huonetta, ja
   // kuvasta tehdään ympäristökartta. Lakattu pöytä ja messinki heijastavat sitten
   // oikeasti ikkunaa ja seiniä. Yksi kertalasku latauksessa, ei kuluta pelin aikana.
-  const probeTarget = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType });
+  const probeTarget = new THREE.WebGLCubeRenderTarget(quality.probeSize, { type: quality.probeType });
   const probe = new THREE.CubeCamera(0.1, 30, probeTarget);
   probe.position.set(0.4, 1.3, -0.2);
   shafts.visible = false;
@@ -411,22 +415,31 @@ function showIntro() {
 loadRoom();
 
 // --- jälkikäsittely --------------------------------------------------------------
-const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THREE.HalfFloatType, samples: 4 });
+// Tietokone: liukulukupuskuri 4x MSAA:lla, AO, ääriviiva ja bloom (kuten ennenkin).
+// Puhelin: ei MSAA:ta eikä AO:ta, ääriviivaa tai bloomia; puskuri 8-bittinen, jos
+// laite ei osaa renderöidä liukulukuun (quality.js).
+const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: quality.targetType, samples: quality.samples });
 const composer = new EffectComposer(renderer, target);
 composer.addPass(new RenderPass(scene, camera));
-const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
-gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 8 });
-gtao.blendIntensity = 0.9;
-composer.addPass(gtao);
+let gtao = null;
+if (quality.ao) {
+  gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+  gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 8 });
+  gtao.blendIntensity = 0.9;
+  composer.addPass(gtao);
+}
 // Hiiren alla olevan esineen kultainen ääriviiva (valitut objektit: interact.js)
-const outline = new OutlinePass(new THREE.Vector2(innerWidth, innerHeight), scene, camera);
-Object.assign(outline, { edgeStrength: 3.5, edgeGlow: 0.25, edgeThickness: 1.2 });
-outline.visibleEdgeColor.set(0xd9a04a);
-outline.hiddenEdgeColor.set(0x000000);   // ei piirretä muiden takana olevia osia (ei paljasta laatikon sisältöä)
-composer.addPass(outline);
+let outline = null;
+if (quality.outline) {
+  outline = new OutlinePass(new THREE.Vector2(innerWidth, innerHeight), scene, camera);
+  Object.assign(outline, { edgeStrength: 3.5, edgeGlow: 0.25, edgeThickness: 1.2 });
+  outline.visibleEdgeColor.set(0xd9a04a);
+  outline.hiddenEdgeColor.set(0x000000);   // ei piirretä muiden takana olevia osia (ei paljasta laatikon sisältöä)
+  composer.addPass(outline);
+}
 // AO- ja ääriviivapassit piirtävät huoneen syvyyden uudelleen: valonsäteet eivät
 // saa olla silloin mukana, muuten ne näkyisivät pintoina ilmassa.
-for (const pass of [gtao, outline]) {
+for (const pass of [gtao, outline].filter(Boolean)) {
   const render = pass.render.bind(pass);
   pass.render = (...args) => {
     shafts.visible = false;
@@ -434,7 +447,7 @@ for (const pass of [gtao, outline]) {
     shafts.visible = true;
   };
 }
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
+if (quality.bloom) composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
 composer.addPass(new OutputPass());
 // Kaikki välivaiheet samaan kokoon renderöijän tarkkuuden kanssa
 composer.setPixelRatio(pixelRatio);
@@ -509,7 +522,7 @@ interaction = new Interaction({
   dom: renderer.domElement,
   environment: scene.environment,
   onChange: () => { roomDirty = true; },
-  onHover: (objects) => { outline.selectedObjects = objects; },
+  onHover: (objects) => { if (outline) outline.selectedObjects = objects; },
 });
 
 // --- pulmat ---------------------------------------------------------------------
@@ -656,7 +669,7 @@ addEventListener('resize', () => {
 
 if (import.meta.env.DEV) {
   window.__debug = {
-    scene, camera, sun, bounce, skyLight, gtao, renderer, views, interaction, game, SECRETS, updateSun,
+    scene, camera, sun, bounce, skyLight, gtao, renderer, views, interaction, game, SECRETS, updateSun, composer, quality,
     get finale() { return finale; },
     // peek([x,y,z], [x,y,z]) vie kameran haluttuun paikkaan, peek() palauttaa
     peek(pos, target) {
@@ -688,6 +701,7 @@ function drawRoomAndDust() {
   if (roomDirty) {
     composer.render();
     roomDirty = false;
+    updateDebug();
   }
   renderer.setRenderTarget(null);
   renderer.autoClear = false;

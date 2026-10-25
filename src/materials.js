@@ -11,17 +11,19 @@ const nextFrame = () => new Promise((resolve) => {
 });
 
 // Tekstuurit lasketaan yksi kerrallaan, ja onProgress(0..1) kertoo etenemisen.
-export async function createMaterials(anisotropy, onProgress = () => {}) {
+// textureScale: puhelimella koodilla lasketut tekstuurit puolet pienempiä (muisti).
+export async function createMaterials(anisotropy, onProgress = () => {}, { textureScale = 1 } = {}) {
+  const px = (n) => Math.round(n * textureScale);
   const jobs = {
-    walnut: () => woodTexture({ light: 0x6b4128, dark: 0x2a160b, seed: 2 }, anisotropy),
-    mahogany: () => woodTexture({ light: 0x7a3420, dark: 0x2e0f07, seed: 11, meters: 1.2 }, anisotropy),
-    parquet: () => parquetTexture(anisotropy),
-    wall: () => mottledTexture({ base: 0x3f5243, variance: 0.05, seed: 4 }, anisotropy),
-    ceiling: () => mottledTexture({ base: 0xd2ccbf, variance: 0.03, seed: 8 }, anisotropy),
-    leather: () => mottledTexture({ base: 0x4a2414, variance: 0.12, seed: 5, meters: 0.5, freq: 16 }, anisotropy),
-    steel: () => brushedTexture({ base: 0x50545a, seed: 21 }, anisotropy),
-    plasticDark: () => plasticTexture({ base: 0x1a1a1c, seed: 31 }, anisotropy),
-    plasticGrey: () => plasticTexture({ base: 0x5a5c60, seed: 37 }, anisotropy),
+    walnut: () => woodTexture({ light: 0x6b4128, dark: 0x2a160b, seed: 2, size: px(1024) }, anisotropy),
+    mahogany: () => woodTexture({ light: 0x7a3420, dark: 0x2e0f07, seed: 11, meters: 1.2, size: px(1024) }, anisotropy),
+    parquet: () => parquetTexture(anisotropy, { size: px(1536) }),
+    wall: () => mottledTexture({ base: 0x3f5243, variance: 0.05, seed: 4, size: px(1024) }, anisotropy),
+    ceiling: () => mottledTexture({ base: 0xd2ccbf, variance: 0.03, seed: 8, size: px(1024) }, anisotropy),
+    leather: () => mottledTexture({ base: 0x4a2414, variance: 0.12, seed: 5, meters: 0.5, freq: 16, size: px(1024) }, anisotropy),
+    steel: () => brushedTexture({ base: 0x50545a, seed: 21, size: px(512) }, anisotropy),
+    plasticDark: () => plasticTexture({ base: 0x1a1a1c, seed: 31, size: px(512) }, anisotropy),
+    plasticGrey: () => plasticTexture({ base: 0x5a5c60, seed: 37, size: px(512) }, anisotropy),
   };
   const tex = {};
   const names = Object.keys(jobs);
