@@ -204,12 +204,16 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   }
 
   // Kalevi astuu ovesta: henkilökuva ja repliikki ruudun vasempaan laitaan.
-  function showKalevi(reason, found) {
-    const quote = reason === 'time'
+  function kaleviQuote(reason, found) {
+    return reason === 'time'
       ? '– Mitä te teette minun laatikoillani?!'
       : found === EVIDENCE_TOTAL
         ? '– No mutta. Te olette… perusteellinen. Kahvia?'
         : '– Ai, tarkastus? Kukaan ei kertonut. Viskiä?';
+  }
+
+  function showKalevi(reason, found) {
+    const quote = kaleviQuote(reason, found);
     const card = el('div', 'kalevi-arrives');
     const img = new Image();
     img.src = `${import.meta.env.BASE_URL}characters/kalevi.jpg`;
@@ -230,40 +234,71 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     return ['Hylätty', 'Kalevi tarjoaa sinulle viskiä. Kieltäydyt, mutta todisteita ei ole.'];
   }
 
+  // Lopputulos isona näkymänä: vasemmalla Kalevi repliikkeineen, oikealla arvosana,
+  // tarina, tilastot ja löydetyt todisteet; alla termit kahdessa sarakkeessa.
   function showResult({ reason, found }) {
-    document.body.classList.add('result-open');   // Kalevin kortti pienenee tuloksen tieltä
+    document.body.classList.add('result-open');
     const [title, line] = grade(found);
     const overlay = el('div', 'overlay lock result');
-    const card = el('div', 'lock-card');
+    const card = el('div', 'lock-card result-card');
+
+    const side = el('aside', 'result-side');
+    const img = new Image();
+    img.src = `${import.meta.env.BASE_URL}characters/kalevi.jpg`;
+    img.alt = 'Kalevi K.';
+    side.append(img, el('p', 'result-quote', kaleviQuote(reason, found)));
+
+    const main = el('div', 'result-main');
     const story = reason === 'report'
       ? `Lähetit raportin kello ${storyClock(elapsed)}. Samalla ovi aukeaa: Kalevi palaa lounaalta ja löytää sinut työpöytänsä äärestä.`
-      : 'Ovi aukeaa ennen kuin raportti on valmis. Kalevi palaa lounaalta ja tuijottaa avattuja laatikoitaan. – Tämä on… rutiinitarkastus, sinä sanot.';
-    card.append(
+      : 'Ovi aukeaa ennen kuin raportti on valmis. Kalevi palaa lounaalta ja tuijottaa avattuja laatikoitaan. – Tämä on… rutiinikäynti, sinä sanot.';
+    const stats = el('div', 'result-stats');
+    [
+      ['Todisteita', `${found}/${EVIDENCE_TOTAL}`],
+      ['Perusteet oikein', `${correctReasons()}/${found}`],
+      ['Aikaa kului', fmt(Math.min(elapsed, TIME_LIMIT))],
+      ['Vihjeitä', String(hintsUsed)],
+    ].forEach(([k, v]) => {
+      const s = el('div', 'result-stat');
+      s.append(el('div', 'result-stat-value', v), el('div', 'result-stat-label', k));
+      stats.appendChild(s);
+    });
+    const list = el('ul', 'result-evidence');
+    Object.keys(EVIDENCE).forEach((id) => {
+      const ok = game.hasEvidence(id);
+      const right = ok && chosen[id] === REASONS[id][0].text;
+      const li = el('li', ok ? (right ? 'ok' : 'half') : 'miss');
+      li.append(
+        el('span', 'result-evidence-mark', ok ? (right ? '✓' : '½') : '–'),
+        el('span', null, ok ? EVIDENCE[id] : `Löytymättä: ${EVIDENCE_CATEGORY[id]}`),
+      );
+      list.appendChild(li);
+    });
+    main.append(
       el('div', 'result-kicker', reason === 'report' ? 'Tarkastus valmis' : 'Aika loppui'),
       el('h2', null, `Arvosana: ${title}`),
-      el('p', 'result-story', story),
       el('p', 'result-line', line),
-      el('p', 'result-stats', [
-        `Todisteita ${found}/${EVIDENCE_TOTAL}`,
-        `perusteista oikein ${correctReasons()}/${found}`,
-        `aikaa kului ${fmt(Math.min(elapsed, TIME_LIMIT))}`,
-        `vihjeitä ${hintsUsed}`,
-      ].filter(Boolean).join(' · ')),
+      el('p', 'result-story', story),
+      stats,
+      list,
     );
+
     // termit yhden rivin selityksineen
-    const terms = el('dl', 'result-terms');
-    terms.appendChild(el('dt', 'result-terms-title', 'Tarkastuksessa vastaan tulleet termit'));
+    const terms = el('section', 'result-terms');
+    terms.appendChild(el('h3', 'result-terms-title', 'Tarkastuksessa vastaan tulleet termit'));
+    const grid = el('dl', 'result-terms-grid');
     TERMS.forEach(([term, note]) => {
       const row = el('div');
       row.append(el('dt', null, term), el('dd', null, note));
-      terms.appendChild(row);
+      grid.appendChild(row);
     });
-    card.appendChild(terms);
+    terms.appendChild(grid);
+
     const again = el('button', 'lock-open', 'Pelaa uudelleen');
     again.addEventListener('click', () => location.reload());
     const buttons = el('div', 'lock-buttons');
     buttons.append(again);
-    card.append(buttons);
+    card.append(side, main, terms, buttons);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
   }
