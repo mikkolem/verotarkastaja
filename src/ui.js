@@ -121,6 +121,23 @@ export function inventoryHud(game, { onHelp }) {
   hud.append(row, panel);
   document.body.appendChild(hud);
 
+  // Kapealla näytöllä (CSS) tavarat, todisteet, muistiinpanot ja ohjeet ovat valikon
+  // takana. finale.js siirtää napin yläpalkin riviin kellon viereen.
+  const menuBtn = el('button', 'hud-menu-btn');
+  menuBtn.setAttribute('aria-label', 'Valikko: tavarat, todisteet, muistiinpanot ja ohjeet');
+  const menuIcon = el('span', 'hud-menu-icon', '☰');
+  const menuCount = el('span', 'hud-menu-count');
+  menuBtn.append(menuIcon, menuCount);
+  hud.appendChild(menuBtn);
+  const setMenu = (open) => {
+    hud.classList.toggle('menu-open', open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+    if (!open) panel.hidden = true;
+  };
+  menuBtn.addEventListener('click', () => setMenu(!hud.classList.contains('menu-open')));
+  help.addEventListener('click', () => setMenu(false));
+  addEventListener('pointerdown', (e) => { if (hud.classList.contains('menu-open') && !hud.contains(e.target)) setMenu(false); });
+
   let lastNotes = 0;
   game.onChange(() => {
     const owned = game.inventory.map((id) => el('span', 'hud-chip', INVENTORY[id]));
@@ -135,6 +152,13 @@ export function inventoryHud(game, { onHelp }) {
       notesBtn.classList.add('pulse');
     }
     lastNotes = n;
+    menuCount.textContent = `${game.evidence.length}/${EVIDENCE_TOTAL}`;
+    if (n > 0 && !hud.classList.contains('menu-open')) {
+      menuBtn.classList.remove('pulse');
+      void menuBtn.offsetWidth;
+      if (n > (menuBtn._n ?? 0)) menuBtn.classList.add('pulse');
+    }
+    menuBtn._n = n;
     if (!panel.hidden) render();
   });
 }

@@ -39,13 +39,17 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   // --- aikanäyttö -----------------------------------------------------------------
   const timer = el('div', 'timer', '⏱');
   timer.title = 'Aikaa jäljellä ennen kuin Kalevi palaa';
-  const reportButton = el('button', 'timer-report', 'Tarkastusraportti');
+  // Pitkä ja lyhyt teksti: kapealla näytöllä näytetään lyhyt (CSS: .label-long / .label-short)
+  const labels = (long, short) => [el('span', 'label-long', long), el('span', 'label-short', short)];
+  const reportButton = el('button', 'timer-report');
+  reportButton.append(...labels('Tarkastusraportti', '📋 Raportti'));
   reportButton.addEventListener('click', () => openReport());
   const box = el('div', 'timer-box');
   // Vihje maksaa aikaa vain ensimmäisellä kerralla: saman vaiheen vihjeen voi
   // pyytää uudelleen ilmaiseksi. Kun kaikki todisteet on löydetty, vihje on ilmainen.
   const hintButton = el('button', 'timer-hint');
-  const hintText = el('span', null, '💡 Pyydä vihje');
+  const hintText = el('span');
+  hintText.append(...labels('💡 Pyydä vihje', '💡 Vihje'));
   const hintCost = el('span', 'timer-hint-cost');
   hintButton.append(hintText, hintCost);
   const paidHints = new Set();
@@ -75,7 +79,9 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
   });
   // Tauko: pysäyttää kellon ja peittää ruudun, kunnes pelaaja jatkaa.
   let paused = false;
-  const pauseButton = el('button', 'timer-pause', '⏸ Tauko');
+  const pauseButton = el('button', 'timer-pause');
+  pauseButton.append(...labels('⏸ Tauko', '⏸'));
+  pauseButton.setAttribute('aria-label', 'Tauko');
   pauseButton.title = 'Pysäytä peli';
   pauseButton.addEventListener('click', () => setPaused(true));
   const pauseOverlay = el('div', 'pause-overlay');
@@ -114,7 +120,9 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     jump.classList.add('show');
   }
 
-  box.append(timer, hintButton, pauseButton, reportButton);
+  // valikkonappi (ui.js) näkyy vain kapealla näytöllä, muut tiedot ovat sen takana
+  const menuButton = document.querySelector('.hud-menu-btn');
+  box.append(timer, hintButton, pauseButton, reportButton, ...(menuButton ? [menuButton] : []));
   // yläkulman tietojen (tavarat, todisteet, ohjeet) eteen samalle riville
   document.querySelector('.hud').prepend(box);
   const render = () => {

@@ -197,6 +197,9 @@ Esineiden kuvaukset src/items.js, paperit src/paper.js.
   Safarissa huone jäi mustaksi (pöly näkyi), koska liukulukupuskuri MSAA:lla ja jälkikäsittelyn
   puskurit eivät toimineet. Kytkimet: `?quality=low|high`, `?target=8`, `?debug` (diagnoosirivi:
   näytönohjain, profiili, virheet).
+- **Mobiilin yläpalkki** (alle 760 px): yhdellä rivillä aika, ”💡 Vihje −5 min”, tauko (⏸),
+  ”📋 Raportti” ja valikko (☰ ja todisteiden määrä). Tavarat, todisteet, muistiinpanot ja ohjeet
+  ovat valikon takana; otsikko piilotetaan. Tietokoneen yläpalkki on ennallaan.
 - Toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio, prologi ja
   tulosnäkymä mukautuvat); ensisijainen kohde on tietokoneen selain.
 

@@ -607,6 +607,46 @@ body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
 @media (max-width: 560px) {
   .timer, .timer-hint, .timer-report, .timer-pause { font-size: 14px; padding: 7px 12px; }
 }
+/* lyhyet tekstit vain kapealla näytöllä; valikkonappi vain kapealla */
+.label-short { display: none; }
+.hud-menu-btn { display: none; }
+@media (max-width: 760px) {
+  /* Yläpalkki: aika, vihje, tauko, raportti ja valikko yhdellä rivillä koko leveydellä */
+  .title { display: none; }
+  .hud { left: 10px; right: 10px; top: 10px; max-width: none; align-items: stretch; gap: 6px; }
+  .timer-box { justify-content: space-between; gap: 5px; }
+  .timer, .timer-hint, .timer-report, .timer-pause { font-size: 14px; padding: 8px 10px; white-space: nowrap; }
+  .timer-hint { gap: 5px; }
+  .label-long { display: none; }
+  .label-short { display: inline; }
+  .hud-menu-btn {
+    display: inline-flex; align-items: center; gap: 6px; flex: none;
+    padding: 8px 11px; font: inherit; font-size: 15px; font-weight: 600;
+    color: var(--ui-text); background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 999px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); cursor: pointer;
+  }
+  .hud-menu-count { font-size: 12px; font-weight: 700; color: var(--ui-accent); }
+  .hud-menu-btn.pulse { animation: notes-pulse 1.2s ease-out; }
+  .hud.menu-open .hud-menu-btn { border-color: var(--ui-accent); }
+  /* valikon sisältö: piilossa, kunnes valikko avataan; avattuna pystylista */
+  .hud-row { display: none; }
+  .hud.menu-open .hud-row {
+    display: flex; flex-direction: column; align-items: stretch; gap: 6px;
+    margin-left: auto; width: min(320px, 100%); padding: 10px;
+    background: rgba(18, 14, 10, 0.94); border: 1px solid var(--ui-border); border-radius: 12px;
+  }
+  .hud.menu-open .hud-items { justify-content: flex-start; }
+  .hud.menu-open .hud-row > button { text-align: left; }
+  .hud-panel { margin-left: auto; width: min(400px, 100%); }
+  /* sivutiedote yläpalkin alle, koska otsikkoa ei näytetä */
+  .notice { top: 58px; left: 10px; }
+  .toast, .toast.hint { top: 64px; }
+}
+@media (max-width: 400px) {
+  .timer, .timer-hint, .timer-report, .timer-pause, .hud-menu-btn { font-size: 13px; padding: 7px 8px; }
+  .timer-box { gap: 4px; }
+  .hud-menu-count { display: none; }
+}
 
 /* Tarkastusraportti ja lopputulos */
 .report { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow-y: auto; text-align: left; }
