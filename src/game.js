@@ -39,6 +39,15 @@ export const EVIDENCE = {
 };
 export const EVIDENCE_TOTAL = Object.keys(EVIDENCE).length;
 
+// Mistä kukin todiste löytyi: näytetään todistelistassa ja raportissa.
+export const EVIDENCE_PLACE = {
+  kiuas: 'Työpöytä · laatikko A · kuitit',
+  cayman_invoice: 'Työpöytä · laatikko B + Ikkuna · silppuri',
+  second_ledger: 'Kirjahylly · kassakaappi · musta kirja',
+  cayman_transfer: 'Työpöytä · tietokone · kalenteri',
+  offshore_account: 'Sohva · kunniakirjan takaa',
+};
+
 // Raportissa puuttuvan todisteen kohdalla näytetään vain kategoria: mitä etsitään, ei mistä.
 export const EVIDENCE_CATEGORY = {
   kiuas: 'yksityinen kulu yhtiön kuluissa',
@@ -96,6 +105,8 @@ const state = {
   inventory: new Set(),
   evidence: new Set(),
   flags: new Set(),
+  // muistiinpanot: johtolangat, jotka pelaaja on nähnyt (id -> { source, text }), lisäysjärjestyksessä
+  notes: new Map(),
 };
 const listeners = new Set();
 
@@ -121,6 +132,14 @@ export const game = {
     changed();
     return true;
   },
+  // Kirjaa johtolangan muistiinpanoihin; palauttaa true, jos se oli uusi.
+  addNote(id, source, text) {
+    if (state.notes.has(id)) return false;
+    state.notes.set(id, { source, text });
+    changed();
+    return true;
+  },
+  get notes() { return [...state.notes.values()]; },
   get inventory() { return [...state.inventory]; },
   get evidence() { return [...state.evidence]; },
   onChange(fn) {

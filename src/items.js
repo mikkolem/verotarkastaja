@@ -8,12 +8,37 @@ import { SECRETS, game } from './game.js';
 // Pirjo jättää lisäksi uuden viestin aina, kun pelaaja löytää todisteen.
 const MESSAGES = [
   { from: 'Pirjo P., kirjanpito', time: 'tänään 9.12',
+    note: ['vm_pirjo', 'Puhelinvastaaja, Pirjo', () => 'Kesäkuun myyntilasku 117 puuttuu kirjanpidosta, liikevaihto ei täsmää pankkitiliin.'],
     text: 'Kalevi, Pirjo täällä. Kesäkuun myyntilasku numero 117 puuttuu kirjanpidosta, eikä liikevaihto täsmää pankkitiliin. Laitoitko sen taas silppuriin? Soita!' },
   { from: 'Marjatta', time: 'tänään 10.40',
+    note: ['vm_marjatta', 'Puhelinvastaaja, Marjatta (vaimo)', () => `Hääpäivä on ${SECRETS.weddingText}.`],
     text: () => `Kalle, kulta. Muistathan, että meidän hääpäivä on ${SECRETS.weddingText}, niin kuin joka vuosi. Älä unohda tällä kertaa! Ja juhannuksena saunotaan uudella kiukaalla.` },
   { from: 'Raimo, golfklubi', time: 'tänään 11.05',
+    note: ['vm_raimo', 'Puhelinvastaaja, Raimo (golfkaveri)', () => 'Vitsailee Kalevin golftasoituksesta. Perjantain ”golfmatka” meni läpi.'],
     text: 'Kalevi, Raimo tässä! Lauantaina klo 9 ykkösteellä. Ja se sinun tasoituksesi ei ole tasoitus vaan toive, hahhah! Perjantain ”golfmatka” meni kai läpi?' },
 ];
+
+// Muistiinpanot: mitä pelaaja näkee, kun avaa esineen lähikuvaan (open) tai lukee
+// paperin (read). [lähde, teksti]; teksti voi olla funktio (arvotut koodit).
+export const NOTES = {
+  open: {
+    note_avain: ['Tietokoneen kannen lappu (Työpöytä)', () => 'Laatikon A varavain on kukkaruukun alla.'],
+    plant: ['Viherkasvi (Ikkuna)', () => 'Kirjattu taideteokseksi, 12 000 €.'],
+    diploma: ['Kunniakirja (Sohva)', () => `Vuoden veronmaksaja ${SECRETS.year}. Kehys roikkuu vinossa.`],
+    photo: ['Mökkikuva (Työpöytä)', () => `Kulmassa: ”Hääpäivä ${SECRETS.weddingShort}${SECRETS.weddingYear}, mökillä”.`],
+    laptop: ['Tietokone (Työpöytä)', () => 'Salasanan vihje: ”tasoitukseni”.'],
+    trophy: ['Golfpokaali (Kirjahylly)', () => `Laattaan kaiverrettu: ”Tasoitus ${SECRETS.handicap}”.`],
+    note_pirjo: ['Lappu laatikossa A', () => 'Laatikon B koodi on vuosi kunniakirjassa sohvan yläpuolella.'],
+    safe: ['Kassakaappi (Kirjahylly)', () => 'Nelinumeroinen koodi, rullat DEBET ja KREDIT.'],
+  },
+  read: {
+    note_pirjo: ['Lappu laatikossa A', () => 'Laatikon B koodi on vuosi kunniakirjassa sohvan yläpuolella.'],
+    drawer_b_papers: ['Lappu laatikossa B', () => 'Laskun loppuosa on silppurissa ikkunan alla. Kassakaapin koodi on HÄÄPÄIVÄ.'],
+    ledger_book: ['Musta kirja (kassakaappi)', () => 'Siirtojen ajankohdat sovittu Raimon kanssa. ”Tiliotteet: ylpeyteni takana.”'],
+    binder_1: ['Mappi Kirjanpito 2025', () => 'Tositeluettelosta puuttuu ML 117. Tiliotteella pano Kivi Consulting Ltd:ltä ilman tositetta.'],
+    binder_3: ['Mappi Tilinpäätös', () => 'Taseessa taide-esineet 12 000 €: yksi viherkasvi.'],
+  },
+};
 
 // Pirjon jatkoviestit todisteiden mukaan (järjestyksessä, jossa ne löytyvät)
 const PIRJO_FOLLOWUPS = {
@@ -195,7 +220,10 @@ export const ITEMS = {
         // uudet viestit ensin; vanhat voi kuunnella uudelleen alusta
         const all = messages();
         const list = unheardMessages() > 0 ? all.slice(heard) : all;
-        api.voicemail(list, { onDone: () => { heard = all.length; game.set('messages_heard'); game.set(`heard_${heard}`); } });
+        api.voicemail(list, {
+          onMessage: (m) => { if (m.note) game.addNote(m.note[0], m.note[1], m.note[2]()); },
+          onDone: () => { heard = all.length; game.set('messages_heard'); game.set(`heard_${heard}`); },
+        });
       },
     }],
   },

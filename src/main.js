@@ -23,7 +23,7 @@ import { addPaperItems, pagesFor, shredderCanvas } from './paper.js';
 import { Interaction } from './interact.js';
 import { createFinale } from './finale.js';
 import { runPrologue } from './prologue.js';
-import { ITEMS, unheardMessages } from './items.js';
+import { ITEMS, NOTES, unheardMessages } from './items.js';
 import { EVIDENCE, EVIDENCE_TOTAL, SECRETS, game } from './game.js';
 import { codeLock, inventoryHud, passwordPrompt, readView, shredPuzzle, toast, voicemail } from './ui.js';
 import './style.css';
@@ -566,6 +566,12 @@ const READ_TITLES = {
   offshore_statement: 'Kunniakirjan takaa: tiliote',
 };
 
+// Muistiinpanot: johtolanka kirjautuu, kun esine avataan lähikuvaan tai paperi luetaan.
+function addNote(kind, key) {
+  const n = NOTES[kind][key];
+  if (n) game.addNote(`${kind}:${key}`.replace('open:note_pirjo', 'read:note_pirjo'), n[0], n[1]());
+}
+
 // Esineiden toiminnot (items.js) käyttävät näitä.
 interaction.api = {
   toast,
@@ -581,6 +587,7 @@ interaction.api = {
     shredPuzzle({ canvas: shredderCanvas(), strips: 5, onDone, onCancel: () => toast('Suikaleet jäivät säiliöön. Voit palata niihin myöhemmin.', 'notice') });
   },
   read(key) {
+    addNote('read', key);
     readView(ITEMS[key]?.title ?? READ_TITLES[key], pagesFor(key), {
       isMarked: (page) => page.evidence && game.hasEvidence(page.evidence),
       onMark(page, button) {
@@ -603,6 +610,7 @@ interaction.api = {
   },
 };
 game.onChange(() => interaction.refresh());
+interaction.onOpen = (key) => addNote('open', key);
 inventoryHud(game, { onHelp: () => { interaction.close(); showIntro(); } });
 
 // Vihjeet pyydetään yläkulman napista (maksaa aikaa, ks. finale.js). Jos peli ei

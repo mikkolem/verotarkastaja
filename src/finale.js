@@ -1,6 +1,6 @@
 // Pelin loppuosa: 30 minuutin aikaraja, tarkastusraportti ja loppukohtaus,
 // jossa ovi aukeaa ja Kalevi palaa lounaalta.
-import { EVIDENCE, EVIDENCE_CATEGORY, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
+import { EVIDENCE, EVIDENCE_CATEGORY, EVIDENCE_PLACE, EVIDENCE_TOTAL, REASONS, TERMS, game } from './game.js';
 
 const TIME_LIMIT = 30 * 60;            // sekuntia
 const HINT_COST = 5 * 60;              // vihje vähentää aikaa näin monta sekuntia
@@ -153,6 +153,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
       const item = el('li', `report-item${ok ? ' found' : ''}`);
       const body = el('div', 'report-item-body');
       body.appendChild(el('div', null, ok ? EVIDENCE[id] : `Todiste ${i + 1}: ${EVIDENCE_CATEGORY[id]} – ei vielä löydetty`));
+      if (ok) body.appendChild(el('div', 'report-place', `📍 ${EVIDENCE_PLACE[id]}`));
       if (ok) {
         // peruste valitaan kolmesta vaihtoehdosta; muistiinpano selittää termin
         const reasons = el('div', 'report-reason');

@@ -1,6 +1,6 @@
 // Pelin käyttöliittymän palaset: ilmoitukset, tavaraluettelo, paperien
 // lukunäkymä ja numerolukko. Kaikki rakennetaan DOMiin tässä tiedostossa.
-import { EVIDENCE, EVIDENCE_TOTAL, INVENTORY } from './game.js';
+import { EVIDENCE, EVIDENCE_PLACE, EVIDENCE_TOTAL, INVENTORY } from './game.js';
 
 function el(tag, className, text) {
   const e = document.createElement(tag);
@@ -57,29 +57,85 @@ export function toast(message, type = 'info') {
 }
 
 // --- tavarat ja todisteet oikeassa yläkulmassa ----------------------------------------
+// Yläkulman toinen rivi: tavarat, Todisteet, Muistiinpanot ja Ohjeet. Todisteet ja
+// Muistiinpanot avaavat saman paneelin eri välilehdille.
 export function inventoryHud(game, { onHelp }) {
   const hud = el('div', 'hud');
   const items = el('div', 'hud-items');
   const evidence = el('button', 'hud-evidence');
-  evidence.title = 'Näytä löydetyt todisteet';
+  evidence.title = 'Löydetyt todisteet ja mistä ne löytyivät';
+  const notesBtn = el('button', 'hud-notes');
+  notesBtn.title = 'Muistiinpanot: johtolangat, jotka olet nähnyt';
   const help = el('button', 'hud-help', 'Ohjeet');
   help.addEventListener('click', onHelp);
-  const list = el('ul', 'hud-list');
-  list.hidden = true;
-  evidence.addEventListener('click', () => { list.hidden = !list.hidden; });
-  // toinen rivi: tavarat, todisteet ja ohjeet (ensimmäisellä rivillä kello, vihje ja raportti)
+
+  const panel = el('div', 'hud-panel');
+  panel.hidden = true;
+  const tabs = el('div', 'hud-tabs');
+  const tabEvidence = el('button', 'hud-tab', 'Todisteet');
+  const tabNotes = el('button', 'hud-tab', 'Muistiinpanot');
+  tabs.append(tabEvidence, tabNotes);
+  const body = el('div', 'hud-panel-body');
+  panel.append(tabs, body);
+  let tab = 'evidence';
+
+  function render() {
+    tabEvidence.classList.toggle('active', tab === 'evidence');
+    tabNotes.classList.toggle('active', tab === 'notes');
+    if (tab === 'evidence') {
+      const list = el('ul', 'hud-list');
+      if (!game.evidence.length) list.appendChild(el('li', 'hud-empty', 'Ei vielä todisteita. Kun luet papereita, merkitse epäilyttävät kohdat todisteiksi.'));
+      game.evidence.forEach((id) => {
+        const li = el('li');
+        li.append(el('div', 'hud-item-text', EVIDENCE[id]), el('div', 'hud-item-place', `📍 ${EVIDENCE_PLACE[id]}`));
+        list.appendChild(li);
+      });
+      body.replaceChildren(list);
+    } else {
+      const list = el('ul', 'hud-list hud-notes-list');
+      const notes = game.notes;
+      if (!notes.length) list.appendChild(el('li', 'hud-empty', 'Ei vielä muistiinpanoja. Lappujen, viestien ja esineiden johtolangat kirjautuvat tänne.'));
+      notes.forEach(({ source, text }) => {
+        const li = el('li');
+        li.append(el('div', 'hud-item-place', source), el('div', 'hud-item-text', text));
+        list.appendChild(li);
+      });
+      body.replaceChildren(list);
+    }
+  }
+  function toggle(which) {
+    if (!panel.hidden && tab === which) { panel.hidden = true; return; }
+    tab = which;
+    panel.hidden = false;
+    render();
+  }
+  evidence.addEventListener('click', () => toggle('evidence'));
+  notesBtn.addEventListener('click', () => toggle('notes'));
+  // klikkaus paneelin ulkopuolelle (esim. huoneeseen) sulkee sen
+  addEventListener('pointerdown', (e) => { if (!panel.hidden && !hud.contains(e.target)) panel.hidden = true; });
+  tabEvidence.addEventListener('click', () => { tab = 'evidence'; render(); });
+  tabNotes.addEventListener('click', () => { tab = 'notes'; render(); });
+
   const row = el('div', 'hud-row');
-  row.append(items, evidence, help);
-  hud.append(row, list);
+  row.append(items, evidence, notesBtn, help);
+  hud.append(row, panel);
   document.body.appendChild(hud);
 
+  let lastNotes = 0;
   game.onChange(() => {
     const owned = game.inventory.map((id) => el('span', 'hud-chip', INVENTORY[id]));
     items.replaceChildren(...(owned.length ? [el('span', 'hud-label', 'Tavarat'), ...owned] : []));
     evidence.textContent = `Todisteet ${game.evidence.length}/${EVIDENCE_TOTAL}`;
-    list.replaceChildren(...(game.evidence.length
-      ? game.evidence.map((id) => el('li', null, EVIDENCE[id]))
-      : [el('li', 'hud-empty', 'Ei vielä todisteita. Kun luet papereita, merkitse epäilyttävät kohdat todisteiksi.')]));
+    const n = game.notes.length;
+    notesBtn.textContent = `📝 Muistiinpanot ${n}`;
+    // uusi muistiinpano: nappi välähtää (ei erillistä ilmoitusta)
+    if (n > lastNotes && lastNotes >= 0) {
+      notesBtn.classList.remove('pulse');
+      void notesBtn.offsetWidth;
+      notesBtn.classList.add('pulse');
+    }
+    lastNotes = n;
+    if (!panel.hidden) render();
   });
 }
 
@@ -237,7 +293,7 @@ export function codeLock({ title, digits, code, hint, onOpen, labels }) {
 
 // --- puhelinvastaajan viestit --------------------------------------------------------
 // messages: [{ from, time, text }] ; näytetään yksi kerrallaan ”toistona”.
-export function voicemail(messages, { onDone } = {}) {
+export function voicemail(messages, { onDone, onMessage } = {}) {
   let index = 0;
   const overlay = el('div', 'overlay lock');
   const card = el('div', 'lock-card voicemail');
@@ -256,6 +312,7 @@ export function voicemail(messages, { onDone } = {}) {
 
   function show() {
     const m = messages[index];
+    onMessage?.(m);
     const body = typeof m.text === 'function' ? m.text() : m.text;
     counter.textContent = `Viesti ${index + 1}/${messages.length}`;
     from.textContent = `${m.from} · ${m.time}`;

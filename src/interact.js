@@ -215,6 +215,7 @@ export class Interaction {
     this.pivot.scale.setScalar(this.flyScale * 0.3);
 
     this.inspecting = key;
+    this.onOpen?.(key);
     this.refresh();
     this.panel.hidden = false;
     document.body.classList.add('inspecting');

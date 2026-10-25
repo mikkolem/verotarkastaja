@@ -119,6 +119,14 @@ viides todiste voi löytyä vahingossa ensimmäisenä (avoin kysymys, luku 11).
 - **Tauko** (nappi tai P) pysäyttää kellon ja peittää ruudun; mitään muuta ei voi tehdä ennen
   kuin pelaaja jatkaa.
 
+- **Todisteet ja muistiinpanot** (yläkulman paneeli kahdella välilehdellä, src/ui.js):
+  todistelista näyttää jokaisen löydetyn todisteen alla, mistä se löytyi (`EVIDENCE_PLACE`,
+  src/game.js). Muistiinpanoihin kirjautuu automaattisesti jokainen johtolanka, kun pelaaja näkee
+  sen: laput, kunniakirjan vuosi, mökkikuvan päiväys, pokaalin tasoitus, salasanavihje,
+  puhelinvastaajan viestit, mustan kirjan rivit ja mappien huomiot (`NOTES`, src/items.js).
+  Koodit kirjautuvat lukuina, koska peli on linjattu helpoksi. Uusi muistiinpano saa napin
+  välähtämään; erillistä ilmoitusta ei tule.
+
 ## 7. Raportti ja arvosana
 
 - Raportti on tarkistuslista viidestä todisteesta. Puuttuvan kohdalla näkyy vain kategoria
