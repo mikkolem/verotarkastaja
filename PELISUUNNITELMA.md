@@ -22,22 +22,28 @@ Pelaaja on Verovirasto-nimisen (keksitty virasto) tarkastaja. Rakennusliike **Ki
 
 Toimitusjohtaja **Kalevi Kivi** on "lähtenyt lounaalle" ja palaa noin 15 minuutin kuluttua. Siihen mennessä pelaajan pitää löytää todisteet piilotetusta, toisesta kirjanpidosta ("laatikko B") ja koota tarkastusraportti.
 
-Kalevia ei nähdä, mutta huoneen tavarat kertovat hänestä kaiken.
+Kalevia ei nähdä pelin aikana, mutta huoneen tavarat kertovat hänestä kaiken. Hän astuu ovesta
+vasta loppukohtauksessa (henkilökuva ja repliikki, joka riippuu tuloksesta).
 
-**Pirjo** on firman kirjanpitäjä, joka jättää puhelinvastaajaan viestejä Kaleville. Ne toimivat samalla vihjeinä pelaajalle.
+**Pirjo** on firman kirjanpitäjä ja nimettömän vihjeen lähettäjä. Hän jättää puhelinvastaajaan
+viestejä Kaleville, jotka toimivat samalla vihjeinä pelaajalle, ja uuden viestin jokaisesta
+löydetystä todisteesta.
 
 ## 3. Huone ja kuvakulmat
 
-Toimitusjohtajan työhuone myöhään iltapäivällä. Aurinko siivilöityy sälekaihtimien läpi, pölyhiukkaset leijuvat valossa ja seinäkello tikittää. Puupaneelit, nahkatuoli ja viskikarahvi kertovat, että rahaa on.
+Toimitusjohtajan työhuone iltapäivällä. Aurinko siivilöityy sälekaihtimien läpi valonsäteinä,
+pölyhiukkaset leijuvat valossa ja aurinko laskee pelin kuluessa. Puupaneelit, nahkasohva ja
+viskikarahvi kertovat, että rahaa on. Ei ääniä.
 
-Pelaaja liikkuu neljän kiinteän kuvakulman välillä:
+Pelaaja liikkuu viiden kiinteän kuvakulman välillä (järjestys myötäpäivään):
 
 | Kuvakulma | Mitä siellä on |
 |---|---|
-| **Työpöytä** | tietokone, muistilaput, pöytälaatikot A ja B, kahvikuppi, pöytäkalenteri |
-| **Kirjahylly** | kirjat, virallinen mappi, kassakaappi (kirjojen takana) |
-| **Ikkuna** | viherkasvi ("taideteos"), paperisilppuri, roskakori, kesämökin kuva |
-| **Ovi** | puhelinvastaaja, kehystetty diplomi, ALV-juliste, naulakko |
+| **Työpöytä** | kannettava tietokone (kalenteri), muistilappu kannessa, pöytälaatikot A ja B, kahvikuppi, kynäpurkki, paperipino (tiliote), lukulasit, nitoja, mökkikuva kehyksessä, pöytälamppu |
+| **Ikkuna** | viherkasvi (”taideteos”, avain ruukun alla), paperisilppuri, roskakori, seinäkello |
+| **Sohva** | Chesterfield-sohva, kukkatyyny, kunniakirja ”Vuoden veronmaksaja” seinällä |
+| **Ovi** | sivupöytä: puhelinvastaaja, muistikirja, viskikarahvi ja lasi; ALV-juliste; ovi käytävään |
+| **Kirjahylly** | kirjasarjat, mapit (Kirjanpito 2025, Kirjanpito 2024, Tilinpäätös), golfpokaali, kassakaappi alahyllyllä |
 
 Esineitä voi klikata, nostaa lähemmäs ja pyöritellä. Läheltä katsottaessa realistiset yksityiskohdat pääsevät oikeuksiinsa.
 
@@ -81,13 +87,17 @@ ja näin pelaat.
 
 ## 5. Huumori ja yksityiskohdat
 
-- Kehystetty diplomi "Vuoden veronmaksaja 1998", selvästi itse tehty
-- Kirjahyllyssä *"Verosuunnittelu for Dummies"* ja *"Kuinka puhua tarkastajalle"* (alleviivattu)
-- Muistilaput: *"Muista silputa!!!"*, *"Kuitit → laatikko B (EI laatikko A)"*
-- Kahvikuppi "Maailman paras johtaja", kirjattu edustuskuluksi
-- Puhelinvastaajassa viestejä vaimolta, golfkaverilta ja Pirjolta
-- Suomalaista toimistokulttuuria: Fiskarsin sakset, pankin joulukorttipino, kesämökin kuva, Marimekon tyyny sohvalla
-- Verovirasto ja firma ovat keksittyjä. Oikeiden virastojen tai yritysten nimiä ja logoja ei käytetä.
+Toteutettu (esineiden kuvaukset src/items.js, paperit src/paper.js):
+
+- Kunniakirja ”Vuoden veronmaksaja [arvottu vuosi]”. Myöntäjä: Kalevi Kivi, saaja: Kalevi Kivi.
+- Muistilaput: ”Varavain siellä missä taide kasvaa”, ”Silppuri – älä unohda!!! Kassakaappi: HÄÄPÄIVÄ (älä kirjoita ylös)”, Pirjon lappu laatikossa A.
+- Kahvikuppi ”Maailman paras johtaja”, kirjattu edustuskuluksi. Viherkasvi taideteoksena 12 000 € (oikea hinta 89 €). Nitojan poistoaika 25 vuotta. Sohva ”neuvottelutilan kalustus 8 900 €”.
+- Tietosanakirjasarja metreittäin, ”ammattikirjallisuutta”, sivut leikkaamatta. Muistikirja ”EI PAPEREITA VEROTTAJALLE – paitsi ne viralliset”.
+- Puhelinvastaajassa viestejä Pirjolta, vaimolta (Marjatta) ja golfkaveri Raimolta. Kalenterissa ”Hallituksen kokous (= minä)” ja ”Verotarkastus?? EI KOSKAAN”.
+- ALV-juliste 25,5 %, johon joku on piirtänyt surullisen naaman.
+- Verovirasto, Kivi & Kumppanit Oy ja Pohjolan Säästöpankki ovat keksittyjä. Oikeiden virastojen tai yritysten nimiä ja logoja ei käytetä (tyyny on yleinen kukkakuvio, ei tuotemerkki).
+
+Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyssä.
 
 ## 6. Tarvittavat esineet (mallilista)
 
@@ -95,36 +105,43 @@ ja näin pelaat.
 
 **Huonekalut:** työpöytä (2 laatikkoa), nahkatuoli, kirjahylly, sohva, kassakaappi, naulakko
 
-**Esineet:** tietokone ja näyttö, pöytälamppu, puhelinvastaaja, seinäkello, viherkasvi ruukussa, paperisilppuri, roskakori, viskikarahvi ja lasi, kahvikuppi, mapit (2), kirjat, kehykset (diplomi, mökkikuva), muistilaput, kuitit, lasku (silputtava), avain, pöytäkalenteri, juliste
+**Esineet:** kannettava tietokone, pöytälamppu, puhelinvastaaja, seinäkello, viherkasvi ruukussa, paperisilppuri, roskakori, viskikarahvi ja lasi, kahvikuppi, kynäpurkki, paperipino, mapit (3), kirjasarjat, golfpokaali, sohvatyyny, kehykset (kunniakirja, mökkikuva), lukulasit, nitoja, muistikirja, muistilaput, kuitit, lasku (silputtu), avain, juliste. Kalenteri on tietokoneen näytöllä, ei pöydällä. Naulakkoa ei ole.
 
-**Mistä mallit tulevat:**
-- Ilmaiset, vapaasti käytettävät mallit ja materiaalit (esim. Poly Haven, Sketchfabin CC-mallit)
-- Omat erikoisesineet, kuten paperit, laput ja mapit, tehdään Blenderissä tai suoraan koodilla
-- Tarvittaessa täydennetään tekoälyllä tehdyillä 3D-malleilla
+**Mistä mallit tulevat (toteutunut):**
+- Huone, ovi, käytävä, työpöytä, kirjahylly ja sivupöytä: Blender-skripti blender/build_room.py
+- Puhelinvastaaja, kassakaappi, mapit, silppuri, roskakori: blender/build_props.py
+- 13 valmista Poly Havenin CC0-mallia (src/props.js), pakattu `npm run models`-komennolla
+- Kahvikuppi, kynäpurkki, paperipino, karahvi, pokaali ja tyyny: three.js:n perusmuodot (src/decor.js)
+- Paperit ja tekstit piirretään canvakselle (src/paper.js), käsiala Kalam-fontilla
+- Henkilökuvat ja kollaasi: tekoälyllä tehdyt piirroskuvat (public/characters, public/comic)
 
 ## 7. Tekniikka (lyhyesti)
 
-- **three.js** selaimessa, mallit **Blenderistä** (asennettuna versio 4.5.14 LTS)
-- Julkaisu **GitHub Pagesissa**, myöhemmin tarvittaessa Cloudflare Pagesissa
-- Äänet: kellon tikitys, paperin kahina, puhelinvastaajan viestit (mahdollisesti tekoälyäänillä)
+- **three.js** (0.186) ja **Vite**, mallit **Blenderistä** (4.5 LTS) meshopt-pakattuina
+- Jälkikäsittely: GTAO, bloom, ääriviivat, AgX-sävykartta. Huone piirretään vain kameran liikkuessa, levossa päivittyy vain pöly.
+- Julkaisu **GitHub Pagesissa** (.github/workflows/deploy.yml), osoite https://mikkolem.github.io/verotarkastaja/. Cloudflare Pages harkinnassa myöhemmin.
+- **Ei ääniä.** Päätetty jättää pois; rytmi tehdään tekstien ilmestymisellä ja kameran liikkeellä.
 
 ## 8. Toteutusvaiheet
 
-1. **Huone näkyviin:** tyhjä huone, valaistus ja kuvakulmien vaihto selaimessa. Tästä näkee jo, onko ulkoasu näyttävä.
-2. **Kalusteet ja esineet:** huone täytetään ja esineitä voi klikata ja tarkastella läheltä.
-3. **Pulmat:** pulmaketju 1–4, aikaraja ja tarkastusraportti.
-4. **Viimeistely:** äänet, huumoriyksityiskohdat, vihjeet ja loppukohtaus.
-5. **Julkaisu:** GitHub Pages.
-
-Jokaisen vaiheen jälkeen on olemassa jotain toimivaa ja näytettävää.
+1. ✅ **Huone näkyviin:** tyhjä huone, valaistus ja kuvakulmien vaihto selaimessa.
+2. ✅ **Kalusteet ja esineet:** huone täytetty, esineitä voi klikata ja tarkastella läheltä.
+3. ✅ **Pulmat:** pulmaketju 1–4, aikaraja ja tarkastusraportti.
+4. ✅ **Viimeistely:** huumoriyksityiskohdat, vihjeet, loppukohtaus ja prologi (ei ääniä).
+5. ✅ **Julkaisu:** GitHub Pages.
+6. ✅ **Wow-tehosteet ja termit:** valonsäteet, laskeva aurinko, satunnaiset koodit, silppuripeli, raportin perusteet (ks. luvut 4 ja 10).
+7. **Seuraavaksi:** pelin jatkokehitys (tutoriaalin keventäminen, Sohva-näkymän sisältö, aikarajan näkyvyys, vaihtuvat todisteet, Kalevin repliikit löydösten mukaan).
 
 ## 9. Avoimet kysymykset
 
-- Lopullinen nimi?
-- Onko aikaraja oikea (kello käy) vai vain tunnelmaa varten?
-- Saako pelaaja nimen ja hahmon, vai onko hän vain "tarkastaja"?
-- Pitääkö pelin toimia myös puhelimella?
-- Pelaajan valitsemat raportin löydökset: kuinka monta harhautusta?
+- Lopullinen nimi? (Työnimi ”Laatikko B” on käytössä otsikoissa.)
+- Cloudflare Pagesiin siirtyminen: milloin, vai jäädäänkö GitHub Pagesiin?
+
+Ratkaistut:
+- Aikaraja on oikea: kello käy, vihje maksaa minuutin, väärä merkintä puoli minuuttia, lopussa Kalevi palaa.
+- Pelaaja on ”Sinä”, verotarkastaja, ilman nimeä. Virastossa kutsutaan ”Pilkuksi”.
+- Peli toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio ja prologi mukautuvat), mutta ensisijainen kohde on tietokoneen selain.
+- Raportissa jokaiselle todisteelle kolme perustevaihtoehtoa: oikea, uskottava väärä ja hölmö.
 
 ## 10. Visuaaliset tehosteet (toteutettu)
 
