@@ -7,7 +7,7 @@ import { SECRETS, game } from './game.js';
 // Puhelinvastaajan viestit (pulmat 3 ja 4: kassakaapin koodi ja golftasoitus).
 // Pirjo jättää lisäksi uuden viestin aina, kun pelaaja löytää todisteen.
 const MESSAGES = [
-  { from: 'Pirjo, kirjanpito', time: 'tänään 9.12',
+  { from: 'Pirjo P., kirjanpito', time: 'tänään 9.12',
     text: 'Kalevi, Pirjo täällä. Kesäkuun myyntilasku numero 117 puuttuu kirjanpidosta, eikä liikevaihto täsmää pankkitiliin. Laitoitko sen taas silppuriin? Soita!' },
   { from: 'Marjatta', time: 'tänään 10.40',
     text: () => `Kalle, kulta. Muistathan, että meidän hääpäivä on ${SECRETS.weddingText}, niin kuin joka vuosi. Älä unohda tällä kertaa! Ja juhannuksena saunotaan uudella kiukaalla.` },
@@ -18,7 +18,7 @@ const MESSAGES = [
 // Pirjon jatkoviestit todisteiden mukaan (järjestyksessä, jossa ne löytyvät)
 const PIRJO_FOLLOWUPS = {
   kiuas: 'Kalevi, Pirjo. Rauta-Antin kuitti on edustuskuluissa. Se on kiuas. Mökille. Minä en kirjaa sitä, kirjaa itse.',
-  cayman_invoice: 'Lasku 117 näkyy tiliotteella mutta ei mapissa. Jos se on silppurissa, minä en ole koskaan ollut täällä töissä.',
+  cayman_invoice: 'Lasku 117 näkyy tiliotteella mutta ei mapissa. Jos se on silppurissa, se on sinun käsialaasi, ei minun. Minulla on kopio.',
   second_ledger: 'Se musta kirja kassakaapissa ei ole kirjanpitoa, Kalevi. Se on tunnustus.',
   cayman_transfer: 'Perjantain siirto. Minä irtisanoudun. Varavain on kukkaruukun alla, niin kuin aina.',
   offshore_account: 'Se kuori oli siellä koko ajan. Minä ripustin sen kunniakirjan. Suoraan.',
@@ -29,7 +29,7 @@ let heard = 0;   // montako viestiä pelaaja on kuunnellut
 export function messages() {
   const extra = game.evidence
     .filter((id) => PIRJO_FOLLOWUPS[id])
-    .map((id, i) => ({ from: 'Pirjo, kirjanpito', time: `tänään 12.${String(9 + i * 2).padStart(2, '0')}`, text: PIRJO_FOLLOWUPS[id] }));
+    .map((id, i) => ({ from: 'Pirjo P., kirjanpito', time: `tänään 12.${String(9 + i * 2).padStart(2, '0')}`, text: PIRJO_FOLLOWUPS[id] }));
   return [...MESSAGES, ...extra];
 }
 export const unheardMessages = () => Math.max(0, messages().length - heard);
@@ -61,7 +61,7 @@ export const ITEMS = {
   // Todiste 5 (vaikein): kehyksen takana on teipattu kirjekuori. Vihje B-kirjassa: ”ylpeyteni takana”.
   diploma: {
     title: 'Kunniakirja',
-    text: () => `Vuoden veronmaksaja ${SECRETS.year}. Myöntäjä: Kalevi Kivi. Saaja: Kalevi Kivi.${
+    text: () => `Vuoden veronmaksaja ${SECRETS.year}. Myöntäjä: Kalevi K. Saaja: Kalevi K.${
       game.has('envelope') ? ' Kehyksen takana oli teipattu kirjekuori.' : ' Kehys roikkuu hieman vinossa, kuin sitä olisi nosteltu usein.'}`,
     actions: (api) => (game.has('envelope') ? [{ label: 'Lue tiliote', run: () => api.read('offshore_statement') }] : [{
       label: 'Nosta kehystä',
@@ -134,8 +134,8 @@ export const ITEMS = {
   },
   // Pulma 2b: laatikon B koodi = vuosi, josta Kalevi on ylpein (diplomi 1998)
   note_pirjo: {
-    title: 'Pirjon lappu',
-    text: 'Pirjon siistiä käsialaa: ”Kalevi, laatikon B koodi on se vuosi, joka lukee kunniakirjassasi sohvan yläpuolella. Et unohda sitä, kun katsot seinälle. – P.”',
+    title: 'Lappu laatikossa A',
+    text: 'Siistiä käsialaa, ei Kalevin: ”Sinulle, joka osaat etsiä: laatikon B koodi on vuosi kunniakirjassa sohvan yläpuolella.” Ei allekirjoitusta.',
     rotation: [0, 0, 0],
   },
   drawer_b: {
@@ -259,7 +259,7 @@ export const ITEMS = {
   decanter: { title: 'Viskikarahvi', text: 'Single malt, 18 vuotta. Kirjanpidossa: ”neuvottelutarjoilut”. Lasissa on vielä tilkka – lounaalle lähdettiin kiireellä.' },
   trophy: {
     title: 'Golfpokaali',
-    text: () => `Kesäkisat, Kalevi Kivi. Laattaan on kaiverrettu ”Tasoitus ${SECRETS.handicap}”. Kalevi on ylpeä luvusta, jota kukaan muu ei pidä saavutuksena.`,
+    text: () => `Kesäkisat, Kalevi K. Laattaan on kaiverrettu ”Tasoitus ${SECRETS.handicap}”. Kalevi on ylpeä luvusta, jota kukaan muu ei pidä saavutuksena.`,
     rotation: [0, -Math.PI / 2, 0],
   },
   pillow: { title: 'Sohvatyyny', text: 'Kukkakuvioinen tyyny. Kirjanpidossa: ”neuvottelutilan tekstiilit”. Tyynyn alla on golfkentän tuloskortti.' },

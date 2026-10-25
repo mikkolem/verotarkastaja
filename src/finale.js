@@ -154,7 +154,7 @@ export function createFinale({ scene, views, interaction, animations, toast, onD
     const card = el('div', 'kalevi-arrives');
     const img = new Image();
     img.src = `${import.meta.env.BASE_URL}characters/kalevi.jpg`;
-    img.alt = 'Kalevi Kivi';
+    img.alt = 'Kalevi K.';
     card.append(img, el('p', 'kalevi-quote', quote));
     document.body.appendChild(card);
   }

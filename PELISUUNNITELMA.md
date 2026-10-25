@@ -1,9 +1,9 @@
-# Pelisuunnitelma: "Laatikko B" (työnimi)
+# Pelisuunnitelma: "Tarkastuskäynti – kirjanpito, joka ei täsmää"
 
 > Realistinen yhden huoneen point-and-click-pakohuonepeli selaimessa.
-> Pelaaja on verotarkastaja, joka tekee yllätystarkastuksen toimitusjohtajan työhuoneeseen.
+> Pelaaja on Veroviraston viranomainen, joka tekee epävirallisen käynnin toimitusjohtajan työhuoneeseen ennen virallista tarkastusta.
 
-Muita nimiehdotuksia: *Yllätystarkastus*, *Kivi & Kumppanit*, *Toinen mappi*.
+Aiempi työnimi *Laatikko B* hylättiin: laatikko-sanaleikki ei kantanut. Henkilöt esiintyvät vain etunimellä ja alkukirjaimella (Kalevi K., Pirjo P.).
 
 ---
 
@@ -20,16 +20,16 @@ Muita nimiehdotuksia: *Yllätystarkastus*, *Kivi & Kumppanit*, *Toinen mappi*.
 
 Pelaaja on Verovirasto-nimisen (keksitty virasto) tarkastaja. Rakennusliike **Kivi & Kumppanit Oy:n** kirjanpidossa on ollut outoja lukuja, ja nyt tehdään yllätystarkastus.
 
-Toimitusjohtaja **Kalevi Kivi** on "lähtenyt lounaalle" ja palaa noin 30 minuutin kuluttua. Siihen mennessä pelaajan pitää todistaa, että toinen, oikea kirjanpito on olemassa, ja koota tarkastusraportti.
+Toimitusjohtaja **Kalevi K.** on "lähtenyt lounaalle" ja palaa noin 30 minuutin kuluttua. Siihen mennessä pelaajan pitää todistaa, että toinen, oikea kirjanpito on olemassa, ja koota tarkastusraportti.
 
-**"Laatikko B"** on Kalevin oma kiertoilmaus koko rinnakkaiselle kirjanpidolle, ei fyysinen laatikko. Työpöydän laatikot A ja B ovat hänen vitsinsä, kassakaapin musta kirja on itse B-kirjanpito. Kirje sanoo sen ääneen: "Se ei ole laatikko."
+Työpöydän laatikot A ja B ovat Kalevin vitsi, ja kassakaapin musta kirja on hänen "Kirjanpito B":nsä. Kirje ja muistio eivät käytä laatikko-sanaa: tehtävä on "selvitä kirjanpidon epäselvyydet", ja punainen lanka on puuttuva tosite 117.
 
 **Tämä ei ole virallinen verotarkastus** vaan epävirallinen käynti ennen sitä (virallinen alkaa ensi kuussa, "siihen mennessä paperit ovat silppurissa"). Oikea tarkastus ei tonki laatikoita johtajan ollessa lounaalla; peli on salapoliisityötä tarkastajan vaatteissa, ja prologi tunnustaa sen huumorilla. Sisältö (termit, kirjaukset, ALV) on silti asiallisesti oikein.
 
 Kalevia ei nähdä pelin aikana, mutta huoneen tavarat kertovat hänestä kaiken. Hän astuu ovesta
 vasta loppukohtauksessa (henkilökuva ja repliikki, joka riippuu tuloksesta).
 
-**Pirjo** on firman kirjanpitäjä ja nimettömän vihjeen lähettäjä. Hän jättää puhelinvastaajaan
+**Pirjo P.** on firman kirjanpitäjä (3 vuotta talossa) ja whistleblower: hän yritti ensin sanoa Kaleville, nyt hän jättää jälkiä vieraalle (nimetön lappu laatikossa A). Pelille ei kerrota suoraan, että kirje on hänen. Hän jättää puhelinvastaajaan
 viestejä Kaleville, jotka toimivat samalla vihjeinä pelaajalle, ja uuden viestin jokaisesta
 löydetystä todisteesta.
 
@@ -93,7 +93,7 @@ ja näin pelaat.
 
 Toteutettu (esineiden kuvaukset src/items.js, paperit src/paper.js):
 
-- Kunniakirja ”Vuoden veronmaksaja [arvottu vuosi]”. Myöntäjä: Kalevi Kivi, saaja: Kalevi Kivi.
+- Kunniakirja ”Vuoden veronmaksaja [arvottu vuosi]”. Myöntäjä: Kalevi K., saaja: Kalevi K.
 - Muistilaput: ”Varavain siellä missä taide kasvaa”, ”Silppuri – älä unohda!!! Kassakaappi: HÄÄPÄIVÄ (älä kirjoita ylös)”, Pirjon lappu laatikossa A.
 - Kahvikuppi ”Maailman paras johtaja”, kirjattu edustuskuluksi. Viherkasvi taideteoksena 12 000 € (oikea hinta 89 €). Nitojan poistoaika 25 vuotta. Sohva ”neuvottelutilan kalustus 8 900 €”.
 - Tietosanakirjasarja metreittäin, ”ammattikirjallisuutta”, sivut leikkaamatta. Muistikirja ”EI PAPEREITA VEROTTAJALLE – paitsi ne viralliset”.
@@ -139,12 +139,12 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 
 ## 9. Avoimet kysymykset
 
-- Lopullinen nimi? (Työnimi ”Laatikko B” on käytössä otsikoissa.)
+- Nimi päätetty: *Tarkastuskäynti – kirjanpito, joka ei täsmää*.
 - Cloudflare Pagesiin siirtyminen: milloin, vai jäädäänkö GitHub Pagesiin?
 
 Ratkaistut:
 - Aikaraja on oikea: 30 minuuttia, kello käy, vihje maksaa kolme minuuttia, lopussa Kalevi palaa.
-- Pelaaja on ”Sinä”, verotarkastaja, ilman nimeä. Virastossa kutsutaan ”Pilkuksi”.
+- Pelaaja on ”Sinä”, Veroviraston viranomainen, ilman nimeä. Käynti on epävirallinen, salapoliisityötä.
 - Peli toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio ja prologi mukautuvat), mutta ensisijainen kohde on tietokoneen selain.
 - Raportissa jokaiselle todisteelle kolme perustevaihtoehtoa: oikea, uskottava väärä ja hölmö, kukin selitysrivillä.
 - Termit selitetään vain raportissa ja tuloksessa, henkilön äänellä, ei huoneessa.

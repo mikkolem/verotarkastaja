@@ -1,4 +1,4 @@
-# Laatikko B
+# Tarkastuskäynti – kirjanpito, joka ei täsmää
 
 Realistinen yhden huoneen pakohuonepeli selaimessa (three.js + Blender).
 Pelin idea ja vaiheet: [PELISUUNNITELMA.md](PELISUUNNITELMA.md).

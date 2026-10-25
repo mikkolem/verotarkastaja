@@ -10,30 +10,31 @@ const BASE = import.meta.env.BASE_URL;
 
 // Diat: tarina, kirje ja henkilöt. Kollaasikuva on koko ajan taustalla.
 const CHARACTERS = [
-  { id: 'kalevi', name: 'Kalevi Kivi', role: 'Toimitusjohtaja', line: () => `”Vuoden veronmaksaja ${SECRETS.year}.” Oman ilmoituksensa mukaan.` },
-  { id: 'pirjo', name: 'Pirjo', role: 'Kirjanpitäjä, 19 vuotta talossa', line: () => 'Täsmäyttää kaiken. Myös sen, mikä ei täsmää.' },
-  { id: 'sina', name: 'Sinä', role: 'Verotarkastaja', line: () => 'Et ole koskaan jättänyt yhtäkään kuittia tarkistamatta.' },
+  { id: 'kalevi', name: 'Kalevi K.', role: 'Toimitusjohtaja, Kivi & Kumppanit Oy', line: () => `”Vuoden veronmaksaja ${SECRETS.year}.” Oman ilmoituksensa mukaan.` },
+  { id: 'pirjo', name: 'Pirjo P.', role: 'Kirjanpitäjä, 3 vuotta talossa', line: () => 'Tietää, missä mapit ovat. Ja mitä niistä puuttuu.' },
+  { id: 'sina', name: 'Sinä', role: 'Viranomainen, Verovirasto', line: () => 'Et ole koskaan jättänyt yhtäkään kuittia tarkistamatta.' },
 ];
 
 const SLIDES = [
   {
     kind: 'story',
     kicker: 'Helsinki, maanantai. Kello 11.47.',
-    title: 'Laatikko B',
+    title: 'Tarkastuskäynti',
+    subtitle: 'Kirjanpito, joka ei täsmää',
     lines: [
-      'Rakennusliike Kivi & Kumppanit Oy ilmoittaa liikevaihdokseen puolet siitä, mitä sen pankkitilille tulee.',
-      'Kirjanpitäjä on huomannut sen. Toimitusjohtaja ei ole huomannut, että kirjanpitäjä on huomannut.',
-      'Sinä olet Veroviraston tarkastaja. Virallinen tarkastus alkaa ensi kuussa – siihen mennessä paperit ovat silppurissa. Tänään pöydällesi tuli kirje ilman lähettäjää.',
+      'Rakennusliike Kivi & Kumppanit Oy ilmoittaa liikevaihdokseen puolet siitä, mitä sen pankkitilille tulee. Jokin ei täsmää.',
+      'Sinä olet Veroviraston viranomainen. Virallinen tarkastus alkaa ensi kuussa – siihen mennessä paperit ovat silppurissa.',
+      'Tänään pöydällesi tuli kirje ilman lähettäjää. Tämä on salapoliisityötä.',
     ],
   },
   {
     kind: 'letter',
     kicker: 'Kirje on kirjoitettu koneella. Ei allekirjoitusta.',
     lines: [
-      'Kalevi Kivi pitää toista kirjanpitoa. Oikeaa. Hän kutsuu sitä ”laatikko B:ksi”. Se ei ole laatikko.',
-      'Kaikki on hänen työhuoneessaan, jos osaa katsoa.',
+      'Kirjanpidosta puuttuu tosite 117. Se ei ole ainoa.',
+      'Kalevi pitää toista kirjanpitoa, sitä oikeaa. Kaikki on hänen työhuoneessaan, jos osaa katsoa.',
       'Hän lähtee lounaalle tasan kello 12 ja palaa puolen tunnin päästä. Ovi jää raolleen.',
-      'Todista, että B on olemassa, ennen kuin hän palaa.',
+      'Etsi todisteet ennen kuin hän palaa.',
       '– Joku, joka tietää',
     ],
   },
@@ -72,6 +73,7 @@ function buildSlide(slide) {
   if (slide.kicker) s.appendChild(el('div', 'pro-kicker', slide.kicker));
   if (slide.kind === 'story') {
     s.appendChild(el('h1', 'pro-title', slide.title));
+    if (slide.subtitle) s.appendChild(el('div', 'pro-subtitle', slide.subtitle));
     slide.lines.forEach((line, i) => s.appendChild(reveal(el('p', 'pro-line', line), 600 + i * 1500)));
   } else if (slide.kind === 'letter') {
     const paper = el('div', 'pro-paper');

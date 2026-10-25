@@ -643,6 +643,7 @@ body.result-open .kalevi-quote { display: none; }
 .pro-slide { width: min(820px, 100%); padding-bottom: 12px; animation: pro-in 0.6s ease-out; }
 @keyframes pro-in { from { opacity: 0; transform: translateY(14px); } }
 .pro-kicker { font-size: 14px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ui-accent); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); }
+.pro-subtitle { margin: -10px 0 18px; font-size: clamp(17px, 2.4vw, 24px); color: var(--ui-muted); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); }
 .pro-title { margin: 8px 0 18px; font-size: clamp(44px, 8vw, 84px); font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: #f3e9d8; text-shadow: 0 4px 24px rgba(0, 0, 0, 0.8); }
 .pro-line { margin: 0 0 12px; font-size: clamp(17px, 2.2vw, 23px); line-height: 1.4; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9); opacity: 0; transform: translateY(6px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
 .pro-line.shown { opacity: 1; transform: none; }

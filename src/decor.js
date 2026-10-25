@@ -170,7 +170,7 @@ function trophy() {
       c.fillStyle = '#3a2a10';
       c.textAlign = 'center';
       c.font = 'bold 40px Georgia, serif';
-      c.fillText('KESÄKISAT · KALEVI KIVI', w / 2, 62);
+      c.fillText('KESÄKISAT · KALEVI K.', w / 2, 62);
       c.font = 'bold 54px Georgia, serif';
       c.fillText(`TASOITUS ${SECRETS.handicap}`, w / 2, 130);
     }),

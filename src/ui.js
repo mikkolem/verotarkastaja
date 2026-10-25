@@ -289,7 +289,7 @@ export function passwordPrompt({ title, hint, check, failHint, onOpen }) {
   cancel.type = 'button';
   const buttons = el('div', 'lock-buttons');
   buttons.append(cancel, open);
-  card.append(el('h2', null, title), el('div', 'login-user', 'Kalevi Kivi'), input, message, buttons);
+  card.append(el('h2', null, title), el('div', 'login-user', 'Kalevi K.'), input, message, buttons);
   overlay.appendChild(card);
   document.body.appendChild(overlay);
   input.focus();

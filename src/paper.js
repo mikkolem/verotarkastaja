@@ -132,10 +132,10 @@ function diplomaTexture() {
     g.font = `italic 34px ${SERIF}`;
     g.fillText('myönnetään', w / 2, 490);
     g.font = `48px ${SERIF}`;
-    g.fillText('Kalevi Kivelle', w / 2, 560);
+    g.fillText('Kalevi K:lle', w / 2, 560);
     g.font = `22px ${SERIF}`;
     g.fillStyle = '#6b5a3a';
-    g.fillText('Myöntäjä: Kalevi Kivi', w / 2, 660);
+    g.fillText('Myöntäjä: Kalevi K.', w / 2, 660);
     // kultainen sinetti
     g.fillStyle = '#c99a2e';
     g.beginPath();
@@ -225,14 +225,14 @@ function spineTexture(text, bg) {
 }
 
 // --- laatikon B paperit (johtavat pulmaan 3) -----------------------------------------
-// Pirjon lappu laatikossa A: vihje laatikon B koodiin (diplomin vuosi 1998)
+// Nimetön lappu laatikossa A (Pirjon jälki vieraalle): vihje laatikon B koodiin
 function pirjoNoteTexture() {
   return canvasTexture(420, 420, (g, w, h) => {
     paperBackground(g, w, h, '#fbf8ee');
     g.fillStyle = '#5a2a6a';
     g.font = `27px ${HAND}`;
     g.font = `25px ${HAND}`;
-    ['Kalevi,', 'laatikon B koodi on', 'se vuosi, joka lukee', 'kunniakirjassasi', 'sohvan yläpuolella.', '        – P.'].forEach((l, i) => g.fillText(l, 24, 60 + i * 56));
+    ['Sinulle, joka', 'osaat etsiä:', 'laatikon B koodi on', 'vuosi kunniakirjassa', 'sohvan yläpuolella.'].forEach((l, i) => g.fillText(l, 24, 60 + i * 56));
   });
 }
 
@@ -322,7 +322,7 @@ function invoiceBottomCanvas() {
   g.fillText('Tilille: Cayman National Bank, George Town', 50, 360);
   g.font = `italic 15px ${SERIF}`;
   g.fillStyle = '#555';
-  g.fillText('Ei kirjanpitoon. – K.K.', 50, 420);
+  g.fillText('Ei kirjanpitoon. – K.', 50, 420);
   return c;
 }
 
@@ -378,7 +378,7 @@ function officialPnlCanvas() {
   g.textAlign = 'left';
   g.fillStyle = '#1f3a8a';
   g.font = `28px ${HAND}`;
-  ['Kalevi! Liikevaihto ei', 'täsmää pankkitiliin.', 'Missä on kesäkuun', 'lasku nro 117?? – Pirjo'].forEach((l, i) => g.fillText(l, 40, 560 + i * 44));
+  ['Kalevi! Liikevaihto ei', 'täsmää pankkitiliin.', 'Missä on kesäkuun', 'lasku nro 117?? – P.P.'].forEach((l, i) => g.fillText(l, 40, 560 + i * 44));
   return c;
 }
 
@@ -555,7 +555,7 @@ function offshoreStatementCanvas() {
   g.fillStyle = '#222';
   g.font = `16px ${MONO}`;
   g.fillText('Account statement · June 2025', 30, 115);
-  g.fillText('Account holder: KALEVI KIVI (private)', 30, 142);
+  g.fillText('Account holder: KALEVI K. (private)', 30, 142);
   g.fillText('Harbour Road 7, George Town', 30, 166);
   g.fillRect(30, 185, c.width - 60, 1);
   const rows = [
@@ -589,7 +589,7 @@ function offshoreStatementCanvas() {
   g.fillStyle = '#1f3a8a';
   g.font = `26px ${HAND}`;
   g.fillText('Eläkerahasto. Ei Pirjolle.', 30, 660);
-  g.fillText('– K.K.', 420, 700);
+  g.fillText('– K.', 420, 700);
   return c;
 }
 
@@ -658,7 +658,7 @@ function calendarCanvas() {
   g.fillRect(0, 0, c.width, 70);
   g.fillStyle = '#fff';
   g.font = `bold 26px ${SERIF}`;
-  g.fillText('Kalenteri – Kalevi Kivi', 30, 45);
+  g.fillText('Kalenteri – Kalevi K.', 30, 45);
   g.font = `18px ${SERIF}`;
   g.textAlign = 'right';
   g.fillText('Viikko 26 / 2025', c.width - 30, 45);
