@@ -72,12 +72,12 @@ vaihtoehdosta (oikea termi, uskottava väärä, hölmö). Raportin voi lähettä
 oikeiden perusteiden ja käytettyjen vihjeiden mukaan. Vihje maksaa minuutin, väärä
 epäilymerkintä puoli minuuttia. Tuloksen alla listataan pelissä esiintyneet termit.
 
-**Prologi (src/prologue.js):** sarjakuva, viisi ruutua, klikkaus eteen- ja taaksepäin
-(nuolet, nuolinäppäimet, Esc ohittaa). Ruuduissa kuva, keltainen kuvateksti ja puhekupla:
-1) tarkastaja ja kirjekuori Verovirastossa, 2) kirje lähikuvassa, 3) Kalevi lähtee lounaalle,
-4) Pirjo katsoo perään, 5) tarkastaja raollaan olevan oven edessä. Kuvat kansiosta
-public/comic/ (ohje README.txt); puuttuvan kuvan tilalla näytetään henkilökuva.
-Sen jälkeen tarkastusmääräys kolmessa vaiheessa (tehtävä, näin pelaat, ohjaus ja vihjeet).
+**Prologi (src/prologue.js):** kaksi ruutua ja ovisiirtymä, alle puoli minuuttia.
+1) Kollaasikuva Kalevista, Pirjosta ja tarkastajasta (public/comic/collage.jpg), jonka päällä
+tarina kerrotaan kolmessa virkkeessä: firma, epäily, kirje. 2) Nimetön vihjekirje: laatikko B,
+lounas kello 12, vartti aikaa. Sitten ovi aukeaa ja kamera ajaa käytävästä työpöydälle.
+Klikkaus eteen- ja taaksepäin, Esc ohittaa. Huoneessa tarkastusmääräys kahdessa vaiheessa:
+tehtävä lyhyesti (neljä todistetta, 15 minuuttia) ja näin pelaat.
 
 ## 5. Huumori ja yksityiskohdat
 

@@ -640,21 +640,6 @@ body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
 @keyframes panel-left { from { opacity: 0; transform: translateX(-60px) rotate(-2deg); } }
 .comic-art { display: block; width: 100%; height: 100%; object-fit: cover; animation: ken-burns 9s ease-out both; }
 @keyframes ken-burns { from { transform: scale(1.02); } to { transform: scale(1.09); } }
-/* varakuva (pystykuva henkilöstä) piirretyn taustan edessä, toisessa laidassa */
-.comic-art-fallback {
-  position: absolute;
-  inset: 0;
-  object-fit: contain;
-  object-position: 100% 100%;
-  padding: 10% 3% 0;
-  background: none;
-  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6)) contrast(1.08) saturate(1.15);
-  mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
-}
-.comic-art-fallback.side-left { object-position: 0% 100%; }
-.comic-scene { position: absolute; inset: 0; }
-.comic-scene svg { display: block; width: 100%; height: 100%; animation: ken-burns 9s ease-out both; }
 /* rasteripisteet koko ruudun päälle */
 .comic-halftone {
   position: absolute;
@@ -664,13 +649,48 @@ body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
   background: radial-gradient(circle at 1px 1px, rgba(27, 20, 12, 0.22) 0.8px, transparent 1.6px) 0 0 / 5px 5px;
   mix-blend-mode: multiply;
 }
-/* vauhtiviivat Kalevin ruutuun */
-.comic-speed {
+/* kollaasiruutu: kuva taustalla, nimilaput ja tarina sen päällä */
+.comic-collage .comic-art { animation: ken-burns 14s ease-out both; }
+.comic-labels {
   position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(-6deg, transparent 0 22px, rgba(27, 20, 12, 0.35) 22px 25px);
-  mask-image: linear-gradient(to left, transparent 40%, #000 75%);
-  -webkit-mask-image: linear-gradient(to left, transparent 40%, #000 75%);
+  left: 0;
+  right: 0;
+  top: 46px;
+  z-index: 1;
+  display: flex;
+}
+.comic-labels span {
+  flex: 1;
+  margin: 8px 6px 0;
+  text-align: center;
+  font-size: clamp(11px, 1.3vw, 14px);
+  font-weight: 700;
+  color: #f3e9d8;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+  background: rgba(14, 11, 9, 0.5);
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+.comic-story {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: 70px 26px 22px;
+  background: linear-gradient(to bottom, transparent, rgba(10, 8, 6, 0.9) 35%);
+}
+.comic-story .comic-line {
+  margin: 0 0 10px;
+  font-size: clamp(14px, 1.9vw, 19px);
+  line-height: 1.4;
+  color: #f3e9d8;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+}
+.comic-story .comic-line:last-child { margin: 0; color: var(--ui-accent); font-weight: 700; }
+@media (max-width: 640px) {
+  .comic-labels { display: none; }
+  .comic-story { padding: 40px 14px 14px; }
 }
 
 /* kuvateksti: keltainen laatikko yläreunassa */
@@ -732,7 +752,8 @@ body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
   font-family: 'Courier New', Courier, monospace;
   transform: rotate(1.2deg);
 }
-.comic-line { margin: 0 0 14px; font-size: clamp(15px, 1.9vw, 19px); line-height: 1.5; opacity: 0; animation: pro-line 0.8s ease-out forwards; }
+.comic-line { margin: 0 0 14px; font-size: clamp(15px, 1.9vw, 19px); line-height: 1.5; opacity: 0; transform: translateY(6px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+.comic-line.shown { opacity: 1; transform: none; }
 .comic-sign { text-align: right; font-style: italic; }
 @keyframes pro-line { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
@@ -773,7 +794,8 @@ body.ending .nav, body.ending .edge, body.ending .hud { display: none; }
   .pro-nav { min-width: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .comic-panel, .comic-bubble, .comic-line { animation: none; opacity: 1; }
+  .comic-panel, .comic-bubble { animation: none; opacity: 1; }
+  .comic-line { transition: none; }
 }
 
 .intro {
