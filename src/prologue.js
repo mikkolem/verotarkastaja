@@ -1,28 +1,34 @@
-// Prologi: kaksi ruutua ja ovisiirtymä, yhteensä alle puoli minuuttia.
-//   1. Kollaasikuva henkilöistä, jonka päällä kerrotaan tarina ja pelin idea.
-//   2. Nimetön vihjekirje lähikuvassa.
+// Prologi: kolme diaa kollaasikuvan päällä ja ovisiirtymä, alle puoli minuuttia.
+//   1. Tarina ja pelin idea kolmessa virkkeessä.
+//   2. Nimetön vihjekirje.
+//   3. Henkilöt pieninä kortteina.
 // Sitten ovi aukeaa ja kamera ajaa työpöydälle (main.js: cinematic).
 // Eteenpäin klikkaamalla, nuolella tai välilyönnillä; taaksepäin nuolella; Esc ohittaa.
 import { SECRETS } from './game.js';
 
 const BASE = import.meta.env.BASE_URL;
 
-const PANELS = [
+// Diat: tarina, kirje ja henkilöt. Kollaasikuva on koko ajan taustalla.
+const CHARACTERS = [
+  { id: 'kalevi', name: 'Kalevi Kivi', role: 'Toimitusjohtaja', line: () => `”Vuoden veronmaksaja ${SECRETS.year}.” Oman ilmoituksensa mukaan.` },
+  { id: 'pirjo', name: 'Pirjo', role: 'Kirjanpitäjä, 19 vuotta talossa', line: () => 'Täsmäyttää kaiken. Myös sen, mikä ei täsmää.' },
+  { id: 'sina', name: 'Sinä', role: 'Verotarkastaja', line: () => 'Et ole koskaan jättänyt yhtäkään kuittia tarkistamatta.' },
+];
+
+const SLIDES = [
   {
-    kind: 'collage',
-    image: 'comic/collage.jpg',
-    caption: 'Helsinki, maanantai. Kello 11.47.',
-    story: [
-      'Rakennusliike Kivi & Kumppanit Oy:n kirjanpito ei täsmää. Toimitusjohtaja Kalevi Kivi ' +
-      `(”Vuoden veronmaksaja ${SECRETS.year}”, oman ilmoituksensa mukaan) ilmoittaa liikevaihdoksi puolet siitä, mitä pankkitilille tulee.`,
-      'Kirjanpitäjä Pirjo on huomannut sen. Hän on 19 vuotta täsmäyttänyt Kalevin lukuja, eikä enää jaksa.',
+    kind: 'story',
+    kicker: 'Helsinki, maanantai. Kello 11.47.',
+    title: 'Laatikko B',
+    lines: [
+      'Rakennusliike Kivi & Kumppanit Oy ilmoittaa liikevaihdokseen puolet siitä, mitä sen pankkitilille tulee.',
+      'Kirjanpitäjä on huomannut sen. Toimitusjohtaja ei ole huomannut, että kirjanpitäjä on huomannut.',
       'Sinä olet Veroviraston tarkastaja. Tänään pöydällesi tuli kirje ilman lähettäjää.',
     ],
-    labels: ['Kalevi Kivi · toimitusjohtaja', 'Pirjo · kirjanpitäjä', 'Sinä · verotarkastaja'],
   },
   {
     kind: 'letter',
-    caption: 'Kirje on kirjoitettu koneella. Ei allekirjoitusta.',
+    kicker: 'Kirje on kirjoitettu koneella. Ei allekirjoitusta.',
     lines: [
       'Kalevi Kivi pitää toista kirjanpitoa. Oikeaa.',
       'Se on hänen työhuoneessaan. Hän kutsuu sitä ”laatikko B:ksi”.',
@@ -30,6 +36,10 @@ const PANELS = [
       'Etsi todisteet ennen kuin hän palaa.',
       '– Joku, joka tietää',
     ],
+  },
+  {
+    kind: 'cast',
+    kicker: 'Henkilöt',
     last: true,
   },
 ];
@@ -48,36 +58,37 @@ function reveal(node, delay) {
   return node;
 }
 
-function buildPanel(panel, index) {
-  const frame = el('figure', 'comic-panel');
-  frame.dataset.index = String(index + 1);
-  if (panel.kind === 'collage') {
-    frame.classList.add('comic-collage');
-    const img = new Image();
-    img.className = 'comic-art';
-    img.alt = 'Kalevi Kivi, Pirjo ja verotarkastaja';
-    img.draggable = false;
-    img.src = `${BASE}${panel.image}`;
-    frame.appendChild(img);
-    frame.appendChild(el('div', 'comic-halftone'));
-    // nimilaput kuvan kolmen osan alle
-    const labels = el('div', 'comic-labels');
-    panel.labels.forEach((t) => labels.appendChild(el('span', null, t)));
-    frame.appendChild(labels);
-    // tarina kuvan alareunassa, rivi kerrallaan
-    const story = el('div', 'comic-story');
-    panel.story.forEach((line, i) => story.appendChild(reveal(el('p', 'comic-line', line), 500 + i * 1600)));
-    frame.appendChild(story);
-  } else {
-    frame.classList.add('comic-letter');
-    const paper = el('div', 'comic-paper');
-    panel.lines.forEach((line, i) => {
-      paper.appendChild(reveal(el('p', `comic-line${i === panel.lines.length - 1 ? ' comic-sign' : ''}`, line), 400 + i * 900));
+function portrait(c) {
+  const img = new Image();
+  img.className = 'cast-portrait';
+  img.alt = c.name;
+  img.draggable = false;
+  img.src = `${BASE}characters/${c.id}.jpg`;
+  return img;
+}
+
+function buildSlide(slide) {
+  const s = el('section', `pro-slide pro-${slide.kind}`);
+  if (slide.kicker) s.appendChild(el('div', 'pro-kicker', slide.kicker));
+  if (slide.kind === 'story') {
+    s.appendChild(el('h1', 'pro-title', slide.title));
+    slide.lines.forEach((line, i) => s.appendChild(reveal(el('p', 'pro-line', line), 600 + i * 1500)));
+  } else if (slide.kind === 'letter') {
+    const paper = el('div', 'pro-paper');
+    slide.lines.forEach((line, i) => {
+      paper.appendChild(reveal(el('p', `pro-line${i === slide.lines.length - 1 ? ' pro-sign' : ''}`, line), 400 + i * 900));
     });
-    frame.appendChild(paper);
+    s.appendChild(paper);
+  } else {
+    const row = el('div', 'cast-row');
+    CHARACTERS.forEach((c, i) => {
+      const card = el('div', 'cast-card');
+      card.append(portrait(c), el('div', 'cast-name', c.name), el('div', 'cast-role', c.role), el('p', 'cast-line', c.line()));
+      row.appendChild(reveal(card, 300 + i * 700));
+    });
+    s.appendChild(row);
   }
-  if (panel.caption) frame.appendChild(el('figcaption', 'comic-caption', panel.caption));
-  return frame;
+  return s;
 }
 
 export function runPrologue({ onDone, cinematic }) {
@@ -92,12 +103,19 @@ export function runPrologue({ onDone, cinematic }) {
   const root = el('div', 'prologue');
   root.setAttribute('role', 'dialog');
   root.setAttribute('aria-label', 'Prologi');
-  const stage = el('div', 'comic-stage');
+  // kollaasi koko ruudun taustana, hitaasti zoomaten
+  const bg = el('div', 'pro-bg');
+  const bgImg = new Image();
+  bgImg.src = `${BASE}comic/collage.jpg`;
+  bgImg.alt = '';
+  bg.appendChild(bgImg);
+  root.appendChild(bg);
+  const stage = el('div', 'pro-stage');
   const footer = el('div', 'pro-footer');
   const prev = el('button', 'pro-nav', '← Edellinen');
   const next = el('button', 'pro-nav primary', 'Seuraava →');
   const dots = el('div', 'pro-dots');
-  PANELS.forEach(() => dots.appendChild(el('span')));
+  SLIDES.forEach(() => dots.appendChild(el('span')));
   const skip = el('button', 'pro-skip', 'Ohita prologi');
   footer.append(prev, dots, next, skip);
   root.append(stage, footer);
@@ -111,16 +129,14 @@ export function runPrologue({ onDone, cinematic }) {
 
   function show(i) {
     if (finished || entering) return;
-    if (i >= PANELS.length) { enterRoom(); return; }
+    if (i >= SLIDES.length) { enterRoom(); return; }
     i = Math.max(0, i);
-    const forward = i > index;
     index = i;
-    const panel = buildPanel(PANELS[i], i);
-    panel.classList.add(forward ? 'enter-right' : 'enter-left');
-    stage.replaceChildren(panel);
+    stage.replaceChildren(buildSlide(SLIDES[i]));
+    root.dataset.slide = String(i);
     [...dots.children].forEach((d, j) => d.classList.toggle('active', j === i));
     prev.disabled = i === 0;
-    next.textContent = PANELS[i].last ? 'Astu sisään →' : 'Seuraava →';
+    next.textContent = SLIDES[i].last ? 'Astu sisään →' : 'Seuraava →';
     next.focus({ preventScroll: true });
   }
 
