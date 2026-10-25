@@ -1,7 +1,7 @@
 # Pelisuunnitelma: "Tarkastuskäynti – kirjanpito, joka ei täsmää"
 
 > Realistinen yhden huoneen point-and-click-pakohuonepeli selaimessa.
-> Pelaaja on Veroviraston viranomainen, joka tekee epävirallisen käynnin toimitusjohtajan työhuoneeseen ennen virallista tarkastusta.
+> Pelaaja on viranomainen, joka tekee epävirallisen käynnin toimitusjohtajan työhuoneeseen ennen virallista tarkastusta.
 
 Aiempi työnimi *Laatikko B* hylättiin: laatikko-sanaleikki ei kantanut. Henkilöt esiintyvät vain etunimellä ja alkukirjaimella (Kalevi K., Pirjo P.).
 
@@ -18,7 +18,7 @@ Aiempi työnimi *Laatikko B* hylättiin: laatikko-sanaleikki ei kantanut. Henkil
 
 ## 2. Tarina
 
-Pelaaja on Verovirasto-nimisen (keksitty virasto) tarkastaja. Rakennusliike **Kivi & Kumppanit Oy:n** kirjanpidossa on ollut outoja lukuja, ja nyt tehdään yllätystarkastus.
+Pelaaja on viranomainen; virastoa ei nimetä, jotta peli ei näytä minkään oikean viranomaisen viestinnältä. Rakennusliike **Kivi & Kumppanit Oy:n** kirjanpidossa on ollut outoja lukuja, ja nyt tehdään yllätystarkastus.
 
 Toimitusjohtaja **Kalevi K.** on "lähtenyt lounaalle" ja palaa noin 30 minuutin kuluttua. Siihen mennessä pelaajan pitää todistaa, että toinen, oikea kirjanpito on olemassa, ja koota tarkastusraportti.
 
@@ -99,7 +99,7 @@ Toteutettu (esineiden kuvaukset src/items.js, paperit src/paper.js):
 - Tietosanakirjasarja metreittäin, ”ammattikirjallisuutta”, sivut leikkaamatta. Muistikirja ”EI PAPEREITA VEROTTAJALLE – paitsi ne viralliset”.
 - Puhelinvastaajassa viestejä Pirjolta, vaimolta (Marjatta) ja golfkaveri Raimolta. Kalenterissa ”Hallituksen kokous (= minä)” ja ”Verotarkastus?? EI KOSKAAN”.
 - ALV-juliste 25,5 %, johon joku on piirtänyt surullisen naaman.
-- Verovirasto, Kivi & Kumppanit Oy ja Pohjolan Säästöpankki ovat keksittyjä. Oikeiden virastojen tai yritysten nimiä ja logoja ei käytetä (tyyny on yleinen kukkakuvio, ei tuotemerkki).
+- Kivi & Kumppanit Oy ja Pohjolan Säästöpankki ovat keksittyjä; virastoa ei nimetä. Oikeiden virastojen tai yritysten nimiä ja logoja ei käytetä (tyyny on yleinen kukkakuvio, ei tuotemerkki).
 
 Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyssä.
 
@@ -144,7 +144,7 @@ Ei toteutettu: Fiskarsin sakset, pankin joulukorttipino, nimetyt kirjat hyllyss�
 
 Ratkaistut:
 - Aikaraja on oikea: 30 minuuttia, kello käy, vihje maksaa kolme minuuttia, lopussa Kalevi palaa.
-- Pelaaja on ”Sinä”, Veroviraston viranomainen, ilman nimeä. Käynti on epävirallinen, salapoliisityötä.
+- Pelaaja on ”Sinä”, viranomainen, ilman nimeä ja ilman viraston nimeä. Käynti on epävirallinen, salapoliisityötä.
 - Peli toimii myös kapealla näytöllä (näkökenttä levenee, lähikuva pienenee, muistio ja prologi mukautuvat), mutta ensisijainen kohde on tietokoneen selain.
 - Raportissa jokaiselle todisteelle kolme perustevaihtoehtoa: oikea, uskottava väärä ja hölmö, kukin selitysrivillä.
 - Termit selitetään vain raportissa ja tuloksessa, henkilön äänellä, ei huoneessa.

@@ -12,7 +12,7 @@ const BASE = import.meta.env.BASE_URL;
 const CHARACTERS = [
   { id: 'kalevi', name: 'Kalevi K.', role: 'Toimitusjohtaja, Kivi & Kumppanit Oy', line: () => `”Vuoden veronmaksaja ${SECRETS.year}.” Oman ilmoituksensa mukaan.` },
   { id: 'pirjo', name: 'Pirjo P.', role: 'Kirjanpitäjä, 3 vuotta talossa', line: () => 'Tietää, missä mapit ovat. Ja mitä niistä puuttuu.' },
-  { id: 'sina', name: 'Sinä', role: 'Viranomainen, Verovirasto', line: () => 'Et ole koskaan jättänyt yhtäkään kuittia tarkistamatta.' },
+  { id: 'sina', name: 'Sinä', role: 'Viranomainen', line: () => 'Et ole koskaan jättänyt yhtäkään kuittia tarkistamatta.' },
 ];
 
 const SLIDES = [
@@ -23,7 +23,7 @@ const SLIDES = [
     subtitle: 'Kirjanpito, joka ei täsmää',
     lines: [
       'Rakennusliike Kivi & Kumppanit Oy ilmoittaa liikevaihdokseen puolet siitä, mitä sen pankkitilille tulee. Jokin ei täsmää.',
-      'Sinä olet Veroviraston viranomainen. Virallinen tarkastus alkaa ensi kuussa – siihen mennessä paperit ovat silppurissa.',
+      'Sinä olet viranomainen. Virallinen tarkastus alkaa ensi kuussa – siihen mennessä paperit ovat silppurissa.',
       'Tänään pöydällesi tuli kirje ilman lähettäjää. Tämä on salapoliisityötä.',
     ],
   },

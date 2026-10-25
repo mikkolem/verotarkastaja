@@ -192,7 +192,7 @@ function posterTexture() {
     g.fillStyle = '#ffffff';
     g.textAlign = 'center';
     g.font = `bold 40px ${SERIF}`;
-    g.fillText('VEROVIRASTO', w / 2, 90);
+    g.fillText('TIEDOTE', w / 2, 90);
     g.fillStyle = '#1f4e79';
     g.font = `bold 150px ${SERIF}`;
     g.fillText('ALV', w / 2, 330);
