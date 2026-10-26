@@ -421,6 +421,40 @@ loadRoom();
 // laite ei osaa renderöidä liukulukuun (quality.js). Ketju rakennetaan funktiolla,
 // jotta se voidaan rakentaa uudelleen kevyempänä, jos huonekuva jää mustaksi.
 let composer, gtao, outline;
+function sanitizePass() {
+  return new ShaderPass({
+    uniforms: { tDiffuse: { value: null } },
+    vertexShader: CopyShader.vertexShader,
+    fragmentShader: /* glsl */ `
+      uniform sampler2D tDiffuse;
+      varying vec2 vUv;
+      void main() {
+        vec4 c = texture2D(tDiffuse, vUv);
+        // NaN ei ole yhtä suuri kuin itsensä; isnan/isinf lisäksi varmuuden vuoksi
+        bool bad = any(isnan(c)) || any(isinf(c)) || c.r != c.r || c.g != c.g || c.b != c.b;
+        c = bad ? vec4(0.0, 0.0, 0.0, 1.0) : clamp(c, vec4(0.0), vec4(64.0));
+        gl_FragColor = c;
+      }
+    `,
+  });
+}
+function nanInjectPass() {
+  return new ShaderPass({
+    uniforms: { tDiffuse: { value: null }, uZero: { value: 0 } },
+    vertexShader: CopyShader.vertexShader,
+    fragmentShader: /* glsl */ `
+      uniform sampler2D tDiffuse;
+      uniform float uZero;
+      varying vec2 vUv;
+      void main() {
+        vec4 c = texture2D(tDiffuse, vUv);
+        // muutama pikseli NaN:ksi
+        if (fract(vUv.x * 37.0) < 0.02 && fract(vUv.y * 23.0) < 0.02) c = vec4(uZero / uZero);
+        gl_FragColor = c;
+      }
+    `,
+  });
+}
 function buildPipeline(q) {
   if (composer) {
     composer.renderTarget1.dispose();
@@ -456,7 +490,15 @@ function buildPipeline(q) {
       shafts.visible = true;
     };
   }
-  if (q.bloom) composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
+  // ?simnan: simuloi näytönohjainta, joka tuottaa yksittäisiin pikseleihin NaN-arvoja (testaus)
+  if (new URLSearchParams(location.search).has('simnan')) composer.addPass(nanInjectPass());
+  if (q.bloom) {
+    // Puhdistus ennen bloomia: NaN- ja äärettömät arvot nollaksi ja liian kirkkaat rajattu.
+    // Apple Silicon -koneilla (M3, Firefox) muutama virheellinen pikseli levisi bloomin
+    // sumennuksessa koko kuvaan, ja huone muuttui mustaksi.
+    if (!new URLSearchParams(location.search).has('nosanitize')) composer.addPass(sanitizePass());
+    composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
+  }
   composer.addPass(new OutputPass());
   // ?simblack: simuloi laitetta, jolla täysi ketju tuottaa mustaa (varapolun testaus)
   if (new URLSearchParams(location.search).has('simblack') && q.name === 'high') {
@@ -736,8 +778,12 @@ function lowerQuality() {
 // kevyellä profiililla. Valinta muistetaan koneelle. Testauskytkimillä ei tehdä tätä.
 let blackChecks = 0;
 let blackStreak = 0;
+let renderCount = 0;
 function checkRoomNotBlack() {
-  if (blackChecks >= 6 || testingToggles()) return;
+  if (testingToggles()) return;
+  renderCount++;
+  // aluksi joka piirto, sen jälkeen joka 20. (vika voi ilmetä vasta pelin aikana)
+  if (blackChecks >= 6 && renderCount % 20 !== 0 && blackStreak === 0) return;
   blackChecks++;
   const px = new Uint8Array(4);
   let max = 0;
@@ -753,8 +799,8 @@ function checkRoomNotBlack() {
   // piirretään heti uudelleen ja tarkistetaan toisen kerran
   if (blackStreak < 2) { roomDirty = true; return; }
   blackStreak = 0;
-  if (quality.name === 'high') {
-    console.warn('Huonekuva musta: siirrytään turvalliseen profiiliin (ei MSAA:ta, AO:ta, ääriviivaa eikä bloomia).');
+  if (quality.name === 'high' || quality.name === 'high-apple') {
+    console.warn('Huonekuva musta: siirrytään turvalliseen profiiliin (ei bloomia eikä MSAA:ta).');
     quality = safeVariant(quality);
     rememberFallback('safe');
     buildPipeline(quality);

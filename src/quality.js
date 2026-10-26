@@ -34,8 +34,10 @@ export function rememberFallback(level) {
 const TOGGLES = ['msaa', 'ao', 'bloom', 'outline', 'shadow'];
 export const testingToggles = () => params.get('quality') != null || TOGGLES.some((t) => params.has(t));
 
+// Turvallinen: bloom ja MSAA pois (M3-Macin testissä bloom oli syy, MSAA vahvisti sitä).
+// AO ja ääriviiva säilyvät.
 export function safeVariant(q) {
-  return { ...q, name: 'safe', samples: 0, ao: false, outline: false, bloom: false };
+  return { ...q, name: 'safe', samples: 0, bloom: false };
 }
 
 function applyToggles(q) {
@@ -50,8 +52,24 @@ function applyToggles(q) {
   return out;
 }
 
+// Apple Silicon (M1–M4): Chrome kertoo ”Apple M3”, Safari ”Apple GPU”, Firefox ”Apple M1”
+// tms. Intel-Macit kertovat Intel tai AMD.
+export function isAppleSilicon(renderer) {
+  const gl = renderer.getContext();
+  const info = gl.getExtension('WEBGL_debug_renderer_info');
+  const gpu = String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+  return /Apple (M\d|GPU)/i.test(gpu);
+}
+
 export function detectQuality(renderer) {
-  return applyToggles(baseQuality(renderer));
+  const q = baseQuality(renderer);
+  // M3-MacBookin testi: täysi profiili musta, bloom pois → täydellinen (MSAA ja AO saivat jäädä).
+  // Siksi Apple Silicon -koneilla bloom on oletuksena pois; ?bloom=1 pakottaa sen päälle.
+  if (q.name === 'high' && isAppleSilicon(renderer) && params.get('bloom') !== '1') {
+    q.bloom = false;
+    q.name = 'high-apple';
+  }
+  return applyToggles(q);
 }
 
 function baseQuality(renderer) {
