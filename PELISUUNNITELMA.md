@@ -188,7 +188,10 @@ Esineiden kuvaukset src/items.js, paperit src/paper.js.
 ## 10. Tekniikka
 
 - **three.js** 0.186 ja **Vite**, mallit **Blenderistä** (4.5 LTS) meshopt-pakattuina, tekstuurit WebP.
-- Huone piirretään vain kameran liikkuessa; levossa päivittyy vain pöly (30 fps). Tarkkuus
+- Huone piirretään vain kameran liikkuessa; levossa päivittyy vain pöly (30 fps). Valmis huonekuva
+  kopioidaan heti piirron jälkeen tavalliseen 8-bittiseen välimuistipuskuriin, josta se piirretään
+  ruudulle joka kuvassa. Jälkikäsittelyn MSAA-liukulukupuskurin sisältö ei säilynyt kuvasta toiseen
+  Apple Silicon -koneilla (huone välähti vain liikkeessä, kaikissa selaimissa). Tarkkuus
   laskee automaattisesti, jos kone ei jaksa.
 - Julkaisu **GitHub Pagesissa** (.github/workflows/deploy.yml) jokaisesta pushista mainiin.
 - **Laatuprofiili** (src/quality.js): tietokoneella täysi jälkikäsittely (liukulukupuskuri 4x MSAA,

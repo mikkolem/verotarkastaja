@@ -459,6 +459,18 @@ composer.renderToScreen = false;
 const copyQuad = new FullScreenQuad(new THREE.ShaderMaterial({
   ...CopyShader, uniforms: THREE.UniformsUtils.clone(CopyShader.uniforms), depthTest: false, depthWrite: false,
 }));
+// Huonekuvan välimuisti: valmis kuva kopioidaan heti piirron jälkeen tavalliseen
+// 8-bittiseen puskuriin ilman reunanpehmennystä, ja ruudulle piirretään joka kuvassa
+// siitä. Jälkikäsittelyn omaan (MSAA-liukuluku)puskuriin ei voi luottaa kuvasta
+// toiseen: Apple Silicon -koneilla sen sisältö katosi, ja huone välähti vain
+// liikkeen aikana (kaikki selaimet, Metal-näytönohjainpolku).
+const roomCache = new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType, depthBuffer: false });
+function sizeRoomCache() {
+  const size = renderer.getDrawingBufferSize(new THREE.Vector2());
+  roomCache.setSize(size.x, size.y);
+}
+sizeRoomCache();
+
 // Tarkastelun aikana huone näkyy taustalla himmennettynä ja sumennettuna
 // (syväterävyyden tuntu). Yksi 12 näytteen sumennus koko ruudulle: halpa.
 const dimQuad = new FullScreenQuad(new THREE.ShaderMaterial({
@@ -663,6 +675,7 @@ addEventListener('resize', () => {
   fitCamera();
   renderer.setSize(innerWidth, innerHeight);
   composer.setSize(innerWidth, innerHeight);
+  sizeRoomCache();
   dimQuad.material.uniforms.uTexel.value.set(1 / innerWidth, 1 / innerHeight);
   roomDirty = true;
 });
@@ -694,25 +707,30 @@ function lowerQuality() {
   pixelRatio = Math.max(MIN_PIXEL_RATIO, pixelRatio - 0.25);
   renderer.setPixelRatio(pixelRatio);
   composer.setPixelRatio(pixelRatio);
+  sizeRoomCache();
   roomDirty = true;
 }
 
 function drawRoomAndDust() {
   if (roomDirty) {
     composer.render();
+    // talteen omaan puskuriin heti, kun kuva on varmasti ehjä
+    copyQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
+    renderer.setRenderTarget(roomCache);
+    copyQuad.render(renderer);
     roomDirty = false;
     updateDebug();
   }
   renderer.setRenderTarget(null);
   renderer.autoClear = false;
   if (interaction.inspecting) {
-    dimQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
+    dimQuad.material.uniforms.tDiffuse.value = roomCache.texture;
     dimQuad.material.uniforms.uBlur.value = blur;
     dimQuad.render(renderer);
     renderer.clearDepth();
     renderer.render(interaction.scene, interaction.inspectCamera);
   } else {
-    copyQuad.material.uniforms.tDiffuse.value = composer.readBuffer.texture;
+    copyQuad.material.uniforms.tDiffuse.value = roomCache.texture;
     copyQuad.render(renderer);
     renderer.clearDepth();
     renderer.render(dustScene, camera);
