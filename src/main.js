@@ -11,9 +11,10 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { CopyShader } from 'three/addons/shaders/CopyShader.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 import { createMaterials } from './materials.js';
-import { debugOverlay, detectQuality } from './quality.js';
+import { debugOverlay, detectQuality, rememberFallback, safeVariant, testingToggles } from './quality.js';
 import { createDust } from './dust.js';
 import { createShafts } from './shafts.js';
 import { addDecor } from './decor.js';
@@ -58,8 +59,8 @@ renderer.toneMapping = THREE.AgXToneMapping;
 renderer.toneMappingExposure = 1.1;
 document.getElementById('app').appendChild(renderer.domElement);
 // Laatuprofiili (quality.js): tietokoneella kuten ennenkin, puhelimella kevyt polku.
-const quality = detectQuality(renderer);
-const updateDebug = debugOverlay(renderer, quality);
+let quality = detectQuality(renderer);
+const updateDebug = debugOverlay(renderer, () => quality);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.05, 60);
@@ -417,44 +418,58 @@ loadRoom();
 // --- jälkikäsittely --------------------------------------------------------------
 // Tietokone: liukulukupuskuri 4x MSAA:lla, AO, ääriviiva ja bloom (kuten ennenkin).
 // Puhelin: ei MSAA:ta eikä AO:ta, ääriviivaa tai bloomia; puskuri 8-bittinen, jos
-// laite ei osaa renderöidä liukulukuun (quality.js).
-const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: quality.targetType, samples: quality.samples });
-const composer = new EffectComposer(renderer, target);
-composer.addPass(new RenderPass(scene, camera));
-let gtao = null;
-if (quality.ao) {
-  gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
-  gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 8 });
-  gtao.blendIntensity = 0.9;
-  composer.addPass(gtao);
+// laite ei osaa renderöidä liukulukuun (quality.js). Ketju rakennetaan funktiolla,
+// jotta se voidaan rakentaa uudelleen kevyempänä, jos huonekuva jää mustaksi.
+let composer, gtao, outline;
+function buildPipeline(q) {
+  if (composer) {
+    composer.renderTarget1.dispose();
+    composer.renderTarget2.dispose();
+    composer.passes.forEach((p) => p.dispose?.());
+  }
+  const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: q.targetType, samples: q.samples });
+  composer = new EffectComposer(renderer, target);
+  composer.addPass(new RenderPass(scene, camera));
+  gtao = null;
+  if (q.ao) {
+    gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+    gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.5, thickness: 1, scale: 1.2, samples: 8 });
+    gtao.blendIntensity = 0.9;
+    composer.addPass(gtao);
+  }
+  // Hiiren alla olevan esineen kultainen ääriviiva (valitut objektit: interact.js)
+  outline = null;
+  if (q.outline) {
+    outline = new OutlinePass(new THREE.Vector2(innerWidth, innerHeight), scene, camera);
+    Object.assign(outline, { edgeStrength: 3.5, edgeGlow: 0.25, edgeThickness: 1.2 });
+    outline.visibleEdgeColor.set(0xd9a04a);
+    outline.hiddenEdgeColor.set(0x000000);   // ei piirretä muiden takana olevia osia (ei paljasta laatikon sisältöä)
+    composer.addPass(outline);
+  }
+  // AO- ja ääriviivapassit piirtävät huoneen syvyyden uudelleen: valonsäteet eivät
+  // saa olla silloin mukana, muuten ne näkyisivät pintoina ilmassa.
+  for (const pass of [gtao, outline].filter(Boolean)) {
+    const render = pass.render.bind(pass);
+    pass.render = (...args) => {
+      shafts.visible = false;
+      render(...args);
+      shafts.visible = true;
+    };
+  }
+  if (q.bloom) composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
+  composer.addPass(new OutputPass());
+  // ?simblack: simuloi laitetta, jolla täysi ketju tuottaa mustaa (varapolun testaus)
+  if (new URLSearchParams(location.search).has('simblack') && q.name === 'high') {
+    composer.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: CopyShader.vertexShader, fragmentShader: 'void main() { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }' }));
+  }
+  // Kaikki välivaiheet samaan kokoon renderöijän tarkkuuden kanssa
+  composer.setPixelRatio(pixelRatio);
+  composer.setSize(innerWidth, innerHeight);
+  composer.renderToScreen = false;
 }
-// Hiiren alla olevan esineen kultainen ääriviiva (valitut objektit: interact.js)
-let outline = null;
-if (quality.outline) {
-  outline = new OutlinePass(new THREE.Vector2(innerWidth, innerHeight), scene, camera);
-  Object.assign(outline, { edgeStrength: 3.5, edgeGlow: 0.25, edgeThickness: 1.2 });
-  outline.visibleEdgeColor.set(0xd9a04a);
-  outline.hiddenEdgeColor.set(0x000000);   // ei piirretä muiden takana olevia osia (ei paljasta laatikon sisältöä)
-  composer.addPass(outline);
-}
-// AO- ja ääriviivapassit piirtävät huoneen syvyyden uudelleen: valonsäteet eivät
-// saa olla silloin mukana, muuten ne näkyisivät pintoina ilmassa.
-for (const pass of [gtao, outline].filter(Boolean)) {
-  const render = pass.render.bind(pass);
-  pass.render = (...args) => {
-    shafts.visible = false;
-    render(...args);
-    shafts.visible = true;
-  };
-}
-if (quality.bloom) composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.15, 0.6, 1.4));
-composer.addPass(new OutputPass());
-// Kaikki välivaiheet samaan kokoon renderöijän tarkkuuden kanssa
-composer.setPixelRatio(pixelRatio);
-composer.setSize(innerWidth, innerHeight);
-// Valmis huonekuva jää composerin puskuriin, josta se kopioidaan ruudulle
+buildPipeline(quality);
+// Valmis huonekuva kopioidaan välimuistiin (roomCache), josta se piirretään ruudulle
 // joka kuvassa. Huone piirretään uudelleen vain, kun kamera liikkuu.
-composer.renderToScreen = false;
 // Kopio ei saa kirjoittaa syvyyttä, muuten se peittäisi pölyn kokonaan.
 const copyQuad = new FullScreenQuad(new THREE.ShaderMaterial({
   ...CopyShader, uniforms: THREE.UniformsUtils.clone(CopyShader.uniforms), depthTest: false, depthWrite: false,
@@ -682,7 +697,11 @@ addEventListener('resize', () => {
 
 if (import.meta.env.DEV) {
   window.__debug = {
-    scene, camera, sun, bounce, skyLight, gtao, renderer, views, interaction, game, SECRETS, updateSun, composer, quality,
+    scene, camera, sun, bounce, skyLight, renderer, views, interaction, game, SECRETS, updateSun,
+    get composer() { return composer; },
+    get quality() { return quality; },
+    // piirtää yhden kuvan heti (testaus piilotetussa välilehdessä, jossa animaatiosilmukka ei pyöri)
+    renderFrame() { roomDirty = true; drawRoomAndDust(); },
     get finale() { return finale; },
     // peek([x,y,z], [x,y,z]) vie kameran haluttuun paikkaan, peek() palauttaa
     peek(pos, target) {
@@ -711,6 +730,43 @@ function lowerQuality() {
   roomDirty = true;
 }
 
+// Mustan kuvan tunnistus: muutaman ensimmäisen piirron jälkeen luetaan välimuistista
+// pisteitä. Jos kaikki ovat mustia, laite ei osaa täyttä ketjua (esim. M3-Mac
+// Firefoxissa): rakennetaan ketju turvallisena, ja jos sekin on musta, ladataan sivu
+// kevyellä profiililla. Valinta muistetaan koneelle. Testauskytkimillä ei tehdä tätä.
+let blackChecks = 0;
+let blackStreak = 0;
+function checkRoomNotBlack() {
+  if (blackChecks >= 6 || testingToggles()) return;
+  blackChecks++;
+  const px = new Uint8Array(4);
+  let max = 0;
+  for (const fy of [0.3, 0.5, 0.7]) {
+    for (const fx of [0.25, 0.5, 0.75]) {
+      renderer.readRenderTargetPixels(roomCache, Math.floor(roomCache.width * fx), Math.floor(roomCache.height * fy), 1, 1, px);
+      max = Math.max(max, px[0], px[1], px[2]);
+    }
+  }
+  if (max > 6) { blackStreak = 0; return; }
+  blackStreak++;
+  // ensimmäinen musta kuva voi olla sattumaa (esim. varjot vielä laskematta):
+  // piirretään heti uudelleen ja tarkistetaan toisen kerran
+  if (blackStreak < 2) { roomDirty = true; return; }
+  blackStreak = 0;
+  if (quality.name === 'high') {
+    console.warn('Huonekuva musta: siirrytään turvalliseen profiiliin (ei MSAA:ta, AO:ta, ääriviivaa eikä bloomia).');
+    quality = safeVariant(quality);
+    rememberFallback('safe');
+    buildPipeline(quality);
+    blackChecks = 0;
+    roomDirty = true;
+  } else if (quality.name === 'safe') {
+    console.warn('Huonekuva yhä musta: ladataan kevyellä profiililla.');
+    rememberFallback('low');
+    location.reload();
+  }
+}
+
 function drawRoomAndDust() {
   if (roomDirty) {
     composer.render();
@@ -719,6 +775,7 @@ function drawRoomAndDust() {
     renderer.setRenderTarget(roomCache);
     copyQuad.render(renderer);
     roomDirty = false;
+    checkRoomNotBlack();
     updateDebug();
   }
   renderer.setRenderTarget(null);

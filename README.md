@@ -56,6 +56,10 @@ Puhelimella peli käyttää automaattisesti kevyempää renderöintiä (`src/qua
 | `?debug` | näyttää diagnoosirivin: näytönohjain, laatuprofiili ja virheet |
 | `?quality=low` / `?quality=high` | pakottaa kevyen tai täyden renderöinnin |
 | `?target=8` | pakottaa 8-bittisen puskurin (simuloi laitetta ilman liukulukupuskuria) |
+| `?msaa=0`, `?ao=0`, `?bloom=0`, `?outline=0`, `?shadow=2048` | kytkee yksittäisen osan pois (vian rajaus) |
+| `?reset` | nollaa koneelle muistetun varapolun |
+
+Jos täyden profiilin huonekuva jää mustaksi, peli vaihtaa automaattisesti kevyempään profiiliin ja muistaa valinnan.
 
 ## Ohjaus
 

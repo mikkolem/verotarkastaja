@@ -201,6 +201,12 @@ Esineiden kuvaukset src/items.js, paperit src/paper.js.
   Safarissa huone jäi mustaksi (pöly näkyi), koska liukulukupuskuri MSAA:lla ja jälkikäsittelyn
   puskurit eivät toimineet. Kytkimet: `?quality=low|high`, `?target=8`, `?debug` (diagnoosirivi:
   näytönohjain, profiili, virheet).
+- **Automaattinen varapolku:** ensimmäisten piirtojen jälkeen peli lukee huonekuvasta pisteitä.
+  Jos kuva on musta kahdesti peräkkäin, ketju rakennetaan ”turvallisena” (täysi profiili ilman
+  MSAA:ta, AO:ta, ääriviivaa ja bloomia), ja jos sekin on musta, sivu ladataan kevyellä profiililla.
+  Valinta muistetaan koneelle (localStorage); `?reset` nollaa. Syy: M3-MacBookilla Firefoxissa
+  täysi profiili jäi mustaksi, kevyt toimi. Osat voi kytkeä pois yksi kerrallaan syyn rajaamiseksi:
+  `?msaa=0`, `?ao=0`, `?bloom=0`, `?outline=0`, `?shadow=2048` (näillä varapolku ei käynnisty).
 - **Mobiilin yläpalkki** (alle 760 px): yhdellä rivillä aika, ”💡 Vihje −5 min”, tauko (⏸),
   ”📋 Raportti” ja valikko (☰ ja todisteiden määrä). Tavarat, todisteet, muistiinpanot ja ohjeet
   ovat valikon takana; otsikko piilotetaan. Tietokoneen yläpalkki on ennallaan.
